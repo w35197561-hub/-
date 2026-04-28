@@ -1,45 +1,37 @@
 <template>
   <input
     class="input-component"
-    :type="component.props.type || 'text'"
-    :placeholder="component.props.placeholder || '请输入内容'"
-    :value="component.props.value || ''"
-    :style="{
-      fontSize: `${component.style.fontSize || 14}px`,
-      color: component.style.color || '#333333',
-      backgroundColor: component.style.backgroundColor || '#ffffff',
-      border: component.style.borderWidth ? `${component.style.borderWidth}px solid ${component.style.borderColor || '#dcdfe6'}` : '1px solid #dcdfe6',
-      borderRadius: component.style.borderRadius ? `${component.style.borderRadius}px` : '4px',
-      padding: '8px 12px',
-      boxSizing: 'border-box',
-      width: '100%',
-      height: '100%'
-    }"
-    @input="handleInput"
-    @focus="handleFocus"
-    @blur="handleBlur"
+    :type="(component.props.type as string) || 'text'"
+    :placeholder="(component.props.placeholder as string) || '请输入内容'"
+    :value="(component.props.value as string) || ''"
+    :style="computedStyle"
   />
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { ComponentData } from '@/types'
+import { useComponentStyle } from './composables/useComponentStyle'
 
-defineProps<{
+const props = defineProps<{
   component: ComponentData
 }>()
 
-const handleInput = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  console.log('输入内容:', target.value)
-}
+const { baseStyle } = useComponentStyle(props.component.style)
 
-const handleFocus = () => {
-  console.log('输入框获得焦点')
-}
-
-const handleBlur = () => {
-  console.log('输入框失去焦点')
-}
+const computedStyle = computed(() => ({
+  ...baseStyle,
+  color: props.component.style.color ?? '#333333',
+  backgroundColor: props.component.style.backgroundColor ?? '#ffffff',
+  // 输入框默认有 1px 边框
+  border: props.component.style.borderWidth
+    ? `${props.component.style.borderWidth}px solid ${props.component.style.borderColor ?? '#dcdfe6'}`
+    : '1px solid #dcdfe6',
+  borderRadius: props.component.style.borderRadius
+    ? `${props.component.style.borderRadius}px`
+    : '4px',
+  padding: '8px 12px',
+}))
 </script>
 
 <style scoped>
@@ -47,6 +39,7 @@ const handleBlur = () => {
   outline: none;
   transition: border-color 0.2s;
   min-height: 32px;
+  box-sizing: border-box;
 }
 
 .input-component:focus {

@@ -1,28 +1,28 @@
 <template>
-  <div 
-    class="text-component"
-    :style="{
-      fontSize: `${component.style.fontSize || 14}px`,
-      color: component.style.color || '#333333',
-      backgroundColor: component.style.backgroundColor || 'transparent',
-      border: component.style.borderWidth ? `${component.style.borderWidth}px solid ${component.style.borderColor || '#ccc'}` : 'none',
-      borderRadius: component.style.borderRadius ? `${component.style.borderRadius}px` : '0',
-      padding: '4px 8px',
-      boxSizing: 'border-box',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'break-word'
-    }"
-  >
+  <div class="text-component" :style="computedStyle">
     {{ component.props.content || '文本内容' }}
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { ComponentData } from '@/types'
+import { useComponentStyle } from './composables/useComponentStyle'
 
-defineProps<{
+const props = defineProps<{
   component: ComponentData
 }>()
+
+const { baseStyle } = useComponentStyle(props.component.style)
+
+const computedStyle = computed(() => ({
+  ...baseStyle,
+  color: props.component.style.color ?? '#333333',
+  backgroundColor: props.component.style.backgroundColor ?? 'transparent',
+  whiteSpace: 'pre-wrap' as const,
+  wordBreak: 'break-word' as const,
+  padding: '4px 8px',
+}))
 </script>
 
 <style scoped>
@@ -33,5 +33,6 @@ defineProps<{
   align-items: center;
   justify-content: flex-start;
   min-height: 20px;
+  box-sizing: border-box;
 }
 </style>

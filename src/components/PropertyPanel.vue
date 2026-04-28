@@ -1,5 +1,7 @@
 <template>
   <div class="property-panel">
+    <!-- 图层列表面板（始终显示在顶部） -->
+    <LayerPanel />
     <div class="panel-header">
       <h3>属性配置</h3>
       <el-button 
@@ -81,27 +83,59 @@
         </div>
         
         <div class="property-section">
-          <h4>图层操作</h4>
+          <h4>图层管理</h4>
+          <!-- 当前 z-index 信息展示 -->
+          <div class="zindex-info">
+            <span class="zindex-label">当前层级</span>
+            <div class="zindex-badge-row">
+              <span class="zindex-badge">{{ currentComponent.style.zIndex }}</span>
+              <span class="zindex-range-tip">（共 {{ totalLayers }} 层）</span>
+            </div>
+          </div>
+          <!-- 快速操作按钮 -->
           <div class="property-buttons">
-            <el-button-group>
-              <el-button @click="moveLayer('up')" :disabled="!canMoveUp">
-                <el-icon><Top /></el-icon>
-                上移一层
-              </el-button>
-              <el-button @click="moveLayer('down')" :disabled="!canMoveDown">
-                <el-icon><Bottom /></el-icon>
-                下移一层
-              </el-button>
-              <el-button @click="moveLayer('top')" :disabled="!canMoveUp">
-                <el-icon><SortUp /></el-icon>
+            <div class="layer-btn-grid">
+              <el-button size="small" @click="moveLayer('top')" :disabled="isOnTop">
+                <el-icon><DArrowRight style="transform: rotate(-90deg)" /></el-icon>
                 置顶
               </el-button>
-              <el-button @click="moveLayer('bottom')" :disabled="!canMoveDown">
-                <el-icon><SortDown /></el-icon>
+              <el-button size="small" @click="moveLayer('up')" :disabled="isOnTop">
+                <el-icon><ArrowUp /></el-icon>
+                上移一层
+              </el-button>
+              <el-button size="small" @click="moveLayer('down')" :disabled="isOnBottom">
+                <el-icon><ArrowDown /></el-icon>
+                下移一层
+              </el-button>
+              <el-button size="small" @click="moveLayer('bottom')" :disabled="isOnBottom">
+                <el-icon><DArrowRight style="transform: rotate(90deg)" /></el-icon>
                 置底
               </el-button>
-            </el-button-group>
+            </div>
           </div>
+          <!-- 直接输入 z-index -->
+          <div class="zindex-input-row">
+            <label>精确设置层级</label>
+            <el-input-number
+              v-model="customZIndex"
+              :min="1"
+              :max="999"
+              :step="1"
+              size="small"
+              @change="applyCustomZIndex"
+            />
+          </div>
+          <!-- 归一化按钮 -->
+          <el-button
+            size="small"
+            type="info"
+            plain
+            class="normalize-btn"
+            @click="normalizeAllLayers"
+            title="将所有组件的层级整理为连续整数，消除层级混乱"
+          >
+            整理层级
+          </el-button>
         </div>
         
         <div class="property-section">
@@ -198,6 +232,29 @@
                 @change="updateComponentProps"
               />
             </div>
+
+            <div v-if="currentComponent.type === 'Form'" class="property-item">
+              <label>容器标题</label>
+              <el-input
+                v-model="currentComponent.props.title"
+                @change="updateComponentProps"
+              />
+            </div>
+
+            <div v-if="currentComponent.type === 'Tabs'" class="property-item">
+              <label>当前激活Tab</label>
+              <el-select
+                v-model="currentComponent.props.activeTab"
+                @change="updateComponentProps"
+              >
+                <el-option
+                  v-for="tab in ((currentComponent.props.tabs as Array<{ key: string; label: string }>) || [])"
+                  :key="tab.key"
+                  :label="tab.label"
+                  :value="tab.key"
+                />
+              </el-select>
+            </div>
           </div>
         </div>
       </el-scrollbar>
@@ -206,33 +263,57 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
+import LayerPanel from './LayerPanel.vue'
 import {
   InfoFilled,
-  Top,
-  Bottom,
-  SortUp,
-  SortDown
+  ArrowUp,
+  ArrowDown,
+  DArrowRight
 } from '@element-plus/icons-vue'
 
 const editorStore = useEditorStore()
 
 const currentComponent = computed(() => editorStore.currentComponent)
 
-const canMoveUp = computed(() => {
-  if (!currentComponent.value || !editorStore.currentPage) return false
-  const components = editorStore.currentPage.components
-  const index = components.findIndex(comp => comp.id === currentComponent.value?.id)
-  return index < components.length - 1
+// 当前页面所有组件的层级列表
+const allZIndices = computed(() => {
+  if (!editorStore.currentPage) return []
+  return editorStore.currentPage.components.map(c => c.style.zIndex)
 })
 
-const canMoveDown = computed(() => {
-  if (!currentComponent.value || !editorStore.currentPage) return false
-  const components = editorStore.currentPage.components
-  const index = components.findIndex(comp => comp.id === currentComponent.value?.id)
-  return index > 0
+const totalLayers = computed(() => editorStore.currentPage?.components.length ?? 0)
+
+const maxZ = computed(() => allZIndices.value.length ? Math.max(...allZIndices.value) : 1)
+const minZ = computed(() => allZIndices.value.length ? Math.min(...allZIndices.value) : 1)
+
+const isOnTop = computed(() => {
+  if (!currentComponent.value) return true
+  return currentComponent.value.style.zIndex >= maxZ.value
 })
+
+const isOnBottom = computed(() => {
+  if (!currentComponent.value) return true
+  return currentComponent.value.style.zIndex <= minZ.value
+})
+
+// 精确设置层级输入框的本地状态
+const customZIndex = ref(1)
+watch(
+  () => currentComponent.value?.style.zIndex,
+  (val) => { if (val !== undefined) customZIndex.value = val },
+  { immediate: true }
+)
+
+const applyCustomZIndex = (val: number | null) => {
+  if (!currentComponent.value || val === null) return
+  editorStore.setComponentZIndex(currentComponent.value.id, val)
+}
+
+const normalizeAllLayers = () => {
+  editorStore.normalizeZIndex()
+}
 
 const updateComponentStyle = () => {
   if (!currentComponent.value) return
@@ -345,18 +426,83 @@ const deleteCurrentComponent = () => {
   gap: 8px;
 }
 
-.property-buttons .el-button-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-}
-
-.property-buttons .el-button {
+.zindex-info {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: #f5f7fa;
+  border-radius: 6px;
+}
+
+.zindex-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.zindex-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zindex-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 22px;
+  padding: 0 8px;
+  background: #409eff;
+  color: white;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.zindex-range-tip {
+  font-size: 11px;
+  color: #999;
+}
+
+.layer-btn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.layer-btn-grid .el-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 4px;
   font-size: 12px;
-  padding: 8px 4px;
+}
+
+.zindex-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.zindex-input-row label {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.zindex-input-row .el-input-number {
+  width: 100px;
+}
+
+.normalize-btn {
+  width: 100%;
+  font-size: 12px;
 }
 
 .el-scrollbar {

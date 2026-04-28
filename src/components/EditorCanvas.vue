@@ -55,13 +55,14 @@
             left: `${component.style.left}px`,
             width: `${component.style.width}px`,
             height: `${component.style.height}px`,
-            zIndex: component.style.zIndex,
+            zIndex: currentComponent?.id === component.id
+              ? component.style.zIndex + 1000
+              : component.style.zIndex,
             transform: `rotate(${component.style.rotate}deg)`
           }"
           @mousedown="handleComponentMouseDown(component, $event)"
         >
-          <component
-            :is="getComponentByType(component.type)"
+          <ComponentRenderer
             :component="component"
             class="component-content"
           />
@@ -93,10 +94,7 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import type { ComponentData } from '@/types'
 import { ComponentType } from '@/types'
-import TextComponent from './components/TextComponent.vue'
-import ImageComponent from './components/ImageComponent.vue'
-import ButtonComponent from './components/ButtonComponent.vue'
-import InputComponent from './components/InputComponent.vue'
+import ComponentRenderer from './components/ComponentRenderer.vue'
 
 const editorStore = useEditorStore()
 
@@ -112,36 +110,26 @@ const showGuidelines = computed({
   set: (value) => editorStore.setShowGuidelines(value)
 })
 
-const componentMap = {
-  Text: TextComponent,
-  Image: ImageComponent,
-  Button: ButtonComponent,
-  Input: InputComponent
-}
-
-const getComponentByType = (type: string) => {
-  return componentMap[type as keyof typeof componentMap] || TextComponent
-}
-
 const selectComponent = (component: ComponentData) => {
-  editorStore.selectComponent(component)
+  editorStore.selectComponent(component.id)
 }
 
 const handleComponentMouseDown = (component: ComponentData, event: MouseEvent) => {
-  // 先选择组件
-  selectComponent(component)
-  
-  // 然后开始拖拽
-  startDrag(component, event)
-  
-  // 阻止事件冒泡，避免触发画布点击事件
+  // 支持 shift 多选
+  editorStore.selectComponent(component.id, event.shiftKey)
+  // 多选拖拽
+  if (editorStore.selectedComponentIds.length > 1) {
+    editorStore.startMultiDrag(event)
+  } else {
+    startDrag(component, event)
+  }
   event.stopPropagation()
   event.preventDefault()
 }
 
 const handleCanvasClick = (event: MouseEvent) => {
   if (event.target === event.currentTarget) {
-    editorStore.selectComponent(null)
+    editorStore.clearSelectedComponents()
   }
 }
 
@@ -197,6 +185,7 @@ let dragStartX = 0
 let dragStartY = 0
 let originalLeft = 0
 let originalTop = 0
+let dragStartStyle: ComponentData['style'] | null = null  // 拖拽开始时的完整样式快照
 
 const startDrag = (component: ComponentData, event: MouseEvent) => {
   isDragging = true
@@ -206,6 +195,7 @@ const startDrag = (component: ComponentData, event: MouseEvent) => {
   dragStartY = event.clientY
   originalLeft = component.style.left
   originalTop = component.style.top
+  dragStartStyle = { ...component.style }  // 保存完整样式快照
   
   document.addEventListener('mousemove', handleDrag)
   document.addEventListener('mouseup', stopDrag)
@@ -233,15 +223,29 @@ const handleDrag = (event: MouseEvent) => {
   newLeft = Math.max(0, newLeft)
   newTop = Math.max(0, newTop)
   
-  // 立即更新组件位置
-  editorStore.updateComponentStyle(currentComponent.value.id, {
+  // 使用静默更新，不记录历史（拖拽过程中高频调用）
+  editorStore.updateComponentStyleSilent(currentComponent.value.id, {
     left: newLeft,
     top: newTop
   })
 }
 
 const stopDrag = () => {
+  // 拖拽结束时，如果位置有变化，记录一次历史
+  if (isDragging && currentComponent.value && dragStartStyle) {
+    const currentStyle = currentComponent.value.style
+    // 只有位置真正变化才记录历史
+    if (currentStyle.left !== dragStartStyle.left || currentStyle.top !== dragStartStyle.top) {
+      editorStore.batchUpdateComponentStyle(
+        currentComponent.value.id,
+        dragStartStyle,
+        { left: currentStyle.left, top: currentStyle.top }
+      )
+    }
+  }
+  
   isDragging = false
+  dragStartStyle = null
   document.removeEventListener('mousemove', handleDrag)
   document.removeEventListener('mouseup', stopDrag)
 }
@@ -254,6 +258,7 @@ let originalWidth = 0
 let originalHeight = 0
 let originalLeftResize = 0
 let originalTopResize = 0
+let resizeStartStyle: ComponentData['style'] | null = null  // 缩放开始时的完整样式快照
 
 const startResize = (component: ComponentData, direction: string, event: MouseEvent) => {
   isResizing = true
@@ -264,6 +269,7 @@ const startResize = (component: ComponentData, direction: string, event: MouseEv
   originalHeight = component.style.height
   originalLeftResize = component.style.left
   originalTopResize = component.style.top
+  resizeStartStyle = { ...component.style }  // 保存完整样式快照
   
   document.addEventListener('mousemove', handleResize)
   document.addEventListener('mouseup', stopResize)
@@ -319,7 +325,8 @@ const handleResize = (event: MouseEvent) => {
       break
   }
   
-  editorStore.updateComponentStyle(currentComponent.value.id, {
+  // 使用静默更新，不记录历史（缩放过程中高频调用）
+  editorStore.updateComponentStyleSilent(currentComponent.value.id, {
     width: newWidth,
     height: newHeight,
     left: newLeft,
@@ -328,7 +335,31 @@ const handleResize = (event: MouseEvent) => {
 }
 
 const stopResize = () => {
+  // 缩放结束时，如果样式有变化，记录一次历史
+  if (isResizing && currentComponent.value && resizeStartStyle) {
+    const currentStyle = currentComponent.value.style
+    const hasChanged = 
+      currentStyle.width !== resizeStartStyle.width ||
+      currentStyle.height !== resizeStartStyle.height ||
+      currentStyle.left !== resizeStartStyle.left ||
+      currentStyle.top !== resizeStartStyle.top
+    
+    if (hasChanged) {
+      editorStore.batchUpdateComponentStyle(
+        currentComponent.value.id,
+        resizeStartStyle,
+        {
+          width: currentStyle.width,
+          height: currentStyle.height,
+          left: currentStyle.left,
+          top: currentStyle.top
+        }
+      )
+    }
+  }
+  
   isResizing = false
+  resizeStartStyle = null
   document.removeEventListener('mousemove', handleResize)
   document.removeEventListener('mouseup', stopResize)
 }

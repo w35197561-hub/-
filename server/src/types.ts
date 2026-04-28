@@ -1,3 +1,7 @@
+// =====================
+// 与前端共享的数据类型
+// =====================
+
 export interface ComponentStyle {
   top: number
   left: number
@@ -23,7 +27,7 @@ export interface ComponentProps {
 
 export interface ComponentData {
   id: string
-  type: ComponentType
+  type: string
   style: ComponentStyle
   props: ComponentProps
   events?: ComponentEvent[]
@@ -48,31 +52,29 @@ export interface PageData {
   }
 }
 
-export enum ComponentType {
-  TEXT = 'Text',
-  IMAGE = 'Image',
-  BUTTON = 'Button',
-  INPUT = 'Input',
-  FORM = 'Form',
-  CHART = 'Chart',
-  TABS = 'Tabs'
+// =====================
+// 接口响应类型
+// =====================
+
+export interface ApiResponse<T = unknown> {
+  success: boolean
+  data?: T
+  message?: string
+  error?: string
 }
 
-export interface Command {
-  execute(): void
-  undo(): void
+// 页面列表项（不含组件详情，用于列表展示）
+export interface PageListItem {
+  id: string
+  title: string
+  updatedAt: string
+  createdAt: string
+  componentCount: number
+  style: PageData['style']
 }
 
-export interface EditorState {
-  currentPage: PageData | null
-  currentComponent: ComponentData | null
-  canvasScale: number
-  snapToGrid: boolean
-  showGuidelines: boolean
-}
-
-export interface HistoryState {
-  undoStack: Command[]
-  redoStack: Command[]
-  maxHistorySize: number
+// 存储在磁盘上的页面记录（包含时间戳）
+export interface PageRecord extends PageData {
+  createdAt: string
+  updatedAt: string
 }

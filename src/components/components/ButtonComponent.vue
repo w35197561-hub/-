@@ -1,33 +1,30 @@
 <template>
-  <button
-    class="button-component"
-    :style="{
-      fontSize: `${component.style.fontSize || 14}px`,
-      color: component.style.color || '#ffffff',
-      backgroundColor: component.style.backgroundColor || '#409eff',
-      border: component.style.borderWidth ? `${component.style.borderWidth}px solid ${component.style.borderColor || '#409eff'}` : 'none',
-      borderRadius: component.style.borderRadius ? `${component.style.borderRadius}px` : '4px',
-      padding: '8px 16px',
-      boxSizing: 'border-box',
-      cursor: 'pointer',
-      width: '100%',
-      height: '100%'
-    }"
-    @click="handleClick"
-  >
+  <button class="button-component" :style="computedStyle" @click="handleClick">
     {{ component.props.content || '按钮' }}
   </button>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { ComponentData } from '@/types'
+import { useComponentStyle } from './composables/useComponentStyle'
 
-defineProps<{
+const props = defineProps<{
   component: ComponentData
 }>()
 
+const { baseStyle } = useComponentStyle(props.component.style)
+
+const computedStyle = computed(() => ({
+  ...baseStyle,
+  color: props.component.style.color ?? '#ffffff',
+  backgroundColor: props.component.style.backgroundColor ?? '#409eff',
+  padding: '8px 16px',
+  cursor: 'pointer',
+}))
+
 const handleClick = () => {
-  console.log('按钮被点击')
+  // 事件系统预留：后续可通过 component.events 派发自定义行为
 }
 </script>
 
@@ -36,8 +33,10 @@ const handleClick = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
   min-height: 32px;
+  box-sizing: border-box;
+  transition: opacity 0.2s;
+  outline: none;
 }
 
 .button-component:hover {

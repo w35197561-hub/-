@@ -1,22 +1,10 @@
 <template>
-  <div 
-    class="image-component"
-    :style="{
-      border: component.style.borderWidth ? `${component.style.borderWidth}px solid ${component.style.borderColor || '#ccc'}` : 'none',
-      borderRadius: component.style.borderRadius ? `${component.style.borderRadius}px` : '0',
-      overflow: 'hidden'
-    }"
-  >
+  <div class="image-component" :style="containerStyle">
     <img
-      v-if="component.props.src"
-      :src="component.props.src"
-      :alt="component.props.alt as string || '图片'"
+      v-if="src"
+      :src="src"
+      :alt="(component.props.alt as string) || '图片'"
       class="image-content"
-      :style="{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover'
-      }"
     />
     <div v-else class="image-placeholder">
       <el-icon><Picture /></el-icon>
@@ -26,22 +14,45 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Picture } from '@element-plus/icons-vue'
 import type { ComponentData } from '@/types'
 
-defineProps<{
+const props = defineProps<{
   component: ComponentData
 }>()
+
+const src = computed(() => props.component.props.src as string | undefined)
+
+const containerStyle = computed(() => ({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  overflow: 'hidden',
+  border: props.component.style.borderWidth
+    ? `${props.component.style.borderWidth}px solid ${props.component.style.borderColor ?? '#cccccc'}`
+    : 'none',
+  borderRadius: props.component.style.borderRadius
+    ? `${props.component.style.borderRadius}px`
+    : '0',
+  backgroundColor: props.component.style.backgroundColor ?? '#f5f5f5',
+  boxSizing: 'border-box' as const,
+}))
 </script>
 
 <style scoped>
 .image-component {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5f5f5;
+}
+
+.image-content {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .image-placeholder {
@@ -51,9 +62,5 @@ defineProps<{
   gap: 8px;
   color: #999;
   font-size: 12px;
-}
-
-.image-content {
-  display: block;
 }
 </style>
