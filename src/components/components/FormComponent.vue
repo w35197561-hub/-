@@ -1,6 +1,6 @@
 <template>
   <div class="form-component">
-    <div class="form-header">{{ (component.props.title as string) || '表单容器' }}</div>
+    <div class="form-header">{{ (component.props.title as string) ?? '' }}</div>
     <div class="form-columns">
       <div v-for="col in columns" :key="col.key" class="form-column">
         <div class="column-title">{{ col.label }}</div>

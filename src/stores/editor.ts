@@ -181,22 +181,12 @@ export const useEditorStore = defineStore('editor', () => {
       rotate: 0
     }
 
-    const typeStyleMap: Partial<Record<ComponentType, Partial<ComponentData['style']>>> = {
-      [ComponentType.FORM]: { width: 520, height: 260 },
-      [ComponentType.TABS]: { width: 560, height: 320 },
-    }
-
     // 从initialProps中提取style相关的属性
     const { left, top, width, height, zIndex, rotate, ...otherProps } = initialProps as Record<string, unknown>
 
-    // componentConfigs 优先，未迁移的组件降级到 typeStyleMap
-    const configDefaultStyle = componentConfigs[type]?.defaultStyle ?? {}
-
-    // 合并style，优先使用传入的位置参数
     const finalStyle = {
       ...defaultStyle,
-      ...(typeStyleMap[type] || {}),
-      ...configDefaultStyle,
+      ...(componentConfigs[type].defaultStyle ?? {}),
       ...(left !== undefined && { left: left as number }),
       ...(top !== undefined && { top: top as number }),
       ...(width !== undefined && { width: width as number }),
@@ -205,23 +195,7 @@ export const useEditorStore = defineStore('editor', () => {
       ...(rotate !== undefined && { rotate: rotate as number })
     }
 
-    const legacyDefaultProps: Partial<Record<ComponentType, Record<string, unknown>>> = {
-      [ComponentType.IMAGE]: { src: '' },
-      [ComponentType.BUTTON]: { content: '按钮' },
-      [ComponentType.INPUT]: { placeholder: '请输入内容' },
-      [ComponentType.FORM]: { title: '表单容器', columns: ['col1', 'col2'] },
-      [ComponentType.CHART]: { type: 'bar' },
-      [ComponentType.TABS]: {
-        tabs: [
-          { key: 'tab1', label: 'Tab 1' },
-          { key: 'tab2', label: 'Tab 2' }
-        ],
-        activeTab: 'tab1'
-      },
-    }
-
-    // componentConfigs 优先，未迁移的组件降级到 legacyDefaultProps
-    const resolvedDefaultProps = componentConfigs[type]?.defaultProps ?? legacyDefaultProps[type] ?? {}
+    const resolvedDefaultProps = componentConfigs[type].defaultProps
 
     const component: ComponentData = {
       id: createComponentId(),
@@ -359,22 +333,7 @@ export const useEditorStore = defineStore('editor', () => {
 
     const { left, top, width, height, zIndex, rotate, ...otherProps } = initialProps as Record<string, unknown>
 
-    const legacyChildDefaultProps: Partial<Record<ComponentType, Record<string, unknown>>> = {
-      [ComponentType.IMAGE]: { src: '' },
-      [ComponentType.BUTTON]: { content: '按钮' },
-      [ComponentType.INPUT]: { placeholder: '请输入内容' },
-      [ComponentType.FORM]: { title: '表单容器', columns: ['col1', 'col2'] },
-      [ComponentType.CHART]: { type: 'bar' },
-      [ComponentType.TABS]: {
-        tabs: [
-          { key: 'tab1', label: 'Tab 1' },
-          { key: 'tab2', label: 'Tab 2' }
-        ],
-        activeTab: 'tab1'
-      },
-    }
-
-    const resolvedChildDefaultProps = componentConfigs[type]?.defaultProps ?? legacyChildDefaultProps[type] ?? {}
+    const resolvedChildDefaultProps = componentConfigs[type].defaultProps
 
     const child: ComponentData = {
       id: createComponentId(),

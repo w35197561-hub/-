@@ -138,59 +138,31 @@
           </el-button>
         </div>
         
-        <!-- 样式设置：已迁移组件走 styleSetters，未迁移组件显示全量字段 -->
-        <div class="property-section">
+        <!-- 样式设置 -->
+        <div class="property-section" v-if="componentConfig?.styleSetters?.length">
           <h4>样式设置</h4>
           <div class="property-grid">
-            <template v-if="componentConfig?.styleSetters">
-              <div v-for="s in componentConfig.styleSetters" :key="s.field" class="property-item">
-                <label>{{ s.label }}</label>
-                <el-input-number
-                  v-if="s.setter === 'NumberSetter'"
-                  :model-value="getStyleVal(s.field) as number"
-                  v-bind="s.setterProps"
-                  @update:model-value="val => setStyleVal(s.field, val)"
-                  @change="updateComponentStyle"
-                />
-                <el-color-picker
-                  v-else-if="s.setter === 'ColorSetter'"
-                  :model-value="getStyleVal(s.field) as string"
-                  @update:model-value="val => setStyleVal(s.field, val)"
-                  @change="updateComponentStyle"
-                />
-              </div>
-            </template>
-            <template v-else>
-              <div class="property-item">
-                <label>字体大小</label>
-                <el-input-number v-model="currentComponent.style.fontSize" :min="8" :max="72" :step="1" @change="updateComponentStyle" />
-              </div>
-              <div class="property-item">
-                <label>字体颜色</label>
-                <el-color-picker v-model="currentComponent.style.color" @change="updateComponentStyle" />
-              </div>
-              <div class="property-item">
-                <label>背景颜色</label>
-                <el-color-picker v-model="currentComponent.style.backgroundColor" @change="updateComponentStyle" />
-              </div>
-              <div class="property-item">
-                <label>边框宽度</label>
-                <el-input-number v-model="currentComponent.style.borderWidth" :min="0" :max="10" :step="1" @change="updateComponentStyle" />
-              </div>
-              <div class="property-item">
-                <label>边框颜色</label>
-                <el-color-picker v-model="currentComponent.style.borderColor" @change="updateComponentStyle" />
-              </div>
-              <div class="property-item">
-                <label>圆角</label>
-                <el-input-number v-model="currentComponent.style.borderRadius" :min="0" :max="50" :step="1" @change="updateComponentStyle" />
-              </div>
-            </template>
+            <div v-for="s in componentConfig.styleSetters" :key="s.field" class="property-item">
+              <label>{{ s.label }}</label>
+              <el-input-number
+                v-if="s.setter === 'NumberSetter'"
+                :model-value="getStyleVal(s.field) as number"
+                v-bind="s.setterProps"
+                @update:model-value="val => setStyleVal(s.field, val)"
+                @change="updateComponentStyle"
+              />
+              <el-color-picker
+                v-else-if="s.setter === 'ColorSetter'"
+                :model-value="getStyleVal(s.field) as string"
+                @update:model-value="val => setStyleVal(s.field, val)"
+                @change="updateComponentStyle"
+              />
+            </div>
           </div>
         </div>
 
-        <!-- 组件属性：已迁移组件走 propSetters，未迁移组件保留 v-if -->
-        <div class="property-section" v-if="componentConfig?.propSetters.length || hasLegacyProps">
+        <!-- 组件属性 -->
+        <div class="property-section" v-if="componentConfig?.propSetters.length">
           <h4>组件属性</h4>
           <div class="property-grid">
             <template v-if="componentConfig?.propSetters">
@@ -236,33 +208,6 @@
                 </el-select>
               </div>
             </template>
-            <template v-else>
-              <div v-if="currentComponent.type === 'Image'" class="property-item">
-                <label>图片地址</label>
-                <el-input v-model="currentComponent.props.src" placeholder="请输入图片URL" @change="updateComponentProps" />
-              </div>
-              <div v-if="currentComponent.type === 'Button'" class="property-item">
-                <label>按钮文本</label>
-                <el-input v-model="currentComponent.props.content" @change="updateComponentProps" />
-              </div>
-              <div v-if="currentComponent.type === 'Input'" class="property-item">
-                <label>占位文本</label>
-                <el-input v-model="currentComponent.props.placeholder" @change="updateComponentProps" />
-              </div>
-              <div v-if="currentComponent.type === 'Form'" class="property-item">
-                <label>容器标题</label>
-                <el-input v-model="currentComponent.props.title" @change="updateComponentProps" />
-              </div>
-              <div v-if="currentComponent.type === 'Tabs'" class="property-item">
-                <label>当前激活Tab</label>
-                <el-select v-model="currentComponent.props.activeTab" @change="updateComponentProps">
-                  <el-option
-                    v-for="tab in ((currentComponent.props.tabs as Array<{ key: string; label: string }>) || [])"
-                    :key="tab.key" :label="tab.label" :value="tab.key"
-                  />
-                </el-select>
-              </div>
-            </template>
           </div>
         </div>
       </el-scrollbar>
@@ -290,10 +235,6 @@ const componentConfig = computed(() =>
   currentComponent.value ? componentConfigs[currentComponent.value.type] : null
 )
 
-const legacyTypes = ['Image', 'Button', 'Input', 'Form', 'Tabs', 'Chart']
-const hasLegacyProps = computed(() =>
-  currentComponent.value ? legacyTypes.includes(currentComponent.value.type) : false
-)
 
 const resolveSetterProps = (s: { setterProps?: Record<string, unknown> | ((props: Record<string, unknown>) => Record<string, unknown>) }) => {
   if (!s.setterProps) return {}

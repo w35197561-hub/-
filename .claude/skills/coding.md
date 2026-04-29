@@ -34,6 +34,23 @@
 - key 用 `[ComponentType.XXX]` 枚举写法，**禁止字符串 key**
 - 新增枚举值后若未补全 componentMap，TypeScript 编译期报错
 
+## Props 渲染规范
+
+画布组件模板里渲染用户可编辑的 prop 时，**必须用 `??` 而不是 `||`**：
+
+```vue
+<!-- ❌ 错误：用户清空内容后画布仍显示默认文字 -->
+{{ component.props.content || '文本内容' }}
+
+<!-- ✅ 正确：清空后画布也跟着空 -->
+{{ component.props.content ?? '' }}
+```
+
+`||` 把空字符串 `''` 视为 falsy 会触发回退；`??` 只在 `null`/`undefined` 时回退。
+
+**例外**：结构性属性不受此限制，仍可用 `||`：
+- `input` 的 `:type="props.type || 'text'"` — 浏览器需要有效 type 值，空值行为异常
+
 ## 禁止事项
 
 - 禁止手动硬编码组件 ID，必须用 `createComponentId()`

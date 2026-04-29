@@ -1,6 +1,6 @@
 <template>
   <button class="button-component" :style="computedStyle" @click="handleClick">
-    {{ component.props.content || '按钮' }}
+    {{ component.props.content ?? '' }}
   </button>
 </template>
 

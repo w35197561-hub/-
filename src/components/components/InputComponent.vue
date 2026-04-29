@@ -2,7 +2,7 @@
   <input
     class="input-component"
     :type="(component.props.type as string) || 'text'"
-    :placeholder="(component.props.placeholder as string) || '请输入内容'"
+    :placeholder="(component.props.placeholder as string) ?? ''"
     :value="(component.props.value as string) || ''"
     :style="computedStyle"
   />

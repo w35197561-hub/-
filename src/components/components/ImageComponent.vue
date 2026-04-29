@@ -3,7 +3,7 @@
     <img
       v-if="src"
       :src="src"
-      :alt="(component.props.alt as string) || '图片'"
+      :alt="(component.props.alt as string) ?? ''"
       class="image-content"
     />
     <div v-else class="image-placeholder">

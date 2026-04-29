@@ -1,6 +1,6 @@
 <template>
   <div class="text-component" :style="computedStyle">
-    {{ component.props.content || '文本内容' }}
+    {{ component.props.content ?? '' }}
   </div>
 </template>
 

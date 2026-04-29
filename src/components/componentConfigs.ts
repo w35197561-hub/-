@@ -1,7 +1,7 @@
 import { ComponentType } from '@/types'
 import type { ComponentConfig } from '@/types'
 
-export const componentConfigs: Partial<Record<ComponentType, ComponentConfig>> = {
+export const componentConfigs: Record<ComponentType, ComponentConfig> = {
   [ComponentType.TEXT]: {
     defaultProps: { content: '文本内容' },
     defaultStyle: { fontSize: 14, color: '#333333', backgroundColor: 'transparent' },
@@ -9,8 +9,89 @@ export const componentConfigs: Partial<Record<ComponentType, ComponentConfig>> =
       { label: '文本内容', setter: 'TextareaSetter', field: 'content' },
     ],
     styleSetters: [
-      { label: '字体大小', setter: 'NumberSetter', field: 'fontSize', setterProps: { min: 8, max: 72, step: 1 } },
-      { label: '字体颜色', setter: 'ColorSetter', field: 'color' },
+      { label: '字体大小', setter: 'NumberSetter', field: 'fontSize',         setterProps: { min: 8, max: 72, step: 1 } },
+      { label: '字体颜色', setter: 'ColorSetter',  field: 'color' },
+      { label: '背景颜色', setter: 'ColorSetter',  field: 'backgroundColor' },
+    ],
+  },
+
+  [ComponentType.BUTTON]: {
+    defaultProps: { content: '按钮' },
+    defaultStyle: { fontSize: 14, color: '#ffffff', backgroundColor: '#409eff', borderRadius: 4 },
+    propSetters: [
+      { label: '按钮文本', setter: 'InputSetter', field: 'content' },
+    ],
+    styleSetters: [
+      { label: '字体大小', setter: 'NumberSetter', field: 'fontSize',         setterProps: { min: 8, max: 72, step: 1 } },
+      { label: '字体颜色', setter: 'ColorSetter',  field: 'color' },
+      { label: '背景颜色', setter: 'ColorSetter',  field: 'backgroundColor' },
+      { label: '圆角',     setter: 'NumberSetter', field: 'borderRadius',     setterProps: { min: 0, max: 50, step: 1 } },
+    ],
+  },
+
+  [ComponentType.IMAGE]: {
+    defaultProps: { src: '', alt: '' },
+    defaultStyle: { backgroundColor: '#f5f5f5', borderRadius: 0 },
+    propSetters: [
+      { label: '图片地址', setter: 'InputSetter', field: 'src' },
+      { label: '替代文本', setter: 'InputSetter', field: 'alt' },
+    ],
+    styleSetters: [
+      { label: '背景颜色', setter: 'ColorSetter',  field: 'backgroundColor' },
+      { label: '边框宽度', setter: 'NumberSetter', field: 'borderWidth',      setterProps: { min: 0, max: 10, step: 1 } },
+      { label: '边框颜色', setter: 'ColorSetter',  field: 'borderColor' },
+      { label: '圆角',     setter: 'NumberSetter', field: 'borderRadius',     setterProps: { min: 0, max: 50, step: 1 } },
+    ],
+  },
+
+  [ComponentType.INPUT]: {
+    defaultProps: { placeholder: '请输入内容', type: 'text' },
+    defaultStyle: { width: 200, height: 40, fontSize: 14, borderWidth: 1, borderRadius: 4 },
+    propSetters: [
+      { label: '占位文本', setter: 'InputSetter', field: 'placeholder' },
+    ],
+    styleSetters: [
+      { label: '字体大小', setter: 'NumberSetter', field: 'fontSize',         setterProps: { min: 8, max: 72, step: 1 } },
+      { label: '字体颜色', setter: 'ColorSetter',  field: 'color' },
+      { label: '背景颜色', setter: 'ColorSetter',  field: 'backgroundColor' },
+      { label: '边框宽度', setter: 'NumberSetter', field: 'borderWidth',      setterProps: { min: 0, max: 10, step: 1 } },
+      { label: '边框颜色', setter: 'ColorSetter',  field: 'borderColor' },
+      { label: '圆角',     setter: 'NumberSetter', field: 'borderRadius',     setterProps: { min: 0, max: 50, step: 1 } },
+    ],
+  },
+
+  [ComponentType.FORM]: {
+    defaultProps: { title: '表单容器', columns: ['col1', 'col2'] },
+    defaultStyle: { width: 520, height: 260 },
+    propSetters: [
+      { label: '容器标题', setter: 'InputSetter', field: 'title' },
+    ],
+    styleSetters: [
+      { label: '背景颜色', setter: 'ColorSetter', field: 'backgroundColor' },
+    ],
+  },
+
+  [ComponentType.TABS]: {
+    defaultProps: {
+      tabs: [
+        { key: 'tab1', label: 'Tab 1' },
+        { key: 'tab2', label: 'Tab 2' },
+      ],
+      activeTab: 'tab1',
+    },
+    defaultStyle: { width: 560, height: 320 },
+    propSetters: [
+      { label: '当前 Tab', setter: 'SelectSetter', field: 'activeTab', optionsField: 'tabs' },
+    ],
+    styleSetters: [
+      { label: '背景颜色', setter: 'ColorSetter', field: 'backgroundColor' },
+    ],
+  },
+
+  [ComponentType.CHART]: {
+    defaultProps: { type: 'bar' },
+    propSetters: [],
+    styleSetters: [
       { label: '背景颜色', setter: 'ColorSetter', field: 'backgroundColor' },
     ],
   },
@@ -32,10 +113,10 @@ export const componentConfigs: Partial<Record<ComponentType, ComponentConfig>> =
       },
     ],
     styleSetters: [
-      { label: '字体大小', setter: 'NumberSetter', field: 'fontSize',    setterProps: { min: 8, max: 72, step: 1 } },
-      { label: '边框宽度', setter: 'NumberSetter', field: 'borderWidth',  setterProps: { min: 0, max: 10, step: 1 } },
+      { label: '字体大小', setter: 'NumberSetter', field: 'fontSize',         setterProps: { min: 8, max: 72, step: 1 } },
+      { label: '边框宽度', setter: 'NumberSetter', field: 'borderWidth',      setterProps: { min: 0, max: 10, step: 1 } },
       { label: '边框颜色', setter: 'ColorSetter',  field: 'borderColor' },
-      { label: '圆角',     setter: 'NumberSetter', field: 'borderRadius', setterProps: { min: 0, max: 50, step: 1 } },
+      { label: '圆角',     setter: 'NumberSetter', field: 'borderRadius',     setterProps: { min: 0, max: 50, step: 1 } },
     ],
   },
 }
