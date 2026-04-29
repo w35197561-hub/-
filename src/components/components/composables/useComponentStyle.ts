@@ -1,11 +1,8 @@
+import { computed } from 'vue'
 import type { ComponentStyle } from '@/types'
 
-/**
- * 将 ComponentStyle 映射为 CSS 内联样式对象
- * 统一处理单位拼接，供所有叶子组件复用
- */
 export function useComponentStyle(style: ComponentStyle) {
-  const baseStyle = {
+  const baseStyle = computed(() => ({
     width: '100%',
     height: '100%',
     boxSizing: 'border-box' as const,
@@ -16,7 +13,7 @@ export function useComponentStyle(style: ComponentStyle) {
       ? `${style.borderWidth}px solid ${style.borderColor ?? '#cccccc'}`
       : 'none',
     borderRadius: style.borderRadius ? `${style.borderRadius}px` : '0',
-  }
+  }))
 
   return { baseStyle }
 }

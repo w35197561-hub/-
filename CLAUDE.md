@@ -170,7 +170,7 @@ interface ComponentData {
 ### 新增组件的完整流程（6 步）
 
 1. **`src/types/index.ts`** → `ComponentType` 枚举加新值
-2. **`src/stores/editor.ts`** → `defaultProps`、`typeStyleMap`（可选）各加一项
+2. **`src/components/componentConfigs.ts`** → 新增一条配置（`defaultProps`、`defaultStyle`、`propSetters`、`styleSetters`），详见 `.claude/skills/coding.md` 的"新增组件自查清单 §2"
 3. **`src/components/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范
 4. **`src/components/components/ComponentRenderer.vue`** → `componentMap` 加新枚举 key
 5. **`src/components/ComponentPanel.vue`** → `componentTypes` 数组加 `{ type, name, icon }`

@@ -50,14 +50,46 @@
 - 原因：画布是"展示态"，组件无权访问 store，用户交互无法持久化，会产生虚假反馈
 - 正确方式：通过属性面板修改 props，canvas 组件只负责渲染
 
-### 2. 样式默认值
-- `typeStyleMap` 中为新组件设置所有**会在属性面板中展示**的样式默认值
-- 必填：`width`、`height`
-- 按需填：`fontSize`、`borderWidth`、`borderRadius`（不填则属性面板显示空）
-- 类型：`Partial<Record<ComponentType, Partial<ComponentData['style']>>>`
+### 2. 在 componentConfigs.ts 中声明组件配置（必须）
+
+新增组件必须在 `src/components/componentConfigs.ts` 中添加一条记录，替代原来分散在 `editor.ts` 中的 `defaultProps` / `typeStyleMap` 硬编码：
+
+```typescript
+[ComponentType.XXX]: {
+  defaultProps: { /* 所有 props 初始值 */ },
+  defaultStyle: { width: 200, height: 50, /* 其余按需 */ },  // 可选
+  propSetters: [
+    { label: '显示名', setter: 'NumberSetter', field: 'propKey', setterProps: { min: 0 } },
+    { label: '文本',   setter: 'TextareaSetter', field: 'content' },
+    { label: '颜色',   setter: 'ColorSetter',    field: 'color' },
+  ],
+  styleSetters: [
+    { label: '字体大小', setter: 'NumberSetter', field: 'fontSize', setterProps: { min: 8, max: 72 } },
+    { label: '边框颜色', setter: 'ColorSetter',  field: 'borderColor' },
+  ],
+}
+```
+
+**setter 选取规则：**
+- `defaultProps` 中的所有字段默认都给 setter，除非满足以下条件才排除：
+  - 框架内部用、用户感知不到（如 `isContainer`）
+  - 结构性数据、面板无法简单编辑（如 `tabs: [{key,label}]`）
+  - 由其他机制控制（如容器内部状态）
+
+**可用 setter 类型：**
+
+| SetterType | 对应控件 | 适用场景 |
+|---|---|---|
+| `NumberSetter` | `el-input-number` | 数值（宽度、大小、步长…） |
+| `InputSetter` | `el-input` | 单行文本 |
+| `TextareaSetter` | `el-input` type="textarea" | 多行文本 |
+| `ColorSetter` | `el-color-picker` | 颜色值 |
+| `SelectSetter` | `el-select` | 枚举选择，需配合 `optionsField` |
+
+声明后，`editor.ts` 会自动读取 `defaultProps` 和 `defaultStyle`，`PropertyPanel.vue` 会自动渲染对应控件，**无需改动这两个文件**。
 
 ### 3. 属性面板验证
-- 拖入组件后打开属性面板，确认样式设置区各字段有合理初始值，无空白项
+- 拖入组件后打开属性面板，确认 propSetters / styleSetters 各字段有合理初始值，无空白项
 
 ## 变更记录
 

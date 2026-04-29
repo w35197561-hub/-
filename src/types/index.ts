@@ -59,6 +59,30 @@ export enum ComponentType {
   NUMBER_INPUT = 'NumberInput'
 }
 
+export type SetterType = 'InputSetter' | 'TextareaSetter' | 'NumberSetter' | 'ColorSetter' | 'SelectSetter'
+
+export interface PropSetter {
+  label: string
+  setter: SetterType
+  field: string
+  setterProps?: Record<string, unknown> | ((props: ComponentProps) => Record<string, unknown>)
+  optionsField?: string
+}
+
+export interface StyleSetter {
+  label: string
+  setter: SetterType
+  field: keyof ComponentStyle
+  setterProps?: Record<string, unknown>
+}
+
+export interface ComponentConfig {
+  defaultProps: ComponentProps
+  defaultStyle?: Partial<ComponentStyle>
+  propSetters: PropSetter[]
+  styleSetters?: StyleSetter[]
+}
+
 export interface Command {
   execute(): void
   undo(): void

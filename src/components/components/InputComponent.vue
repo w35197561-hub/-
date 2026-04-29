@@ -20,7 +20,7 @@ const props = defineProps<{
 const { baseStyle } = useComponentStyle(props.component.style)
 
 const computedStyle = computed(() => ({
-  ...baseStyle,
+  ...baseStyle.value,
   color: props.component.style.color ?? '#333333',
   backgroundColor: props.component.style.backgroundColor ?? '#ffffff',
   // 输入框默认有 1px 边框

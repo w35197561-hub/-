@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import type { PageData, ComponentData, Command } from '@/types'
 import { ComponentType } from '@/types'
 import { useHistoryStore } from './history'
+import { componentConfigs } from '@/components/componentConfigs'
 
 export const useEditorStore = defineStore('editor', () => {
   const currentPage = ref<PageData | null>(null)
@@ -183,16 +184,19 @@ export const useEditorStore = defineStore('editor', () => {
     const typeStyleMap: Partial<Record<ComponentType, Partial<ComponentData['style']>>> = {
       [ComponentType.FORM]: { width: 520, height: 260 },
       [ComponentType.TABS]: { width: 560, height: 320 },
-      [ComponentType.NUMBER_INPUT]: { width: 200, height: 40, fontSize: 14, borderWidth: 1, borderRadius: 4 }
     }
 
     // 从initialProps中提取style相关的属性
     const { left, top, width, height, zIndex, rotate, ...otherProps } = initialProps as Record<string, unknown>
-    
+
+    // componentConfigs 优先，未迁移的组件降级到 typeStyleMap
+    const configDefaultStyle = componentConfigs[type]?.defaultStyle ?? {}
+
     // 合并style，优先使用传入的位置参数
     const finalStyle = {
       ...defaultStyle,
       ...(typeStyleMap[type] || {}),
+      ...configDefaultStyle,
       ...(left !== undefined && { left: left as number }),
       ...(top !== undefined && { top: top as number }),
       ...(width !== undefined && { width: width as number }),
@@ -201,8 +205,7 @@ export const useEditorStore = defineStore('editor', () => {
       ...(rotate !== undefined && { rotate: rotate as number })
     }
 
-    const defaultProps: Record<ComponentType, Record<string, unknown>> = {
-      [ComponentType.TEXT]: { content: '文本内容' },
+    const legacyDefaultProps: Partial<Record<ComponentType, Record<string, unknown>>> = {
       [ComponentType.IMAGE]: { src: '' },
       [ComponentType.BUTTON]: { content: '按钮' },
       [ComponentType.INPUT]: { placeholder: '请输入内容' },
@@ -215,14 +218,16 @@ export const useEditorStore = defineStore('editor', () => {
         ],
         activeTab: 'tab1'
       },
-      [ComponentType.NUMBER_INPUT]: { min: 0, max: 100, step: 1, value: 0, placeholder: '' }
     }
+
+    // componentConfigs 优先，未迁移的组件降级到 legacyDefaultProps
+    const resolvedDefaultProps = componentConfigs[type]?.defaultProps ?? legacyDefaultProps[type] ?? {}
 
     const component: ComponentData = {
       id: createComponentId(),
       type,
       style: finalStyle,
-      props: { ...defaultProps[type], ...otherProps },
+      props: { ...resolvedDefaultProps, ...otherProps },
       isContainer: type === ComponentType.FORM || type === ComponentType.TABS,
       children: type === ComponentType.FORM ? [] : undefined,
       slots: type === ComponentType.FORM
@@ -354,8 +359,7 @@ export const useEditorStore = defineStore('editor', () => {
 
     const { left, top, width, height, zIndex, rotate, ...otherProps } = initialProps as Record<string, unknown>
 
-    const childDefaultProps: Record<ComponentType, Record<string, unknown>> = {
-      [ComponentType.TEXT]: { content: '文本内容' },
+    const legacyChildDefaultProps: Partial<Record<ComponentType, Record<string, unknown>>> = {
       [ComponentType.IMAGE]: { src: '' },
       [ComponentType.BUTTON]: { content: '按钮' },
       [ComponentType.INPUT]: { placeholder: '请输入内容' },
@@ -368,8 +372,9 @@ export const useEditorStore = defineStore('editor', () => {
         ],
         activeTab: 'tab1'
       },
-      [ComponentType.NUMBER_INPUT]: { min: 0, max: 100, step: 1, value: 0, placeholder: '' }
     }
+
+    const resolvedChildDefaultProps = componentConfigs[type]?.defaultProps ?? legacyChildDefaultProps[type] ?? {}
 
     const child: ComponentData = {
       id: createComponentId(),
@@ -383,7 +388,7 @@ export const useEditorStore = defineStore('editor', () => {
         ...(zIndex !== undefined && { zIndex: zIndex as number }),
         ...(rotate !== undefined && { rotate: rotate as number })
       },
-      props: { ...childDefaultProps[type], ...otherProps },
+      props: { ...resolvedChildDefaultProps, ...otherProps },
       isContainer: type === ComponentType.FORM || type === ComponentType.TABS,
       children: type === ComponentType.FORM ? [] : undefined,
       slots: type === ComponentType.FORM

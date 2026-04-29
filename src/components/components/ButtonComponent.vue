@@ -16,7 +16,7 @@ const props = defineProps<{
 const { baseStyle } = useComponentStyle(props.component.style)
 
 const computedStyle = computed(() => ({
-  ...baseStyle,
+  ...baseStyle.value,
   color: props.component.style.color ?? '#ffffff',
   backgroundColor: props.component.style.backgroundColor ?? '#409eff',
   padding: '8px 16px',

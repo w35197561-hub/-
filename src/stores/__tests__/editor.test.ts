@@ -40,6 +40,7 @@ describe('addComponent', () => {
     expect(style?.top).toBe(100)
     expect(style?.left).toBe(100)
     expect(style?.zIndex).toBe(1)
+    expect(style?.fontSize).toBe(14)
   })
 
   it('可通过 initialProps 覆盖默认位置', () => {
