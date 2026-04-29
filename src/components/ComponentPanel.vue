@@ -5,10 +5,11 @@
     </div>
     
     <div class="component-list">
-      <div 
-        v-for="component in componentTypes" 
+      <div
+        v-for="component in componentTypes"
         :key="component.type"
         class="component-item"
+        :data-testid="`component-item-${component.type}`"
         draggable="true"
         @dragstart="handleDragStart(component.type, $event)"
         @dragend="handleDragEnd"

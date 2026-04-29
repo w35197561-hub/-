@@ -40,3 +40,7 @@ __screenshots__/
 
 # 后端环境变量（含 API Key，不提交到版本库）
 server/.env
+
+# Playwright
+playwright-report/
+test-results/

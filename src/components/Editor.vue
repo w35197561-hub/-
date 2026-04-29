@@ -8,11 +8,11 @@
       
       <div class="header-center">
         <el-button-group>
-          <el-button @click="handleUndo" :disabled="!canUndo">
+          <el-button data-testid="btn-undo" @click="handleUndo" :disabled="!canUndo">
             <el-icon><RefreshLeft /></el-icon>
             撤销
           </el-button>
-          <el-button @click="handleRedo" :disabled="!canRedo">
+          <el-button data-testid="btn-redo" @click="handleRedo" :disabled="!canRedo">
             <el-icon><RefreshRight /></el-icon>
             重做
           </el-button>

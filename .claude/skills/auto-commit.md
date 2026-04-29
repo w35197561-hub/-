@@ -10,10 +10,20 @@
 ### Step 2：分析变更，生成 commit message
 根据 diff 内容，按照下方规范生成一条 commit message，**不要询问用户，直接生成**。
 
-### Step 3：展示并确认
+### Step 3：更新 CHANGELOG.md
+在 `CHANGELOG.md` 第一个 `---` 分隔线下方追加本次变更记录：
+
+```markdown
+### <commit message>
+<用 1-3 句话解释：做了什么、为什么这么做、发现了什么问题（如有）>
+```
+
+日期归入当天的 `## YYYY-MM-DD` 区块，若当天区块不存在则新建。
+
+### Step 4：展示并确认
 将生成的 commit message 展示给用户，询问是否直接使用或修改。
 
-### Step 4：执行提交
+### Step 5：执行提交
 调用脚本完成 `git add → git commit → git push`：
 
 ```bash

@@ -37,8 +37,9 @@
       @dragover="handleDragOver"
       @drop="handleDrop"
     >
-      <div 
+      <div
         class="canvas-background"
+        data-testid="canvas-background"
         :style="{
           width: `${currentPage?.style.width || 1200}px`,
           height: `${currentPage?.style.height || 800}px`,
@@ -49,6 +50,7 @@
           v-for="component in currentPage?.components"
           :key="component.id"
           class="component-wrapper"
+          data-testid="component-wrapper"
           :class="{ selected: currentComponent?.id === component.id }"
           :style="{
             top: `${component.style.top}px`,
