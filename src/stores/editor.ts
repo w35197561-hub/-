@@ -213,7 +213,8 @@ export const useEditorStore = defineStore('editor', () => {
           { key: 'tab2', label: 'Tab 2' }
         ],
         activeTab: 'tab1'
-      }
+      },
+      [ComponentType.NUMBER_INPUT]: { min: 0, max: 100, step: 1, value: 0, placeholder: '' }
     }
 
     const component: ComponentData = {
@@ -365,7 +366,8 @@ export const useEditorStore = defineStore('editor', () => {
           { key: 'tab2', label: 'Tab 2' }
         ],
         activeTab: 'tab1'
-      }
+      },
+      [ComponentType.NUMBER_INPUT]: { min: 0, max: 100, step: 1, value: 0, placeholder: '' }
     }
 
     const child: ComponentData = {

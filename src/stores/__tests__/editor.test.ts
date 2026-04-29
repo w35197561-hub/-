@@ -87,6 +87,36 @@ describe('addComponent', () => {
   })
 })
 
+// ── NumberInput 专项 ──────────────────────────────────────────
+describe('addComponent - NumberInput', () => {
+  it('携带正确的默认 props', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.NUMBER_INPUT)
+    const props = editorStore.currentComponent?.props
+    expect(props?.min).toBe(0)
+    expect(props?.max).toBe(100)
+    expect(props?.step).toBe(1)
+    expect(props?.value).toBe(0)
+  })
+
+  it('添加后 undo 移除组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.NUMBER_INPUT)
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    historyStore.undo()
+    expect(editorStore.currentPage?.components).toHaveLength(0)
+  })
+
+  it('undo 后 redo 恢复组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.NUMBER_INPUT)
+    historyStore.undo()
+    historyStore.redo()
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    expect(editorStore.currentComponent?.type).toBe(ComponentType.NUMBER_INPUT)
+  })
+})
+
 // ── deleteComponent ───────────────────────────────────────────
 describe('deleteComponent', () => {
   it('删除组件后数量 -1', () => {

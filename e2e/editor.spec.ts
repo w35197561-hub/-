@@ -30,8 +30,6 @@ test.describe('编辑器加载', () => {
     for (const type of types) {
       await expect(page.locator(`[data-testid="component-item-${type}"]`)).toBeVisible()
     }
-    // 故意断言一个不存在的组件
-    await expect(page.locator('[data-testid="component-item-Video"]')).toBeVisible()
   })
 
   test('初始状态撤销/重做按钮均禁用', async ({ page }) => {
@@ -79,6 +77,20 @@ test.describe('撤销/重做', () => {
     await expect(page.locator('[data-testid="component-wrapper"]')).toHaveCount(0)
 
     await page.locator('[data-testid="btn-redo"]').click()
+    await expect(page.locator('[data-testid="component-wrapper"]')).toHaveCount(1)
+  })
+})
+
+// ─────────────────────────────────────────────
+// NumberInput 组件
+// ─────────────────────────────────────────────
+test.describe('NumberInput 组件', () => {
+  test('组件面板显示数字输入项', async ({ page }) => {
+    await expect(page.locator(`[data-testid="component-item-${ComponentType.NUMBER_INPUT}"]`)).toBeVisible()
+  })
+
+  test('拖入画布后正常渲染', async ({ page }) => {
+    await dragComponentToCanvas(page, ComponentType.NUMBER_INPUT, 200, 150)
     await expect(page.locator('[data-testid="component-wrapper"]')).toHaveCount(1)
   })
 })

@@ -233,6 +233,42 @@
               />
             </div>
 
+            <template v-if="currentComponent.type === 'NumberInput'">
+              <div class="property-item">
+                <label>最小值</label>
+                <el-input-number
+                  v-model="(currentComponent.props.min as number)"
+                  :step="1"
+                  @change="updateComponentProps"
+                />
+              </div>
+              <div class="property-item">
+                <label>最大值</label>
+                <el-input-number
+                  v-model="(currentComponent.props.max as number)"
+                  :step="1"
+                  @change="updateComponentProps"
+                />
+              </div>
+              <div class="property-item">
+                <label>步长</label>
+                <el-input-number
+                  v-model="(currentComponent.props.step as number)"
+                  :min="0.01"
+                  :step="1"
+                  @change="updateComponentProps"
+                />
+              </div>
+              <div class="property-item">
+                <label>默认值</label>
+                <el-input-number
+                  v-model="(currentComponent.props.value as number)"
+                  :step="(currentComponent.props.step as number) || 1"
+                  @change="updateComponentProps"
+                />
+              </div>
+            </template>
+
             <div v-if="currentComponent.type === 'Form'" class="property-item">
               <label>容器标题</label>
               <el-input

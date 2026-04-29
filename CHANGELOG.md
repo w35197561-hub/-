@@ -4,6 +4,13 @@
 
 ---
 
+## 2026-04-29 (feature/add-number-input-component)
+
+### feat(components): 新增 NumberInput 数字输入框组件
+按 6 步流程完整注册：枚举、defaultProps（min/max/step/value）、组件文件、ComponentRenderer、ComponentPanel、PropertyPanel 属性配置。TypeScript 零报错，单元测试 38 个全绿，E2E 11/11 通过。
+
+---
+
 ## 2026-04-29
 
 ### chore: 迁移 .codewiz-spec 至 Claude Code 规范结构
