@@ -19,7 +19,8 @@ if (!existsSync(reportPath)) {
 }
 
 const report = JSON.parse(readFileSync(reportPath, 'utf-8'))
-const date = new Date().toISOString().slice(0, 16).replace('T', ' ')
+const now = new Date()
+const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
 
 let passed = 0
 let failed = 0
@@ -34,13 +35,14 @@ function collectSpecs(suites, describeChain = []) {
         passed++
       } else {
         failed++
+        const stripAnsi = (str) => str.replace(/\x1B\[[0-9;]*m/g, '')
         failures.push({
           describe: chain.join(' > '),
           title: spec.title,
           file: spec.file,
           line: spec.line,
           errors: failedResults.map(r => {
-            const msg = r.error?.message ?? '未知错误'
+            const msg = stripAnsi(r.error?.message ?? '未知错误')
             const stack = r.error?.stack
               ?.split('\n')
               .find(l => l.includes(spec.file))

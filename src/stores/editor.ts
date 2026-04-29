@@ -180,9 +180,10 @@ export const useEditorStore = defineStore('editor', () => {
       rotate: 0
     }
 
-    const typeStyleMap: Partial<Record<ComponentType, { width: number; height: number }>> = {
+    const typeStyleMap: Partial<Record<ComponentType, Partial<ComponentData['style']>>> = {
       [ComponentType.FORM]: { width: 520, height: 260 },
-      [ComponentType.TABS]: { width: 560, height: 320 }
+      [ComponentType.TABS]: { width: 560, height: 320 },
+      [ComponentType.NUMBER_INPUT]: { width: 200, height: 40, fontSize: 14, borderWidth: 1, borderRadius: 4 }
     }
 
     // 从initialProps中提取style相关的属性

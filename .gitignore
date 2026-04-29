@@ -44,3 +44,5 @@ server/.env
 # Playwright
 playwright-report/
 test-results/
+screenshots/
+playwright-verify.cjs

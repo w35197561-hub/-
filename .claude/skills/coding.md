@@ -41,6 +41,24 @@
 - 禁止遗留 `console.log` / `console.error` / `debugger`
 - 禁止硬编码魔法字符串，使用常量或枚举
 
+## 新增组件自查清单
+
+完成 6 步流程后，必须逐项确认：
+
+### 1. 画布交互行为
+- 输入类组件（input、number input、textarea 等）必须加 `readonly` 属性
+- 原因：画布是"展示态"，组件无权访问 store，用户交互无法持久化，会产生虚假反馈
+- 正确方式：通过属性面板修改 props，canvas 组件只负责渲染
+
+### 2. 样式默认值
+- `typeStyleMap` 中为新组件设置所有**会在属性面板中展示**的样式默认值
+- 必填：`width`、`height`
+- 按需填：`fontSize`、`borderWidth`、`borderRadius`（不填则属性面板显示空）
+- 类型：`Partial<Record<ComponentType, Partial<ComponentData['style']>>>`
+
+### 3. 属性面板验证
+- 拖入组件后打开属性面板，确认样式设置区各字段有合理初始值，无空白项
+
 ## 变更记录
 
 每步完成后更新 `.claude/specs/{功能名}/changes.md`：

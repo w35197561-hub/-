@@ -2,6 +2,7 @@
   <input
     class="number-input-component"
     type="number"
+    readonly
     :min="(component.props.min as number)"
     :max="(component.props.max as number)"
     :step="(component.props.step as number)"

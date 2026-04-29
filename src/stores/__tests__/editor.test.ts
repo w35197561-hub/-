@@ -99,6 +99,15 @@ describe('addComponent - NumberInput', () => {
     expect(props?.value).toBe(0)
   })
 
+  it('携带正确的默认样式（fontSize / borderWidth / borderRadius）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.NUMBER_INPUT)
+    const style = editorStore.currentComponent?.style
+    expect(style?.fontSize).toBe(14)
+    expect(style?.borderWidth).toBe(1)
+    expect(style?.borderRadius).toBe(4)
+  })
+
   it('添加后 undo 移除组件', () => {
     const { editorStore, historyStore } = setup()
     editorStore.addComponent(ComponentType.NUMBER_INPUT)
