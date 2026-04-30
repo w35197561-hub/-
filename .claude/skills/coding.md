@@ -7,7 +7,6 @@
 - Props 固定为 `defineProps<{ component: ComponentData }>()`，不得随意扩展
 - 样式通过 `useComponentStyle(component.style)` composable 获取，禁止在模板中写大段内联样式对象
 - CSS 固定 `width:100%; height:100%; box-sizing:border-box`
-- 容器组件（Form/Tabs）的拖放逻辑通过 `useContainerDrop(containerId, getSlotKey)` 复用，不得重复实现
 - 子组件 wrapper 样式抽为独立的 `computed`，避免模板内联对象导致不必要的重渲染
 
 ## TypeScript 规范
@@ -89,10 +88,36 @@ Element Plus <组件名> props 常用属性 <当前年份>
 
 ---
 
-### 1. 画布交互行为
-- 输入类组件（input、number input、textarea 等）必须加 `readonly` 属性
-- 原因：画布是"展示态"，组件无权访问 store，用户交互无法持久化，会产生虚假反馈
-- 正确方式：通过属性面板修改 props，canvas 组件只负责渲染
+### 1. 特征判断（决定额外规则）
+
+画布是"展示态"，组件只负责渲染，用户交互无法持久化。按以下三个问题逐一判断，命中则执行对应规则，**可同时命中多个**：
+
+**① 该组件有原生浏览器交互行为？**（点击、输入、选择、切换等）
+
+→ 是：canvas 模板中必须加 `disabled` 或 `readonly`
+- `input` / `textarea` 用 `readonly`
+- `select` / `button` / `checkbox` / `el-select` 等用 `disabled`
+
+```vue
+<!-- ✅ input 类 -->
+<input :value="component.props.value" readonly />
+
+<!-- ✅ select / button 类 -->
+<el-select disabled />
+```
+
+**② 该组件能包含其他可拖拽子组件？**（容器）
+
+→ 是：必须满足以下三点：
+- `isContainer: true`
+- `slots` 或 `children` 字段存放子组件
+- 拖放逻辑通过 `useContainerDrop(containerId, getSlotKey)` 复用，禁止自行实现
+
+**③ 该组件主要触发动作/事件？**（按钮、链接等）
+
+→ 是：在 `componentConfigs` 的 `propSetters` 中为事件类型提供配置入口（如 `onClick` 的行为类型）
+
+---
 
 ### 2. 在 componentConfigs.ts 中声明组件配置（必须）
 

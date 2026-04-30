@@ -37,9 +37,9 @@ description: 负责代码审查和提交阶段。当编码完成、用户要求 
 - 属性面板可修改 props
 - 撤销/重做正常
 
-验证完成后执行 `npm run test:e2e`，测试结果会自动写入 `docs/test-log.md`。
+验证完成后执行 `npm run test:e2e`，无论通过或失败，测试结果均会自动写入 `docs/test-log.md`（全通过写摘要行，有失败写详细错误）。
 
-- **验证失败** → 记录问题截图，将失败原因手动补充到 `docs/test-log.md` 对应条目，返回 coder 修复
+- **验证失败** → 记录截图，返回 coder 修复；修复后重新执行 `npm run test:e2e` 直至全绿
 
 ### Step 4：提交
 代码审查、单测、浏览器验证均通过后，读取 `.claude/skills/auto-commit.md` 执行提交流程。

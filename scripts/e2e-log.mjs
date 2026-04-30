@@ -60,13 +60,21 @@ collectSpecs(report.suites)
 
 const total = passed + failed
 
+const status = failed === 0 ? '✅' : '❌'
+let entry = `## ${date}  ${status} ${failed === 0 ? `全部通过 ${passed}/${total}` : `${failed}/${total} 失败`}\n\n`
+
 if (failed === 0) {
-  console.log(`✅ 全部通过 (${passed}/${total})，无失败记录，不写入 test-log.md`)
+  // 全部通过时只写摘要行，不写详细信息
+  entry += `> 全部 ${total} 个用例通过。\n\n---\n\n`
+  const existing = existsSync(logPath) ? readFileSync(logPath, 'utf-8') : '# E2E 测试记录\n\n'
+  const insertAt = existing.indexOf('\n\n') + 2
+  const updated = existing.slice(0, insertAt) + entry + existing.slice(insertAt)
+  writeFileSync(logPath, updated)
+  console.log(`✅ 全部通过 (${passed}/${total})，已写入 docs/test-log.md`)
   process.exit(0)
 }
 
-// 只在有失败时写入
-let entry = `## ${date}  ❌ ${failed}/${total} 失败\n\n`
+// 有失败时写入详细信息
 
 for (const f of failures) {
   entry += `### ${f.describe} > ${f.title}\n`
