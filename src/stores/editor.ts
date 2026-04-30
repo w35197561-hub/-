@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import type { PageData, ComponentData, Command } from '@/types'
 import { ComponentType } from '@/types'
 import { useHistoryStore } from './history'
-import { componentConfigs } from '@/components/componentConfigs'
+import { componentConfigs } from '@/components/material/componentConfigs'
 
 export const useEditorStore = defineStore('editor', () => {
   const currentPage = ref<PageData | null>(null)

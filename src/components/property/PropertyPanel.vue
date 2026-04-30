@@ -218,7 +218,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
-import { componentConfigs } from './componentConfigs'
+import { componentConfigs } from '../material/componentConfigs'
 import LayerPanel from './LayerPanel.vue'
 import {
   InfoFilled,

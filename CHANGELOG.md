@@ -4,6 +4,13 @@
 
 ---
 
+## 2026-04-30
+
+### refactor(components): 按物料/画布/属性三层重构组件目录结构
+将 `src/components/` 下扁平的文件按职责拆分为四个子目录：`editor/`（编辑器外壳）、`material/`（左侧物料面板 + componentConfigs）、`canvas/`（画布 + 可渲染组件 + composables）、`property/`（右侧属性/图层面板）。同步更新所有 import 路径、CLAUDE.md 6 步流程及 coding.md 技能文档。
+
+---
+
 ## 2026-04-29 (feature/add-number-input-component)
 
 ### feat(components): 新增 NumberInput 数字输入框组件

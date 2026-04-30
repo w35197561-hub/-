@@ -23,25 +23,29 @@
 vue-yuan-drag/
 ├── src/                              # 前端
 │   ├── components/
-│   │   ├── Editor.vue                # 编辑器主布局（左中右三栏）
-│   │   ├── EditorCanvas.vue          # 画布（拖拽、缩放、对齐）
-│   │   ├── ComponentPanel.vue        # 左侧组件面板（拖出组件）
-│   │   ├── PropertyPanel.vue         # 右侧属性面板（编辑 props/style）
-│   │   ├── LayerPanel.vue            # 图层管理面板
-│   │   ├── AIPanel.vue               # AI 对话面板
-│   │   └── components/               # 可渲染组件
-│   │       ├── ComponentRenderer.vue # 组件分发器（componentMap）
-│   │       ├── TextComponent.vue
-│   │       ├── ImageComponent.vue
-│   │       ├── ButtonComponent.vue
-│   │       ├── InputComponent.vue
-│   │       ├── NumberInputComponent.vue
-│   │       ├── FormComponent.vue     # 容器组件（含 slots）
-│   │       ├── TabsComponent.vue     # 容器组件（含 slots）
-│   │       └── composables/
-│   │           ├── useComponentStyle.ts   # 样式 computed 封装（返回 computed，非普通对象）
-│   │           └── useContainerDrop.ts    # 容器拖放逻辑复用
-│   ├── componentConfigs.ts           # 各组件配置（defaultProps/defaultStyle/propSetters/styleSetters）
+│   │   ├── editor/                   # 编辑器外壳
+│   │   │   ├── Editor.vue            # 主布局（左中右三栏）
+│   │   │   └── AIPanel.vue           # AI 对话面板
+│   │   ├── material/                 # 物料层（左侧组件面板）
+│   │   │   ├── ComponentPanel.vue    # 拖出组件
+│   │   │   └── componentConfigs.ts   # 各组件配置（defaultProps/defaultStyle/propSetters/styleSetters）
+│   │   ├── canvas/                   # 画布层
+│   │   │   ├── EditorCanvas.vue      # 画布（拖拽、缩放、对齐）
+│   │   │   └── components/           # 可渲染组件
+│   │   │       ├── ComponentRenderer.vue  # 组件分发器（componentMap）
+│   │   │       ├── TextComponent.vue
+│   │   │       ├── ImageComponent.vue
+│   │   │       ├── ButtonComponent.vue
+│   │   │       ├── InputComponent.vue
+│   │   │       ├── NumberInputComponent.vue
+│   │   │       ├── FormComponent.vue      # 容器组件（含 slots）
+│   │   │       ├── TabsComponent.vue      # 容器组件（含 slots）
+│   │   │       └── composables/
+│   │   │           ├── useComponentStyle.ts   # 样式 computed 封装（返回 computed，非普通对象）
+│   │   │           └── useContainerDrop.ts    # 容器拖放逻辑复用
+│   │   └── property/                 # 属性层（右侧面板）
+│   │       ├── PropertyPanel.vue     # 属性配置面板
+│   │       └── LayerPanel.vue        # 图层管理面板
 │   ├── stores/
 │   │   ├── editor.ts                 # 编辑器状态（页面、组件、画布）
 │   │   ├── history.ts                # 撤销/重做（Command 模式）
@@ -161,7 +165,7 @@ interface ComponentData {
 
 **PageData：** `{ id, title, components: ComponentData[], style: { width:1200, height:800, backgroundColor:'#fff' } }`
 
-### Vue 组件文件规范（`src/components/components/`）
+### Vue 组件文件规范（`src/components/canvas/components/`）
 
 - Props 固定为 `defineProps<{ component: ComponentData }>()`
 - 样式通过 `computed` 对象绑定，使用 `useComponentStyle(component.style)` composable 获取基础样式
@@ -172,11 +176,11 @@ interface ComponentData {
 ### 新增组件的完整流程（6 步）
 
 1. **`src/types/index.ts`** → `ComponentType` 枚举加新值
-2. **`src/components/componentConfigs.ts`** → 新增一条配置（`defaultProps`、`defaultStyle`、`propSetters`、`styleSetters`），详见 `.claude/skills/coding.md` 的"新增组件自查清单 §2"
-3. **`src/components/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范
-4. **`src/components/components/ComponentRenderer.vue`** → `componentMap` 加新枚举 key
-5. **`src/components/ComponentPanel.vue`** → `componentTypes` 数组加 `{ type, name, icon }`
-6. **`src/components/PropertyPanel.vue`** → 无需改动，属性面板由 `componentConfigs` 自动驱动
+2. **`src/components/material/componentConfigs.ts`** → 新增一条配置（`defaultProps`、`defaultStyle`、`propSetters`、`styleSetters`），详见 `.claude/skills/coding.md` 的"新增组件自查清单 §2"
+3. **`src/components/canvas/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范
+4. **`src/components/canvas/components/ComponentRenderer.vue`** → `componentMap` 加新枚举 key
+5. **`src/components/material/ComponentPanel.vue`** → `componentTypes` 数组加 `{ type, name, icon }`
+6. **`src/components/property/PropertyPanel.vue`** → 无需改动，属性面板由 `componentConfigs` 自动驱动
 
 ### Store 操作规范（`src/stores/editor.ts`）
 

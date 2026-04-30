@@ -69,7 +69,7 @@
 
 ### 2. 在 componentConfigs.ts 中声明组件配置（必须）
 
-新增组件必须在 `src/components/componentConfigs.ts` 中添加一条记录，替代原来分散在 `editor.ts` 中的 `defaultProps` / `typeStyleMap` 硬编码：
+新增组件必须在 `src/components/material/componentConfigs.ts` 中添加一条记录，替代原来分散在 `editor.ts` 中的 `defaultProps` / `typeStyleMap` 硬编码：
 
 ```typescript
 [ComponentType.XXX]: {
@@ -117,11 +117,10 @@
 
 ### 变更文件
 - src/types/index.ts — 枚举新增 XXX
-- src/stores/editor.ts — defaultProps 新增 XXX
-- src/components/components/XxxComponent.vue — 新建组件
-- src/components/components/ComponentRenderer.vue — componentMap 注册
-- src/components/ComponentPanel.vue — componentTypes 注册
-- src/components/PropertyPanel.vue — 属性配置 UI（如有）
+- src/components/material/componentConfigs.ts — 新增组件配置
+- src/components/canvas/components/XxxComponent.vue — 新建组件
+- src/components/canvas/components/ComponentRenderer.vue — componentMap 注册
+- src/components/material/ComponentPanel.vue — componentTypes 注册
 
 ### 验证清单
 - [ ] TypeScript 编译无报错
