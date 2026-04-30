@@ -340,6 +340,7 @@ export const useEditorStore = defineStore('editor', () => {
       type,
       style: {
         ...defaultStyle,
+        ...(componentConfigs[type].defaultStyle ?? {}),
         ...(left !== undefined && { left: left as number }),
         ...(top !== undefined && { top: top as number }),
         ...(width !== undefined && { width: width as number }),
