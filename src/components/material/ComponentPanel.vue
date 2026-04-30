@@ -36,7 +36,8 @@ import {
   Tickets,
   Menu,
   Odometer,
-  ArrowDown
+  ArrowDown,
+  Memo
 } from '@element-plus/icons-vue'
 
 const componentTypes = ref([
@@ -48,6 +49,7 @@ const componentTypes = ref([
   { type: ComponentType.TABS, name: 'Tabs容器', icon: Menu },
   { type: ComponentType.NUMBER_INPUT, name: '数字输入', icon: Odometer },
   { type: ComponentType.SELECT,       name: '下拉复选', icon: ArrowDown },
+  { type: ComponentType.TEXTAREA,     name: '多行文本', icon: Memo },
 ])
 
 const handleDragStart = (componentType: ComponentType, event: DragEvent) => {

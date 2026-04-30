@@ -58,6 +58,7 @@ export enum ComponentType {
   TABS = 'Tabs',
   NUMBER_INPUT = 'NumberInput',
   SELECT = 'Select',
+  TEXTAREA = 'Textarea',
 }
 
 export type SetterType = 'InputSetter' | 'TextareaSetter' | 'NumberSetter' | 'ColorSetter' | 'SelectSetter' | 'StringListSetter'

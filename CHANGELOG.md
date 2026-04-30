@@ -6,6 +6,9 @@
 
 ## 2026-04-30
 
+### feat(components): 新增 Textarea 多行文本组件，规范 canvas 组件实现
+新增 TextareaComponent（原生 textarea，readonly），用 useComponentStyle 保证样式响应式。Select/Textarea 均改用原生元素替代 el-*，解决样式无法穿透 el-* 包装层的问题。精简各组件 styleSetters 为精准暴露（仅保留视觉有效的属性）。coding.md 新增"canvas 禁用 el-*"规则及 styleSetters 精准暴露指南。
+
 ### feat(components): 新增 Select 下拉复选组件，新增 StringListSetter
 新增 SelectComponent（el-select multiple disabled），选项以 string[] 存储，属性面板通过新增的 StringListSetter（每行 el-input + ➕/➖ 按钮）编辑。同步修复 router import 路径、LayerPanel 缺失 NUMBER_INPUT/SELECT 的 typeNames 和 icons、coding.md 新增编码前必须搜索的§0规则。
 

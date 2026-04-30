@@ -96,6 +96,22 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     ],
   },
 
+  [ComponentType.TEXTAREA]: {
+    defaultProps: { placeholder: '请输入内容', rows: 4, maxlength: 500 },
+    defaultStyle: { width: 200, height: 100, fontSize: 14, borderRadius: 4 },
+    propSetters: [
+      { label: '占位文本', setter: 'InputSetter',  field: 'placeholder' },
+      { label: '行数',     setter: 'NumberSetter', field: 'rows',      setterProps: { min: 1, max: 20, step: 1 } },
+      { label: '最大字数', setter: 'NumberSetter', field: 'maxlength', setterProps: { min: 0, step: 1 } },
+    ],
+    styleSetters: [
+      { label: '字体大小', setter: 'NumberSetter', field: 'fontSize',     setterProps: { min: 8, max: 72, step: 1 } },
+      { label: '字体颜色', setter: 'ColorSetter',  field: 'color' },
+      { label: '背景颜色', setter: 'ColorSetter',  field: 'backgroundColor' },
+      { label: '圆角',     setter: 'NumberSetter', field: 'borderRadius', setterProps: { min: 0, max: 50, step: 1 } },
+    ],
+  },
+
   [ComponentType.SELECT]: {
     defaultProps: {
       placeholder: '请选择',
@@ -108,7 +124,6 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     ],
     styleSetters: [
       { label: '背景颜色', setter: 'ColorSetter',  field: 'backgroundColor' },
-      { label: '边框颜色', setter: 'ColorSetter',  field: 'borderColor' },
       { label: '圆角',     setter: 'NumberSetter', field: 'borderRadius', setterProps: { min: 0, max: 50, step: 1 } },
     ],
   },

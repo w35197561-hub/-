@@ -8,6 +8,7 @@
 - 样式通过 `useComponentStyle(component.style)` composable 获取，禁止在模板中写大段内联样式对象
 - CSS 固定 `width:100%; height:100%; box-sizing:border-box`
 - 子组件 wrapper 样式抽为独立的 `computed`，避免模板内联对象导致不必要的重渲染
+- **canvas 组件禁止使用 `el-*` 组件**，必须用原生 HTML 元素（`<input>`、`<textarea>`、`<select>`、`<button>` 等）。原因：`el-*` 是多层 div 包裹的 Vue 组件，`:style` 只作用于最外层，无法将 backgroundColor、fontSize 等样式传入实际的交互元素，导致属性面板修改无效果。
 
 ## TypeScript 规范
 
@@ -85,6 +86,15 @@ Element Plus <组件名> props 常用属性 <当前年份>
 **③ 确认每个 prop 对应的 setter 类型**（参考下方 setter 表）。
 
 **④ 确认 `defaultStyle` 中所有被 styleSetter 引用的字段都有初始值**（如 `borderRadius: 0`），否则属性面板显示空白。
+
+**⑤ styleSetters 精准暴露**：只暴露对该组件视觉有实际效果的样式属性，不套模板。
+
+| 样式属性 | 适用组件 | 不适用 |
+|---------|---------|--------|
+| fontSize / color | 有文字内容的组件（Text/Button/Input/Textarea） | Image/Select/容器 |
+| borderWidth / borderColor | 自绘边框的组件（Image/Input） | 使用 el-* 组件自管边框的（Textarea/Select/NumberInput） |
+| borderRadius | 几乎所有组件 | — |
+| backgroundColor | 几乎所有组件 | — |
 
 ---
 

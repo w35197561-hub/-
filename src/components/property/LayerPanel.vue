@@ -109,6 +109,7 @@ const getComponentName = (c: ComponentData, idx: number): string => {
     [ComponentType.TABS]: '标签页',
     [ComponentType.NUMBER_INPUT]: '数字输入',
     [ComponentType.SELECT]: '下拉复选',
+    [ComponentType.TEXTAREA]: '多行文本',
   }
   const baseName = typeNames[c.type] || c.type
   // 尝试取 props 中有意义的标识
@@ -127,6 +128,7 @@ const getTypeIcon = (type: ComponentType): string => {
     [ComponentType.TABS]: '⧉',
     [ComponentType.NUMBER_INPUT]: '⓪',
     [ComponentType.SELECT]: '▾',
+    [ComponentType.TEXTAREA]: '≡',
   }
   return icons[type] || '□'
 }

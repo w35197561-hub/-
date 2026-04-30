@@ -1,17 +1,12 @@
 <template>
-  <select
-    class="select-component"
-    multiple
-    disabled
+  <textarea
+    class="textarea-component"
+    :placeholder="(component.props.placeholder as string) ?? '请输入内容'"
+    :rows="(component.props.rows as number) ?? 4"
+    :maxlength="(component.props.maxlength as number) || undefined"
+    readonly
     :style="computedStyle"
-  >
-    <option disabled value="" v-if="!options.length">
-      {{ component.props.placeholder ?? '请选择' }}
-    </option>
-    <option v-for="(label, idx) in options" :key="idx" :value="String(idx)">
-      {{ label }}
-    </option>
-  </select>
+  />
 </template>
 
 <script setup lang="ts">
@@ -23,28 +18,28 @@ const props = defineProps<{ component: ComponentData }>()
 
 const { baseStyle } = useComponentStyle(props.component.style)
 
-const options = computed(
-  () => (props.component.props.options as string[] | undefined) ?? [],
-)
-
 const computedStyle = computed(() => ({
   ...baseStyle.value,
+  color: props.component.style.color ?? '#333333',
   backgroundColor: props.component.style.backgroundColor ?? '#ffffff',
+  border: '1px solid #dcdfe6',
   borderRadius: props.component.style.borderRadius
     ? `${props.component.style.borderRadius}px`
     : '4px',
-  border: '1px solid #dcdfe6',
-  padding: '4px 8px',
+  padding: '8px 12px',
+  resize: 'none' as const,
 }))
 </script>
 
 <style scoped>
-.select-component {
-  box-sizing: border-box;
-  font-family: inherit;
-  font-size: 14px;
-  color: #333333;
+.textarea-component {
   outline: none;
-  cursor: default;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.textarea-component::placeholder {
+  color: #c0c4cc;
 }
 </style>

@@ -15,6 +15,7 @@ import FormComponent from './FormComponent.vue'
 import TabsComponent from './TabsComponent.vue'
 import NumberInputComponent from './NumberInputComponent.vue'
 import SelectComponent from './SelectComponent.vue'
+import TextareaComponent from './TextareaComponent.vue'
 
 const props = defineProps<{
   component: ComponentData
@@ -31,6 +32,7 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.TABS]: TabsComponent,
   [ComponentType.NUMBER_INPUT]: NumberInputComponent,
   [ComponentType.SELECT]: SelectComponent,
+  [ComponentType.TEXTAREA]: TextareaComponent,
 }
 
 const resolvedComponent = computed(
