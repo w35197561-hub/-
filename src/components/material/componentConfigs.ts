@@ -145,6 +145,23 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     ],
   },
 
+  [ComponentType.CHECKBOX_GROUP]: {
+    defaultProps: {
+      options: ['选项一', '选项二', '选项三'],
+      defaultValues: ['选项一'],
+    },
+    defaultStyle: { width: 200, height: 100, fontSize: 14, color: '#333333' },
+    propSetters: [
+      { label: '选项列表', setter: 'StringListSetter', field: 'options' },
+      { label: '默认选中', setter: 'StringListSetter', field: 'defaultValues' },
+    ],
+    styleSetters: [
+      { label: '字体大小', setter: 'NumberSetter', field: 'fontSize', setterProps: { min: 8, max: 72, step: 1 } },
+      { label: '文字颜色', setter: 'ColorSetter',  field: 'color' },
+      { label: '背景颜色', setter: 'ColorSetter',  field: 'backgroundColor' },
+    ],
+  },
+
   [ComponentType.NUMBER_INPUT]: {
     defaultProps: { min: 0, max: 100, step: 1, value: 0, placeholder: '' },
     defaultStyle: { width: 200, height: 40, fontSize: 14, borderWidth: 1, borderRadius: 4 },

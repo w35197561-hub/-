@@ -17,6 +17,7 @@ import NumberInputComponent from './NumberInputComponent.vue'
 import SelectComponent from './SelectComponent.vue'
 import TextareaComponent from './TextareaComponent.vue'
 import RadioGroupComponent from './RadioGroupComponent.vue'
+import CheckboxGroupComponent from './CheckboxGroupComponent.vue'
 
 const props = defineProps<{
   component: ComponentData
@@ -35,6 +36,7 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.SELECT]: SelectComponent,
   [ComponentType.TEXTAREA]: TextareaComponent,
   [ComponentType.RADIO_GROUP]: RadioGroupComponent,
+  [ComponentType.CHECKBOX_GROUP]: CheckboxGroupComponent,
 }
 
 const resolvedComponent = computed(

@@ -111,6 +111,7 @@ const getComponentName = (c: ComponentData, idx: number): string => {
     [ComponentType.SELECT]: '下拉复选',
     [ComponentType.TEXTAREA]: '多行文本',
     [ComponentType.RADIO_GROUP]: '单选按钮',
+    [ComponentType.CHECKBOX_GROUP]: '多选复选框',
   }
   const baseName = typeNames[c.type] || c.type
   // 尝试取 props 中有意义的标识
@@ -131,6 +132,7 @@ const getTypeIcon = (type: ComponentType): string => {
     [ComponentType.SELECT]: '▾',
     [ComponentType.TEXTAREA]: '≡',
     [ComponentType.RADIO_GROUP]: '◉',
+    [ComponentType.CHECKBOX_GROUP]: '☑',
   }
   return icons[type] || '□'
 }

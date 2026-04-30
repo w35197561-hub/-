@@ -42,6 +42,7 @@ import {
   Memo,
   Select,
   TrendCharts,
+  Grid,
 } from '@element-plus/icons-vue'
 
 const componentGroups = [
@@ -55,7 +56,8 @@ const componentGroups = [
       { type: ComponentType.BUTTON,       name: '按钮',   icon: CircleCheck },
       { type: ComponentType.IMAGE,        name: '图片',   icon: Picture },
       { type: ComponentType.RADIO_GROUP,  name: '单选按钮', icon: Select },
-      { type: ComponentType.SELECT,       name: '下拉复选', icon: ArrowDown },
+      { type: ComponentType.SELECT,         name: '下拉复选',   icon: ArrowDown },
+      { type: ComponentType.CHECKBOX_GROUP, name: '多选复选框', icon: Grid },
     ],
   },
   {

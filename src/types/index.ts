@@ -60,6 +60,7 @@ export enum ComponentType {
   SELECT = 'Select',
   TEXTAREA = 'Textarea',
   RADIO_GROUP = 'RadioGroup',
+  CHECKBOX_GROUP = 'CheckboxGroup',
 }
 
 export type SetterType = 'InputSetter' | 'TextareaSetter' | 'NumberSetter' | 'ColorSetter' | 'SelectSetter' | 'StringListSetter'
