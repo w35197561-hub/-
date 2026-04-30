@@ -35,11 +35,13 @@ vue-yuan-drag/
 │   │       ├── ImageComponent.vue
 │   │       ├── ButtonComponent.vue
 │   │       ├── InputComponent.vue
+│   │       ├── NumberInputComponent.vue
 │   │       ├── FormComponent.vue     # 容器组件（含 slots）
 │   │       ├── TabsComponent.vue     # 容器组件（含 slots）
 │   │       └── composables/
-│   │           ├── useComponentStyle.ts   # 样式 computed 封装
+│   │           ├── useComponentStyle.ts   # 样式 computed 封装（返回 computed，非普通对象）
 │   │           └── useContainerDrop.ts    # 容器拖放逻辑复用
+│   ├── componentConfigs.ts           # 各组件配置（defaultProps/defaultStyle/propSetters/styleSetters）
 │   ├── stores/
 │   │   ├── editor.ts                 # 编辑器状态（页面、组件、画布）
 │   │   ├── history.ts                # 撤销/重做（Command 模式）
@@ -133,15 +135,15 @@ cd server && npm test         # 后端集成测试
 ### 核心数据类型（`src/types/index.ts`）
 
 **ComponentType 枚举（当前已有）：**
-`Text` / `Image` / `Button` / `Input` / `Form`（容器）/ `Chart` / `Tabs`（容器）
+`Text` / `Image` / `Button` / `Input` / `NumberInput` / `Form`（容器）/ `Chart` / `Tabs`（容器）
 
 **ComponentStyle：** `top, left, width, height, zIndex, rotate`（必填）+ `fontSize, color, backgroundColor, borderWidth, borderColor, borderRadius`（可选，数值均为 `number`，渲染时拼接 `px`）
 
-默认尺寸：顶层组件 `200×50`，Form `520×260`，Tabs `560×320`，子组件 `180×40`
+默认尺寸：顶层组件 `200×50`，子组件 `180×40`（组件特定尺寸在 `componentConfigs.ts` 的 `defaultStyle` 中声明）
 
 **ComponentProps：** `content?, src?, type?, placeholder?, [key: string]: unknown`（可自由扩展）
 
-各类型默认 props：`Text→{content:'文本内容'}` / `Image→{src:''}` / `Button→{content:'按钮'}` / `Input→{placeholder:'请输入内容'}` / `Form→{title:'表单容器',columns:['col1','col2']}` / `Tabs→{tabs:[{key,label}×2], activeTab:'tab1'}`
+各类型默认 props 和默认 style 统一在 `src/components/componentConfigs.ts` 中声明，不再硬编码于 `editor.ts`。
 
 **ComponentData（核心）：**
 ```typescript
@@ -174,7 +176,7 @@ interface ComponentData {
 3. **`src/components/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范
 4. **`src/components/components/ComponentRenderer.vue`** → `componentMap` 加新枚举 key
 5. **`src/components/ComponentPanel.vue`** → `componentTypes` 数组加 `{ type, name, icon }`
-6. **`src/components/PropertyPanel.vue`** → （可选）加对应属性配置 UI
+6. **`src/components/PropertyPanel.vue`** → 无需改动，属性面板由 `componentConfigs` 自动驱动
 
 ### Store 操作规范（`src/stores/editor.ts`）
 
