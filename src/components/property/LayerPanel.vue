@@ -110,6 +110,7 @@ const getComponentName = (c: ComponentData, idx: number): string => {
     [ComponentType.NUMBER_INPUT]: '数字输入',
     [ComponentType.SELECT]: '下拉复选',
     [ComponentType.TEXTAREA]: '多行文本',
+    [ComponentType.RADIO_GROUP]: '单选按钮',
   }
   const baseName = typeNames[c.type] || c.type
   // 尝试取 props 中有意义的标识
@@ -129,6 +130,7 @@ const getTypeIcon = (type: ComponentType): string => {
     [ComponentType.NUMBER_INPUT]: '⓪',
     [ComponentType.SELECT]: '▾',
     [ComponentType.TEXTAREA]: '≡',
+    [ComponentType.RADIO_GROUP]: '◉',
   }
   return icons[type] || '□'
 }

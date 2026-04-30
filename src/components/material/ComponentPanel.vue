@@ -3,30 +3,32 @@
     <div class="panel-header">
       <h3>组件库</h3>
     </div>
-    
+
     <div class="component-list">
-      <div
-        v-for="component in componentTypes"
-        :key="component.type"
-        class="component-item"
-        :data-testid="`component-item-${component.type}`"
-        draggable="true"
-        @dragstart="handleDragStart(component.type, $event)"
-        @dragend="handleDragEnd"
-      >
-        <div class="component-icon">
-          <el-icon>
-            <component :is="component.icon" />
-          </el-icon>
+      <div v-for="group in componentGroups" :key="group.label" class="component-group">
+        <div class="group-label">{{ group.label }}</div>
+        <div class="component-grid">
+          <div
+            v-for="component in group.items"
+            :key="component.type"
+            class="component-item"
+            :data-testid="`component-item-${component.type}`"
+            draggable="true"
+            @dragstart="handleDragStart(component.type, $event)"
+            @dragend="handleDragEnd"
+          >
+            <el-icon class="component-icon">
+              <component :is="component.icon" />
+            </el-icon>
+            <span class="component-name">{{ component.name }}</span>
+          </div>
         </div>
-        <div class="component-name">{{ component.name }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { ComponentType } from '@/types'
 import {
   Document,
@@ -37,20 +39,34 @@ import {
   Menu,
   Odometer,
   ArrowDown,
-  Memo
+  Memo,
+  Select,
+  TrendCharts,
 } from '@element-plus/icons-vue'
 
-const componentTypes = ref([
-  { type: ComponentType.TEXT, name: '文本', icon: Document },
-  { type: ComponentType.IMAGE, name: '图片', icon: Picture },
-  { type: ComponentType.BUTTON, name: '按钮', icon: CircleCheck },
-  { type: ComponentType.INPUT, name: '输入框', icon: EditPen },
-  { type: ComponentType.FORM, name: '表单容器', icon: Tickets },
-  { type: ComponentType.TABS, name: 'Tabs容器', icon: Menu },
-  { type: ComponentType.NUMBER_INPUT, name: '数字输入', icon: Odometer },
-  { type: ComponentType.SELECT,       name: '下拉复选', icon: ArrowDown },
-  { type: ComponentType.TEXTAREA,     name: '多行文本', icon: Memo },
-])
+const componentGroups = [
+  {
+    label: '基础',
+    items: [
+      { type: ComponentType.TEXT,         name: '文本',   icon: Document },
+      { type: ComponentType.TEXTAREA,     name: '多行文本', icon: Memo },
+      { type: ComponentType.INPUT,        name: '输入框', icon: EditPen },
+      { type: ComponentType.NUMBER_INPUT, name: '数字输入', icon: Odometer },
+      { type: ComponentType.BUTTON,       name: '按钮',   icon: CircleCheck },
+      { type: ComponentType.IMAGE,        name: '图片',   icon: Picture },
+      { type: ComponentType.RADIO_GROUP,  name: '单选按钮', icon: Select },
+      { type: ComponentType.SELECT,       name: '下拉复选', icon: ArrowDown },
+    ],
+  },
+  {
+    label: '容器',
+    items: [
+      { type: ComponentType.FORM,  name: '表单容器', icon: Tickets },
+      { type: ComponentType.TABS,  name: 'Tabs容器', icon: Menu },
+      { type: ComponentType.CHART, name: '图表',     icon: TrendCharts },
+    ],
+  },
+]
 
 const handleDragStart = (componentType: ComponentType, event: DragEvent) => {
   if (event.dataTransfer) {
@@ -59,14 +75,12 @@ const handleDragStart = (componentType: ComponentType, event: DragEvent) => {
   }
 }
 
-const handleDragEnd = () => {
-  // 拖拽结束处理
-}
+const handleDragEnd = () => {}
 </script>
 
 <style scoped>
 .component-panel {
-  width: 200px;
+  width: 240px;
   background: white;
   border-right: 1px solid #e0e0e0;
   display: flex;
@@ -74,7 +88,7 @@ const handleDragEnd = () => {
 }
 
 .panel-header {
-  padding: 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid #e0e0e0;
   background: #fafafa;
 }
@@ -88,53 +102,67 @@ const handleDragEnd = () => {
 
 .component-list {
   flex: 1;
-  padding: 16px;
+  padding: 12px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.component-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.group-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  padding: 0 2px;
+}
+
+.component-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .component-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 12px;
-  margin-bottom: 12px;
-  border: 1px solid #e0e0e0;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid #e4e7ed;
   border-radius: 6px;
   background: white;
   cursor: grab;
-  transition: all 0.2s;
   user-select: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  overflow: hidden;
 }
 
 .component-item:hover {
   border-color: #409eff;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
+  box-shadow: 0 1px 6px rgba(64, 158, 255, 0.12);
 }
 
 .component-item:active {
   cursor: grabbing;
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .component-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5f7fa;
-  border-radius: 6px;
-  margin-bottom: 8px;
-}
-
-.component-icon .el-icon {
-  font-size: 20px;
-  color: #409eff;
+  font-size: 15px;
+  color: #606266;
+  flex-shrink: 0;
 }
 
 .component-name {
   font-size: 12px;
-  color: #666;
-  text-align: center;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

@@ -16,6 +16,7 @@ import TabsComponent from './TabsComponent.vue'
 import NumberInputComponent from './NumberInputComponent.vue'
 import SelectComponent from './SelectComponent.vue'
 import TextareaComponent from './TextareaComponent.vue'
+import RadioGroupComponent from './RadioGroupComponent.vue'
 
 const props = defineProps<{
   component: ComponentData
@@ -33,6 +34,7 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.NUMBER_INPUT]: NumberInputComponent,
   [ComponentType.SELECT]: SelectComponent,
   [ComponentType.TEXTAREA]: TextareaComponent,
+  [ComponentType.RADIO_GROUP]: RadioGroupComponent,
 }
 
 const resolvedComponent = computed(

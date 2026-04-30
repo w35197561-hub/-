@@ -1,50 +1,52 @@
 <template>
-  <select
-    class="select-component"
-    multiple
-    disabled
-    :style="computedStyle"
-  >
-    <option disabled value="" v-if="!options.length">
-      {{ component.props.placeholder ?? '请选择' }}
-    </option>
-    <option v-for="(label, idx) in options" :key="idx" :value="String(idx)">
-      {{ label }}
-    </option>
-  </select>
+  <div :style="wrapperStyle" class="select-display">
+    <span class="select-placeholder">{{ component.props.placeholder ?? '请选择' }}</span>
+    <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ComponentData } from '@/types'
-import { useComponentStyle } from './composables/useComponentStyle'
 
 const props = defineProps<{ component: ComponentData }>()
 
-const { baseStyle } = useComponentStyle(props.component.style)
-
-const options = computed(
-  () => (props.component.props.options as string[] | undefined) ?? [],
-)
-
-const computedStyle = computed(() => ({
-  ...baseStyle.value,
+const wrapperStyle = computed(() => ({
+  width: '100%',
+  height: '100%',
+  boxSizing: 'border-box' as const,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '0 10px',
   backgroundColor: props.component.style.backgroundColor ?? '#ffffff',
+  border: '1px solid #dcdfe6',
   borderRadius: props.component.style.borderRadius
     ? `${props.component.style.borderRadius}px`
     : '4px',
-  border: '1px solid #dcdfe6',
-  padding: '4px 8px',
+  cursor: 'default',
 }))
 </script>
 
 <style scoped>
-.select-component {
-  box-sizing: border-box;
-  font-family: inherit;
+.select-display {
+  user-select: none;
+}
+
+.select-placeholder {
   font-size: 14px;
-  color: #333333;
-  outline: none;
-  cursor: default;
+  color: #c0c4cc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-arrow {
+  width: 14px;
+  height: 14px;
+  color: #c0c4cc;
+  flex-shrink: 0;
 }
 </style>

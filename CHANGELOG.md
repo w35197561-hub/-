@@ -6,6 +6,9 @@
 
 ## 2026-04-30
 
+### feat(components): 新增 RadioGroup 单选按钮组，重构组件面板布局
+新增 RadioGroupComponent（原生 radio + label，disabled），属性面板支持 StringListSetter 编辑选项、InputSetter 设置默认选中。ComponentPanel 改为两列网格 + 基础/容器分类布局。SelectComponent 改为 div 模拟下拉外观（占位文本 + 箭头），解决 select multiple 渲染为列表框的问题。
+
 ### feat(components): 新增 Textarea 多行文本组件，规范 canvas 组件实现
 新增 TextareaComponent（原生 textarea，readonly），用 useComponentStyle 保证样式响应式。Select/Textarea 均改用原生元素替代 el-*，解决样式无法穿透 el-* 包装层的问题。精简各组件 styleSetters 为精准暴露（仅保留视觉有效的属性）。coding.md 新增"canvas 禁用 el-*"规则及 styleSetters 精准暴露指南。
 

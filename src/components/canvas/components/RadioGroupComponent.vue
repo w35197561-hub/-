@@ -1,0 +1,65 @@
+<template>
+  <div :style="wrapperStyle">
+    <label
+      v-for="(option, idx) in options"
+      :key="idx"
+      class="radio-item"
+    >
+      <input
+        type="radio"
+        :name="`radio-${component.id}`"
+        :value="option"
+        :checked="option === defaultValue"
+        disabled
+      />
+      <span :style="labelStyle">{{ option }}</span>
+    </label>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import type { ComponentData } from '@/types'
+
+const props = defineProps<{ component: ComponentData }>()
+
+const options = computed(
+  () => (props.component.props.options as string[] | undefined) ?? [],
+)
+
+const defaultValue = computed(
+  () => (props.component.props.defaultValue as string | undefined) ?? '',
+)
+
+const wrapperStyle = computed(() => ({
+  width: '100%',
+  height: '100%',
+  boxSizing: 'border-box' as const,
+  display: 'flex',
+  flexDirection: 'column' as const,
+  justifyContent: 'center',
+  gap: '8px',
+  padding: '8px 12px',
+  backgroundColor: props.component.style.backgroundColor ?? '',
+}))
+
+const labelStyle = computed(() => ({
+  fontSize: props.component.style.fontSize ? `${props.component.style.fontSize}px` : '14px',
+  color: props.component.style.color ?? '#333333',
+}))
+</script>
+
+<style scoped>
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+  user-select: none;
+}
+
+.radio-item input[type='radio'] {
+  cursor: default;
+  flex-shrink: 0;
+}
+</style>

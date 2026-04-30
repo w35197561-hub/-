@@ -59,6 +59,7 @@ export enum ComponentType {
   NUMBER_INPUT = 'NumberInput',
   SELECT = 'Select',
   TEXTAREA = 'Textarea',
+  RADIO_GROUP = 'RadioGroup',
 }
 
 export type SetterType = 'InputSetter' | 'TextareaSetter' | 'NumberSetter' | 'ColorSetter' | 'SelectSetter' | 'StringListSetter'
