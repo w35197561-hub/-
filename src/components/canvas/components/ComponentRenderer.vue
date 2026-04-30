@@ -14,6 +14,7 @@ import InputComponent from './InputComponent.vue'
 import FormComponent from './FormComponent.vue'
 import TabsComponent from './TabsComponent.vue'
 import NumberInputComponent from './NumberInputComponent.vue'
+import SelectComponent from './SelectComponent.vue'
 
 const props = defineProps<{
   component: ComponentData
@@ -29,6 +30,7 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.CHART]: TextComponent, // Chart 组件占位，后续接入真实图表库
   [ComponentType.TABS]: TabsComponent,
   [ComponentType.NUMBER_INPUT]: NumberInputComponent,
+  [ComponentType.SELECT]: SelectComponent,
 }
 
 const resolvedComponent = computed(

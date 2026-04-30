@@ -96,6 +96,23 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     ],
   },
 
+  [ComponentType.SELECT]: {
+    defaultProps: {
+      placeholder: '请选择',
+      options: ['选项一', '选项二', '选项三'],
+    },
+    defaultStyle: { width: 200, height: 40, borderRadius: 4 },
+    propSetters: [
+      { label: '占位文本', setter: 'InputSetter',      field: 'placeholder' },
+      { label: '选项列表', setter: 'StringListSetter', field: 'options' },
+    ],
+    styleSetters: [
+      { label: '背景颜色', setter: 'ColorSetter',  field: 'backgroundColor' },
+      { label: '边框颜色', setter: 'ColorSetter',  field: 'borderColor' },
+      { label: '圆角',     setter: 'NumberSetter', field: 'borderRadius', setterProps: { min: 0, max: 50, step: 1 } },
+    ],
+  },
+
   [ComponentType.NUMBER_INPUT]: {
     defaultProps: { min: 0, max: 100, step: 1, value: 0, placeholder: '' },
     defaultStyle: { width: 200, height: 40, fontSize: 14, borderWidth: 1, borderRadius: 4 },

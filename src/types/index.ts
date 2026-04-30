@@ -56,10 +56,11 @@ export enum ComponentType {
   FORM = 'Form',
   CHART = 'Chart',
   TABS = 'Tabs',
-  NUMBER_INPUT = 'NumberInput'
+  NUMBER_INPUT = 'NumberInput',
+  SELECT = 'Select',
 }
 
-export type SetterType = 'InputSetter' | 'TextareaSetter' | 'NumberSetter' | 'ColorSetter' | 'SelectSetter'
+export type SetterType = 'InputSetter' | 'TextareaSetter' | 'NumberSetter' | 'ColorSetter' | 'SelectSetter' | 'StringListSetter'
 
 export interface PropSetter {
   label: string

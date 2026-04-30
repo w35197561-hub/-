@@ -206,6 +206,20 @@
                     :key="opt.key" :label="opt.label" :value="opt.key"
                   />
                 </el-select>
+                <div v-else-if="s.setter === 'StringListSetter'" class="string-list-setter">
+                  <div
+                    v-for="(item, idx) in (getPropVal(s.field) as string[] ?? [])"
+                    :key="idx"
+                    class="string-list-row"
+                  >
+                    <el-input
+                      :model-value="item"
+                      @update:model-value="val => updateListItem(s.field, idx, String(val))"
+                    />
+                    <el-button :icon="Minus" circle size="small" @click="removeListItem(s.field, idx)" />
+                  </div>
+                  <el-button :icon="Plus" size="small" @click="addListItem(s.field)">添加选项</el-button>
+                </div>
               </div>
             </template>
           </div>
@@ -224,7 +238,9 @@ import {
   InfoFilled,
   ArrowUp,
   ArrowDown,
-  DArrowRight
+  DArrowRight,
+  Plus,
+  Minus
 } from '@element-plus/icons-vue'
 
 const editorStore = useEditorStore()
@@ -305,6 +321,27 @@ const updateComponentStyle = () => {
 const updateComponentProps = () => {
   if (!currentComponent.value) return
   editorStore.updateComponentProps(currentComponent.value.id, currentComponent.value.props)
+}
+
+const updateListItem = (field: string, idx: number, val: string) => {
+  const arr = [...((getPropVal(field) as string[]) ?? [])]
+  arr[idx] = val
+  setPropVal(field, arr)
+  updateComponentProps()
+}
+
+const removeListItem = (field: string, idx: number) => {
+  const arr = [...((getPropVal(field) as string[]) ?? [])]
+  arr.splice(idx, 1)
+  setPropVal(field, arr)
+  updateComponentProps()
+}
+
+const addListItem = (field: string) => {
+  const arr = [...((getPropVal(field) as string[]) ?? [])]
+  arr.push('新选项')
+  setPropVal(field, arr)
+  updateComponentProps()
 }
 
 const moveLayer = (direction: 'up' | 'down' | 'top' | 'bottom') => {
@@ -489,5 +526,21 @@ const deleteCurrentComponent = () => {
 
 .el-scrollbar {
   height: 100%;
+}
+
+.string-list-setter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.string-list-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.string-list-row .el-input {
+  flex: 1;
 }
 </style>

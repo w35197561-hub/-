@@ -6,6 +6,9 @@
 
 ## 2026-04-30
 
+### feat(components): 新增 Select 下拉复选组件，新增 StringListSetter
+新增 SelectComponent（el-select multiple disabled），选项以 string[] 存储，属性面板通过新增的 StringListSetter（每行 el-input + ➕/➖ 按钮）编辑。同步修复 router import 路径、LayerPanel 缺失 NUMBER_INPUT/SELECT 的 typeNames 和 icons、coding.md 新增编码前必须搜索的§0规则。
+
 ### refactor(components): 按物料/画布/属性三层重构组件目录结构
 将 `src/components/` 下扁平的文件按职责拆分为四个子目录：`editor/`（编辑器外壳）、`material/`（左侧物料面板 + componentConfigs）、`canvas/`（画布 + 可渲染组件 + composables）、`property/`（右侧属性/图层面板）。同步更新所有 import 路径、CLAUDE.md 6 步流程及 coding.md 技能文档。
 

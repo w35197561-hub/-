@@ -62,6 +62,33 @@
 
 完成 6 步流程后，必须逐项确认：
 
+### 0. 编码前必做：搜索 + props/setters 分析（强制）
+
+**在写任何代码之前**，先用 `WebSearch` 搜索该组件在 Element Plus 中的常用属性，搜索词格式：
+
+```
+Element Plus <组件名> props 常用属性 <当前年份>
+```
+
+搜索完成后，必须完成以下分析，**不得跳过**：
+
+**① 整理常用 props 清单**（来自文档或搜索结果）：列出该组件最常用的 5~10 个属性及其类型和含义。
+
+**② 区分 defaultProps vs setter**：
+
+| 判断维度 | 放 `defaultProps`（仅初始值） | 放 `propSetters`（面板可编辑） |
+|---|---|---|
+| 用户是否需要在属性面板修改？ | 否 | **是** |
+| 是结构性/程序性数据？（如 `type="submit"`） | 是 | 否 |
+| 是复杂嵌套数组对象？（如 `tabs:[{key,label}]`） | 是，选合适 setter 或跳过 | 视 setter 支持情况 |
+| 用户清空后画布是否应该跟着空？ | — | 是则用 `??`，不是则用 `\|\|` |
+
+**③ 确认每个 prop 对应的 setter 类型**（参考下方 setter 表）。
+
+**④ 确认 `defaultStyle` 中所有被 styleSetter 引用的字段都有初始值**（如 `borderRadius: 0`），否则属性面板显示空白。
+
+---
+
 ### 1. 画布交互行为
 - 输入类组件（input、number input、textarea 等）必须加 `readonly` 属性
 - 原因：画布是"展示态"，组件无权访问 store，用户交互无法持久化，会产生虚假反馈
@@ -102,6 +129,7 @@
 | `TextareaSetter` | `el-input` type="textarea" | 多行文本 |
 | `ColorSetter` | `el-color-picker` | 颜色值 |
 | `SelectSetter` | `el-select` | 枚举选择，需配合 `optionsField` |
+| `StringListSetter` | 多行 `el-input` + ➕/➖ 按钮 | 字符串数组（如下拉选项列表），存 `string[]` |
 
 声明后，`editor.ts` 会自动读取 `defaultProps` 和 `defaultStyle`，`PropertyPanel.vue` 会自动渲染对应控件，**无需改动这两个文件**。
 
