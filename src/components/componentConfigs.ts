@@ -31,7 +31,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
 
   [ComponentType.IMAGE]: {
     defaultProps: { src: '', alt: '' },
-    defaultStyle: { backgroundColor: '#f5f5f5', borderRadius: 0 },
+    defaultStyle: { backgroundColor: '#f5f5f5', borderWidth: 0, borderRadius: 0 },
     propSetters: [
       { label: '图片地址', setter: 'InputSetter', field: 'src' },
       { label: '替代文本', setter: 'InputSetter', field: 'alt' },
