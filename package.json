@@ -17,6 +17,7 @@
     "format": "prettier --write --experimental-cli src/",
     "format:check": "prettier --check --experimental-cli src/",
     "test": "vitest run",
+    "test:log": "vitest run --reporter=verbose --reporter=json --outputFile=vitest-report/results.json && node scripts/unit-test-log.mjs",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test; node scripts/e2e-log.mjs",
