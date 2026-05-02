@@ -187,14 +187,14 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
 
   [ComponentType.TIME_PICKER]: {
     defaultProps: {
-      placeholder: '请选择时间',
+      placeholder: '请选择日期时间',
       value: '',
       disabled: false,
     },
-    defaultStyle: { width: 200, height: 40, borderRadius: 4, backgroundColor: '#ffffff' },
+    defaultStyle: { width: 290, height: 40, borderRadius: 4, backgroundColor: '#ffffff' },
     propSetters: [
       { label: '占位文本', setter: 'InputSetter', field: 'placeholder' },
-      { label: '默认时间', setter: 'InputSetter', field: 'value' },
+      { label: '默认值',   setter: 'InputSetter', field: 'value' },
     ],
     styleSetters: [
       { label: '背景颜色', setter: 'ColorSetter',  field: 'backgroundColor' },
