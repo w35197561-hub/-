@@ -4,13 +4,15 @@
       v-for="(option, idx) in options"
       :key="idx"
       class="radio-item"
+      :class="{ interactive: isPreview }"
     >
       <input
         type="radio"
         :name="`radio-${component.id}`"
         :value="option"
-        :checked="option === defaultValue"
-        disabled
+        :checked="option === (isPreview ? localValue : defaultValue)"
+        :disabled="!isPreview"
+        @change="localValue = option"
       />
       <span :style="labelStyle">{{ option }}</span>
     </label>
@@ -18,10 +20,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject, ref } from 'vue'
 import type { ComponentData } from '@/types'
 
 const props = defineProps<{ component: ComponentData }>()
+
+const isPreview = inject('isPreview', false)
 
 const options = computed(
   () => (props.component.props.options as string[] | undefined) ?? [],
@@ -30,6 +34,8 @@ const options = computed(
 const defaultValue = computed(
   () => (props.component.props.defaultValue as string | undefined) ?? '',
 )
+
+const localValue = ref(defaultValue.value)
 
 const wrapperStyle = computed(() => ({
   width: '100%',
@@ -58,8 +64,16 @@ const labelStyle = computed(() => ({
   user-select: none;
 }
 
+.radio-item.interactive {
+  cursor: pointer;
+}
+
 .radio-item input[type='radio'] {
   cursor: default;
   flex-shrink: 0;
+}
+
+.radio-item.interactive input[type='radio'] {
+  cursor: pointer;
 }
 </style>

@@ -4,17 +4,19 @@
     :placeholder="(component.props.placeholder as string) ?? '请输入内容'"
     :rows="(component.props.rows as number) ?? 4"
     :maxlength="(component.props.maxlength as number) || undefined"
-    readonly
+    :readonly="!isPreview"
     :style="computedStyle"
   />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import type { ComponentData } from '@/types'
 import { useComponentStyle } from './composables/useComponentStyle'
 
 const props = defineProps<{ component: ComponentData }>()
+
+const isPreview = inject('isPreview', false)
 
 const { baseStyle } = useComponentStyle(props.component.style)
 

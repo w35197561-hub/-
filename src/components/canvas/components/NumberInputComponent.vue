@@ -2,7 +2,7 @@
   <input
     class="number-input-component"
     type="number"
-    readonly
+    :readonly="!isPreview"
     :min="(component.props.min as number)"
     :max="(component.props.max as number)"
     :step="(component.props.step as number)"
@@ -13,13 +13,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import type { ComponentData } from '@/types'
 import { useComponentStyle } from './composables/useComponentStyle'
 
 const props = defineProps<{
   component: ComponentData
 }>()
+
+const isPreview = inject('isPreview', false)
 
 const { baseStyle } = useComponentStyle(props.component.style)
 

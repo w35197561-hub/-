@@ -6,6 +6,9 @@
 
 ## 2026-05-02
 
+### feat(preview): 新增全屏预览页，实现组件设计态/运行态双模式
+
+
 
 ### feat(components): 新增 Divider 分割线组件，扩展 SelectSetter 支持静态选项
 

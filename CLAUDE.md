@@ -61,7 +61,8 @@ vue-yuan-drag/
 │   ├── types/index.ts                # 所有核心类型
 │   ├── router/index.ts
 │   └── views/
-│       └── HomeView.vue              # 编辑器入口页
+│       ├── HomeView.vue              # 编辑器入口页
+│       └── PreviewView.vue           # 全屏预览页（/preview，可交互运行态）
 │
 └── server/                           # 后端（Express + TypeScript）
     └── src/
@@ -180,11 +181,27 @@ interface ComponentData {
 - 子组件 wrapper 样式抽为独立函数，避免模板内联对象导致额外重渲染
 - CSS 固定 `width:100%; height:100%; box-sizing:border-box`
 
+### 设计态 / 运行态双模式
+
+所有可交互组件通过 `provide/inject` 区分设计态（编辑器）和运行态（预览页）：
+
+```
+PreviewView.vue         → provide('isPreview', true)
+XxxComponent.vue        → const isPreview = inject('isPreview', false)
+```
+
+- **设计态**（默认，`isPreview = false`）：组件禁止交互（`disabled` / `readonly`），配合画布拖拽/选中不冲突
+- **运行态**（`isPreview = true`）：组件开启原生交互，用本地 `ref` 维护临时状态
+
+**新增有交互需求的组件时，必须同时实现两套行为：**
+- 纯展示型（Input/Textarea/NumberInput/Radio/Checkbox）：绑定 `:disabled="!isPreview"` 或 `:readonly="!isPreview"`，预览时用本地 `ref` + 事件处理
+- 视觉占位型（Select 等假组件）：`v-if="!isPreview"` 渲染静态占位，`v-else` 渲染真实可交互实现
+
 ### 新增组件的完整流程（6 步）
 
 1. **`src/types/index.ts`** → `ComponentType` 枚举加新值，并同步更新 `CLAUDE.md` 本文件的"ComponentType 枚举（当前已有）"列表
 2. **`src/components/material/componentConfigs.ts`** → 新增一条配置（`defaultProps`、`defaultStyle`、`propSetters`、`styleSetters`），详见 `.claude/skills/coding.md` 的"新增组件自查清单 §2"
-3. **`src/components/canvas/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范
+3. **`src/components/canvas/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范；**若组件有交互行为，必须实现设计态/运行态双模式**（见上方"设计态 / 运行态双模式"）
 4. **`src/components/canvas/components/ComponentRenderer.vue`** → `componentMap` 加新枚举 key
 5. **`src/components/material/ComponentPanel.vue`** → `componentTypes` 数组加 `{ type, name, icon }`
 6. **`src/components/property/LayerPanel.vue`** → `typeNames` 和 `typeIcons` 加入新类型（`PropertyPanel.vue` 无需改动，由 `componentConfigs` 自动驱动）

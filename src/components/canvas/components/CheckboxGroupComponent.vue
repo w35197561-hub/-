@@ -4,12 +4,14 @@
       v-for="(option, idx) in options"
       :key="idx"
       class="checkbox-item"
+      :class="{ interactive: isPreview }"
     >
       <input
         type="checkbox"
         :value="option"
-        :checked="defaultValues.includes(option)"
-        disabled
+        :checked="isPreview ? localValues.includes(option) : defaultValues.includes(option)"
+        :disabled="!isPreview"
+        @change="toggleOption(option)"
       />
       <span :style="labelStyle">{{ option }}</span>
     </label>
@@ -17,10 +19,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject, ref } from 'vue'
 import type { ComponentData } from '@/types'
 
 const props = defineProps<{ component: ComponentData }>()
+
+const isPreview = inject('isPreview', false)
 
 const options = computed(
   () => (props.component.props.options as string[] | undefined) ?? [],
@@ -29,6 +33,14 @@ const options = computed(
 const defaultValues = computed(
   () => (props.component.props.defaultValues as string[] | undefined) ?? [],
 )
+
+const localValues = ref<string[]>([...defaultValues.value])
+
+function toggleOption(option: string) {
+  const idx = localValues.value.indexOf(option)
+  if (idx === -1) localValues.value.push(option)
+  else localValues.value.splice(idx, 1)
+}
 
 const wrapperStyle = computed(() => ({
   width: '100%',
@@ -57,8 +69,16 @@ const labelStyle = computed(() => ({
   user-select: none;
 }
 
+.checkbox-item.interactive {
+  cursor: pointer;
+}
+
 .checkbox-item input[type='checkbox'] {
   cursor: default;
   flex-shrink: 0;
+}
+
+.checkbox-item.interactive input[type='checkbox'] {
+  cursor: pointer;
 }
 </style>

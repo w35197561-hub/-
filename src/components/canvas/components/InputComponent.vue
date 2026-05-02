@@ -3,19 +3,24 @@
     class="input-component"
     :type="(component.props.type as string) || 'text'"
     :placeholder="(component.props.placeholder as string) ?? ''"
-    :value="(component.props.value as string) || ''"
+    :value="isPreview ? localValue : ((component.props.value as string) || '')"
+    :readonly="!isPreview"
     :style="computedStyle"
+    @input="isPreview && (localValue = ($event.target as HTMLInputElement).value)"
   />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject, ref } from 'vue'
 import type { ComponentData } from '@/types'
 import { useComponentStyle } from './composables/useComponentStyle'
 
 const props = defineProps<{
   component: ComponentData
 }>()
+
+const isPreview = inject('isPreview', false)
+const localValue = ref((props.component.props.value as string) || '')
 
 const { baseStyle } = useComponentStyle(props.component.style)
 

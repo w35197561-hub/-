@@ -51,45 +51,6 @@
       <PropertyPanel />
     </div>
     
-    <el-dialog
-      v-model="previewVisible"
-      title="页面预览"
-      width="80%"
-      top="5vh"
-    >
-      <div class="preview-container">
-        <div 
-          class="preview-content"
-          :style="{
-            width: `${currentPage?.style.width || 1200}px`,
-            height: `${currentPage?.style.height || 800}px`,
-            backgroundColor: currentPage?.style.backgroundColor || '#ffffff',
-            margin: '0 auto'
-          }"
-        >
-          <div
-            v-for="component in currentPage?.components"
-            :key="component.id"
-            class="preview-component"
-            :style="{
-              top: `${component.style.top}px`,
-              left: `${component.style.left}px`,
-              width: `${component.style.width}px`,
-              height: `${component.style.height}px`,
-              zIndex: component.style.zIndex,
-              transform: `rotate(${component.style.rotate}deg)`
-            }"
-          >
-            <ComponentRenderer :component="component" />
-          </div>
-        </div>
-      </div>
-      
-      <template #footer>
-        <el-button @click="previewVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
-
     <!-- 页面列表弹窗 -->
     <el-dialog
       v-model="pageListVisible"
@@ -127,13 +88,13 @@
 <script setup lang="ts">
 // eslint-disable-next-line vue/multi-word-component-names
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useEditorStore } from '@/stores/editor'
 import { useHistoryStore } from '@/stores/history'
 import ComponentPanel from '../material/ComponentPanel.vue'
 import EditorCanvas from '../canvas/EditorCanvas.vue'
 import PropertyPanel from '../property/PropertyPanel.vue'
-import ComponentRenderer from '../canvas/components/ComponentRenderer.vue'
 import AIPanel from './AIPanel.vue'
 import {
   RefreshLeft,
@@ -147,10 +108,10 @@ import {
 import { savePage, createPage, fetchPageList, fetchPage } from '@/services/api'
 import type { PageListItem } from '@/services/api'
 
+const router = useRouter()
 const editorStore = useEditorStore()
 const historyStore = useHistoryStore()
 
-const previewVisible = ref(false)
 const pageListVisible = ref(false)
 const aiPanelVisible = ref(false)
 const isSaving = ref(false)
@@ -169,7 +130,7 @@ const handleRedo = () => {
 }
 
 const handlePreview = () => {
-  previewVisible.value = true
+  router.push({ name: 'preview' })
 }
 
 const handleExport = () => {
@@ -320,27 +281,4 @@ onMounted(() => {
   overflow: hidden;
 }
 
-.preview-container {
-  max-height: 70vh;
-  overflow: auto;
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-}
-
-.preview-content {
-  position: relative;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.preview-component {
-  position: absolute;
-  pointer-events: none;
-}
-
-.preview-component > * {
-  width: 100%;
-  height: 100%;
-}
 </style>
