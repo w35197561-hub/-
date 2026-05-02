@@ -4,6 +4,11 @@
 
 ---
 
+## 2026-05-02
+
+
+### feat(components): 新增 Divider 分割线组件，扩展 SelectSetter 支持静态选项
+
 ## 2026-04-30
 
 ### feat(components): 新增 CheckboxGroup 多选复选框组件

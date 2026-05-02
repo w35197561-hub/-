@@ -38,6 +38,11 @@ vue-yuan-drag/
 │   │   │       ├── ButtonComponent.vue
 │   │   │       ├── InputComponent.vue
 │   │   │       ├── NumberInputComponent.vue
+│   │   │       ├── SelectComponent.vue
+│   │   │       ├── TextareaComponent.vue
+│   │   │       ├── RadioGroupComponent.vue
+│   │   │       ├── CheckboxGroupComponent.vue
+│   │   │       ├── DividerComponent.vue
 │   │   │       ├── FormComponent.vue      # 容器组件（含 slots）
 │   │   │       ├── TabsComponent.vue      # 容器组件（含 slots）
 │   │   │       └── composables/
@@ -87,9 +92,11 @@ npm run lint         # oxlint + eslint（自动修复）
 npm run format       # prettier 格式化
 
 # 测试
-npm test                      # 前端单元测试（单次）
+npm test                      # 前端单元测试（单次，不写日志）
+npm run test:log              # 前端单元测试 + 写入 docs/test-log.md
 npm run test:watch            # 前端测试（监听）
 npm run test:coverage         # 前端测试 + 覆盖率
+npm run test:e2e              # E2E 测试 + 写入 docs/test-log.md（失败时截图保存至 docs/screenshots/）
 cd server && npm test         # 后端集成测试
 ```
 
@@ -139,7 +146,7 @@ cd server && npm test         # 后端集成测试
 ### 核心数据类型（`src/types/index.ts`）
 
 **ComponentType 枚举（当前已有）：**
-`Text` / `Image` / `Button` / `Input` / `NumberInput` / `Form`（容器）/ `Chart` / `Tabs`（容器）
+`Text` / `Image` / `Button` / `Input` / `NumberInput` / `Select` / `Textarea` / `RadioGroup` / `CheckboxGroup` / `Divider` / `Form`（容器）/ `Chart` / `Tabs`（容器）
 
 **ComponentStyle：** `top, left, width, height, zIndex, rotate`（必填）+ `fontSize, color, backgroundColor, borderWidth, borderColor, borderRadius`（可选，数值均为 `number`，渲染时拼接 `px`）
 
@@ -175,12 +182,12 @@ interface ComponentData {
 
 ### 新增组件的完整流程（6 步）
 
-1. **`src/types/index.ts`** → `ComponentType` 枚举加新值
+1. **`src/types/index.ts`** → `ComponentType` 枚举加新值，并同步更新 `CLAUDE.md` 本文件的"ComponentType 枚举（当前已有）"列表
 2. **`src/components/material/componentConfigs.ts`** → 新增一条配置（`defaultProps`、`defaultStyle`、`propSetters`、`styleSetters`），详见 `.claude/skills/coding.md` 的"新增组件自查清单 §2"
 3. **`src/components/canvas/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范
 4. **`src/components/canvas/components/ComponentRenderer.vue`** → `componentMap` 加新枚举 key
 5. **`src/components/material/ComponentPanel.vue`** → `componentTypes` 数组加 `{ type, name, icon }`
-6. **`src/components/property/PropertyPanel.vue`** → 无需改动，属性面板由 `componentConfigs` 自动驱动
+6. **`src/components/property/LayerPanel.vue`** → `typeNames` 和 `typeIcons` 加入新类型（`PropertyPanel.vue` 无需改动，由 `componentConfigs` 自动驱动）
 
 ### Store 操作规范（`src/stores/editor.ts`）
 
