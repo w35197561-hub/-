@@ -152,7 +152,7 @@ const aiMode = ref<'deepseek' | 'mock'>('mock')
 async function fetchAiStatus() {
   try {
     const res = await fetch('/api/ai/status')
-    const json = await res.json() as { success: boolean; data?: { mode: string } }
+    const json = (await res.json()) as { success: boolean; data?: { mode: string } }
     if (json.success && json.data) {
       aiMode.value = json.data.mode as 'deepseek' | 'mock'
       hasApiKey.value = json.data.mode === 'deepseek'
@@ -183,7 +183,7 @@ function actionLabel(action: CanvasAction): string {
     update_component_props: '更新属性',
     delete_component: '删除组件',
     set_page_style: '更新页面样式',
-    none: '无操作'
+    none: '无操作',
   }
   return typeMap[action.type] ?? action.type
 }
@@ -208,7 +208,7 @@ function executeActions(actions: CanvasAction[]) {
           Button: ComponentType.BUTTON,
           Input: ComponentType.INPUT,
           Form: ComponentType.FORM,
-          Tabs: ComponentType.TABS
+          Tabs: ComponentType.TABS,
         }
         const compType = typeMap[action.componentType ?? '']
         if (!compType) break
@@ -216,7 +216,7 @@ function executeActions(actions: CanvasAction[]) {
         // 合并 style 和 props 作为 initialProps
         const initialProps: Record<string, unknown> = {
           ...(action.props ?? {}),
-          ...(action.style ?? {})
+          ...(action.style ?? {}),
         }
         editorStore.addComponent(compType, initialProps)
         break
@@ -281,17 +281,17 @@ async function handleSend() {
     const canvasContext = {
       pageTitle: page.title,
       componentCount: page.components.length,
-      components: page.components.map(c => ({
+      components: page.components.map((c) => ({
         id: c.id,
         type: c.type,
-        props: c.props as Record<string, unknown>
-      }))
+        props: c.props as Record<string, unknown>,
+      })),
     }
 
     // 发送给后端（仅最近 10 条历史）
-    const historyMessages = messages.value.slice(-10).map(m => ({
+    const historyMessages = messages.value.slice(-10).map((m) => ({
       role: m.role,
-      content: m.content
+      content: m.content,
     }))
 
     const result = await chatWithAI(historyMessages, canvasContext)
@@ -300,7 +300,7 @@ async function handleSend() {
     messages.value.push({
       role: 'assistant',
       content: result.reply,
-      actions: result.actions
+      actions: result.actions,
     })
 
     // 执行画布动作
@@ -311,7 +311,7 @@ async function handleSend() {
     const msg = e instanceof Error ? e.message : 'AI 服务暂时不可用'
     messages.value.push({
       role: 'assistant',
-      content: `⚠️ ${msg}，请确认后端服务已启动。`
+      content: `⚠️ ${msg}，请确认后端服务已启动。`,
     })
   } finally {
     loading.value = false
@@ -349,7 +349,9 @@ function sendQuick(text: string) {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(99, 102, 241, 0.45);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .ai-trigger-btn:hover {
@@ -379,8 +381,14 @@ function sendQuick(text: string) {
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .ai-chat__header {
@@ -467,9 +475,16 @@ function sendQuick(text: string) {
   border-bottom-right-radius: 4px;
 }
 
-.ai-bubble p { margin: 0 0 6px; }
-.ai-bubble ul { margin: 4px 0 0; padding-left: 16px; }
-.ai-bubble li { margin-bottom: 3px; }
+.ai-bubble p {
+  margin: 0 0 6px;
+}
+.ai-bubble ul {
+  margin: 4px 0 0;
+  padding-left: 16px;
+}
+.ai-bubble li {
+  margin-bottom: 3px;
+}
 
 /* 加载动画 */
 .ai-bubble--loading {
@@ -487,13 +502,27 @@ function sendQuick(text: string) {
   animation: bounce 1.2s infinite ease-in-out;
 }
 
-.dot:nth-child(1) { animation-delay: 0s; }
-.dot:nth-child(2) { animation-delay: 0.2s; }
-.dot:nth-child(3) { animation-delay: 0.4s; }
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes bounce {
-  0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
-  40% { transform: scale(1); opacity: 1; }
+  0%,
+  80%,
+  100% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* 动作标签 */

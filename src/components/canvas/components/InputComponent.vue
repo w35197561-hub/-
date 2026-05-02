@@ -3,7 +3,7 @@
     class="input-component"
     :type="(component.props.type as string) || 'text'"
     :placeholder="(component.props.placeholder as string) ?? ''"
-    :value="isPreview ? localValue : ((component.props.value as string) || '')"
+    :value="isPreview ? localValue : (component.props.value as string) || ''"
     :readonly="!isPreview"
     :style="computedStyle"
     @input="isPreview && (localValue = ($event.target as HTMLInputElement).value)"

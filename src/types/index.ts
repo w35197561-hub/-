@@ -65,7 +65,13 @@ export enum ComponentType {
   TIME_PICKER = 'TimePicker',
 }
 
-export type SetterType = 'InputSetter' | 'TextareaSetter' | 'NumberSetter' | 'ColorSetter' | 'SelectSetter' | 'StringListSetter'
+export type SetterType =
+  | 'InputSetter'
+  | 'TextareaSetter'
+  | 'NumberSetter'
+  | 'ColorSetter'
+  | 'SelectSetter'
+  | 'StringListSetter'
 
 export interface PropSetter {
   label: string

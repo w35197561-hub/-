@@ -9,10 +9,7 @@ import { ComponentType } from '@/types'
  * @param containerId  容器组件的 id
  * @param getSlotKey   返回当前要操作的 slotKey 的函数（Form 传入列 key，Tabs 传入当前 activeTab）
  */
-export function useContainerDrop(
-  containerId: string,
-  getSlotKey: () => string,
-) {
+export function useContainerDrop(containerId: string, getSlotKey: () => string) {
   const editorStore = useEditorStore()
   const isPreview = inject('isPreview', false)
 

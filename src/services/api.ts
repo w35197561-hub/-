@@ -9,9 +9,14 @@ import type { PageData } from '@/types'
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json' },
-    ...options
+    ...options,
   })
-  const json = (await res.json()) as { success: boolean; data?: T; message?: string; error?: string }
+  const json = (await res.json()) as {
+    success: boolean
+    data?: T
+    message?: string
+    error?: string
+  }
 
   if (!json.success) {
     throw new Error(json.error ?? json.message ?? '请求失败')
@@ -58,7 +63,7 @@ export function fetchPage(id: string): Promise<PageRecord> {
 export function createPage(page: Partial<PageData>): Promise<PageRecord> {
   return request<PageRecord>('/api/pages', {
     method: 'POST',
-    body: JSON.stringify(page)
+    body: JSON.stringify(page),
   })
 }
 
@@ -66,7 +71,7 @@ export function createPage(page: Partial<PageData>): Promise<PageRecord> {
 export function savePage(id: string, page: PageData): Promise<PageRecord> {
   return request<PageRecord>(`/api/pages/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(page)
+    body: JSON.stringify(page),
   })
 }
 

@@ -283,7 +283,7 @@ describe('addComponent - TimePicker', () => {
     const { editorStore } = setup()
     editorStore.addComponent(ComponentType.TIME_PICKER)
     const props = editorStore.currentComponent?.props
-    expect(props?.placeholder).toBe('请选择时间')
+    expect(props?.placeholder).toBe('请选择日期时间')
     expect(props?.value).toBe('')
     expect(props?.disabled).toBe(false)
   })
@@ -292,7 +292,7 @@ describe('addComponent - TimePicker', () => {
     const { editorStore } = setup()
     editorStore.addComponent(ComponentType.TIME_PICKER)
     const style = editorStore.currentComponent?.style
-    expect(style?.width).toBe(200)
+    expect(style?.width).toBe(290)
     expect(style?.height).toBe(40)
     expect(style?.borderRadius).toBe(4)
     expect(style?.backgroundColor).toBe('#ffffff')

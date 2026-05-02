@@ -13,7 +13,9 @@ import type { ComponentData } from '@/types'
 const props = defineProps<{ component: ComponentData }>()
 
 const text = computed(() => (props.component.props.text as string | undefined) ?? '')
-const borderStyle = computed(() => (props.component.props.borderStyle as string | undefined) ?? 'solid')
+const borderStyle = computed(
+  () => (props.component.props.borderStyle as string | undefined) ?? 'solid',
+)
 const borderWidth = computed(() => props.component.style.borderWidth ?? 1)
 const borderColor = computed(() => props.component.style.borderColor ?? '#dcdfe6')
 

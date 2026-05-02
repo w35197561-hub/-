@@ -132,7 +132,9 @@ const {
   font-size: 12px;
   color: #606266;
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
   user-select: none;
 }
 
@@ -145,7 +147,9 @@ const {
   flex: 1;
   position: relative;
   min-height: 80px;
-  transition: background 0.15s, outline 0.15s;
+  transition:
+    background 0.15s,
+    outline 0.15s;
 }
 
 .tabs-body.is-drag-over {

@@ -27,9 +27,7 @@ const props = defineProps<{ component: ComponentData }>()
 
 const isPreview = inject('isPreview', false)
 
-const options = computed(
-  () => (props.component.props.options as string[] | undefined) ?? [],
-)
+const options = computed(() => (props.component.props.options as string[] | undefined) ?? [])
 
 const defaultValue = computed(
   () => (props.component.props.defaultValue as string | undefined) ?? '',

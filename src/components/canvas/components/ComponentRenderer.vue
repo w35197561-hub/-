@@ -43,7 +43,5 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.TIME_PICKER]: TimePickerComponent,
 }
 
-const resolvedComponent = computed(
-  () => componentMap[props.component.type] ?? TextComponent,
-)
+const resolvedComponent = computed(() => componentMap[props.component.type] ?? TextComponent)
 </script>

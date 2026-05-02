@@ -5,7 +5,7 @@
         <h1>可视化页面编辑器</h1>
         <span class="page-title">{{ currentPage?.title || '未命名页面' }}</span>
       </div>
-      
+
       <div class="header-center">
         <el-button-group>
           <el-button data-testid="btn-undo" @click="handleUndo" :disabled="!canUndo">
@@ -17,18 +17,18 @@
             重做
           </el-button>
         </el-button-group>
-        
+
         <el-button @click="livePreviewVisible = true" type="primary">
           <el-icon><Monitor /></el-icon>
           实时预览
         </el-button>
-        
+
         <el-button @click="handleExport" type="success">
           <el-icon><Download /></el-icon>
           导出JSON
         </el-button>
       </div>
-      
+
       <div class="header-right">
         <el-button @click="handleOpenPageList">
           <el-icon><FolderOpened /></el-icon>
@@ -44,29 +44,20 @@
         </el-button>
       </div>
     </div>
-    
+
     <div class="editor-body">
       <ComponentPanel />
       <EditorCanvas />
       <PropertyPanel />
     </div>
-    
+
     <!-- 实时预览弹窗 -->
-    <el-dialog
-      v-model="livePreviewVisible"
-      title="实时预览"
-      width="90%"
-      top="4vh"
-    >
+    <el-dialog v-model="livePreviewVisible" title="实时预览" width="90%" top="4vh">
       <LivePreviewPanel />
     </el-dialog>
 
     <!-- 页面列表弹窗 -->
-    <el-dialog
-      v-model="pageListVisible"
-      title="打开页面"
-      width="600px"
-    >
+    <el-dialog v-model="pageListVisible" title="打开页面" width="600px">
       <div v-if="pageList.length === 0" class="page-list-empty">
         <el-empty description="暂无已保存的页面" />
       </div>
@@ -113,14 +104,13 @@ import {
   Download,
   Document,
   Plus,
-  FolderOpened
+  FolderOpened,
 } from '@element-plus/icons-vue'
 import { savePage, createPage, fetchPageList, fetchPage } from '@/services/api'
 import type { PageListItem } from '@/services/api'
 
 const editorStore = useEditorStore()
 const historyStore = useHistoryStore()
-
 
 const pageListVisible = ref(false)
 const livePreviewVisible = ref(false)
@@ -206,7 +196,7 @@ const handleLoadPage = async (item: PageListItem) => {
     await ElMessageBox.confirm(
       `加载页面「${item.title}」将替换当前画布内容，是否继续？`,
       '加载页面',
-      { type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消' }
+      { type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消' },
     )
 
     const pageData = await fetchPage(item.id)
@@ -287,5 +277,4 @@ onMounted(() => {
   display: flex;
   overflow: hidden;
 }
-
 </style>

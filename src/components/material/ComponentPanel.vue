@@ -51,25 +51,25 @@ const componentGroups = [
   {
     label: '基础',
     items: [
-      { type: ComponentType.TEXT,         name: '文本',   icon: Document },
-      { type: ComponentType.TEXTAREA,     name: '多行文本', icon: Memo },
-      { type: ComponentType.INPUT,        name: '输入框', icon: EditPen },
+      { type: ComponentType.TEXT, name: '文本', icon: Document },
+      { type: ComponentType.TEXTAREA, name: '多行文本', icon: Memo },
+      { type: ComponentType.INPUT, name: '输入框', icon: EditPen },
       { type: ComponentType.NUMBER_INPUT, name: '数字输入', icon: Odometer },
-      { type: ComponentType.BUTTON,       name: '按钮',   icon: CircleCheck },
-      { type: ComponentType.IMAGE,        name: '图片',   icon: Picture },
-      { type: ComponentType.RADIO_GROUP,  name: '单选按钮', icon: Select },
-      { type: ComponentType.SELECT,         name: '下拉复选',   icon: ArrowDown },
+      { type: ComponentType.BUTTON, name: '按钮', icon: CircleCheck },
+      { type: ComponentType.IMAGE, name: '图片', icon: Picture },
+      { type: ComponentType.RADIO_GROUP, name: '单选按钮', icon: Select },
+      { type: ComponentType.SELECT, name: '下拉复选', icon: ArrowDown },
       { type: ComponentType.CHECKBOX_GROUP, name: '多选复选框', icon: Grid },
-      { type: ComponentType.DIVIDER,        name: '分割线',    icon: Minus },
-      { type: ComponentType.TIME_PICKER,   name: '时间选择',  icon: Timer },
+      { type: ComponentType.DIVIDER, name: '分割线', icon: Minus },
+      { type: ComponentType.TIME_PICKER, name: '时间选择', icon: Timer },
     ],
   },
   {
     label: '容器',
     items: [
-      { type: ComponentType.FORM,  name: '表单容器', icon: Tickets },
-      { type: ComponentType.TABS,  name: 'Tabs容器', icon: Menu },
-      { type: ComponentType.CHART, name: '图表',     icon: TrendCharts },
+      { type: ComponentType.FORM, name: '表单容器', icon: Tickets },
+      { type: ComponentType.TABS, name: 'Tabs容器', icon: Menu },
+      { type: ComponentType.CHART, name: '图表', icon: TrendCharts },
     ],
   },
 ]
@@ -144,7 +144,9 @@ const handleDragEnd = () => {}
   background: white;
   cursor: grab;
   user-select: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   overflow: hidden;
 }
 

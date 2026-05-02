@@ -13,25 +13,17 @@
           <el-icon><FullScreen /></el-icon>
         </el-button>
       </el-button-group>
-      
-      <el-switch
-        v-model="snapToGrid"
-        active-text="吸附网格"
-        inactive-text="自由拖拽"
-      />
-      
-      <el-switch
-        v-model="showGuidelines"
-        active-text="显示辅助线"
-        inactive-text="隐藏辅助线"
-      />
+
+      <el-switch v-model="snapToGrid" active-text="吸附网格" inactive-text="自由拖拽" />
+
+      <el-switch v-model="showGuidelines" active-text="显示辅助线" inactive-text="隐藏辅助线" />
     </div>
-    
-    <div 
+
+    <div
       class="canvas-container"
       :style="{
         transform: `scale(${canvasScale})`,
-        transformOrigin: 'center center'
+        transformOrigin: 'center center',
       }"
       @mousedown="handleCanvasClick"
       @dragover="handleDragOver"
@@ -43,7 +35,7 @@
         :style="{
           width: `${currentPage?.style.width || 1200}px`,
           height: `${currentPage?.style.height || 800}px`,
-          backgroundColor: currentPage?.style.backgroundColor || '#ffffff'
+          backgroundColor: currentPage?.style.backgroundColor || '#ffffff',
         }"
       >
         <div
@@ -57,30 +49,52 @@
             left: `${component.style.left}px`,
             width: `${component.style.width}px`,
             height: `${component.style.height}px`,
-            zIndex: currentComponent?.id === component.id
-              ? component.style.zIndex + 1000
-              : component.style.zIndex,
-            transform: `rotate(${component.style.rotate}deg)`
+            zIndex:
+              currentComponent?.id === component.id
+                ? component.style.zIndex + 1000
+                : component.style.zIndex,
+            transform: `rotate(${component.style.rotate}deg)`,
           }"
           @mousedown="handleComponentMouseDown(component, $event)"
         >
-          <ComponentRenderer
-            :component="component"
-            class="component-content"
-          />
-          
+          <ComponentRenderer :component="component" class="component-content" />
+
           <div v-if="currentComponent?.id === component.id" class="component-resize-handles">
-            <div class="handle handle-tl" @mousedown.stop="startResize(component, 'tl', $event)"></div>
-            <div class="handle handle-tr" @mousedown.stop="startResize(component, 'tr', $event)"></div>
-            <div class="handle handle-bl" @mousedown.stop="startResize(component, 'bl', $event)"></div>
-            <div class="handle handle-br" @mousedown.stop="startResize(component, 'br', $event)"></div>
-            <div class="handle handle-t" @mousedown.stop="startResize(component, 't', $event)"></div>
-            <div class="handle handle-r" @mousedown.stop="startResize(component, 'r', $event)"></div>
-            <div class="handle handle-b" @mousedown.stop="startResize(component, 'b', $event)"></div>
-            <div class="handle handle-l" @mousedown.stop="startResize(component, 'l', $event)"></div>
+            <div
+              class="handle handle-tl"
+              @mousedown.stop="startResize(component, 'tl', $event)"
+            ></div>
+            <div
+              class="handle handle-tr"
+              @mousedown.stop="startResize(component, 'tr', $event)"
+            ></div>
+            <div
+              class="handle handle-bl"
+              @mousedown.stop="startResize(component, 'bl', $event)"
+            ></div>
+            <div
+              class="handle handle-br"
+              @mousedown.stop="startResize(component, 'br', $event)"
+            ></div>
+            <div
+              class="handle handle-t"
+              @mousedown.stop="startResize(component, 't', $event)"
+            ></div>
+            <div
+              class="handle handle-r"
+              @mousedown.stop="startResize(component, 'r', $event)"
+            ></div>
+            <div
+              class="handle handle-b"
+              @mousedown.stop="startResize(component, 'b', $event)"
+            ></div>
+            <div
+              class="handle handle-l"
+              @mousedown.stop="startResize(component, 'l', $event)"
+            ></div>
           </div>
         </div>
-        
+
         <div v-if="showGuidelines" class="guidelines">
           <!-- 简洁的十字辅助线 -->
           <div class="guideline vertical center" :style="{ left: '50%' }"></div>
@@ -105,11 +119,11 @@ const currentComponent = computed(() => editorStore.currentComponent)
 const canvasScale = computed(() => editorStore.canvasScale)
 const snapToGrid = computed({
   get: () => editorStore.snapToGrid,
-  set: (value) => editorStore.setSnapToGrid(value)
+  set: (value) => editorStore.setSnapToGrid(value),
 })
 const showGuidelines = computed({
   get: () => editorStore.showGuidelines,
-  set: (value) => editorStore.setShowGuidelines(value)
+  set: (value) => editorStore.setShowGuidelines(value),
 })
 
 const selectComponent = (component: ComponentData) => {
@@ -156,29 +170,29 @@ const handleDragOver = (event: DragEvent) => {
 
 const handleDrop = (event: DragEvent) => {
   event.preventDefault()
-  
+
   if (!event.dataTransfer || !editorStore.currentPage) return
-  
+
   const componentType = event.dataTransfer.getData('componentType') as ComponentType
   if (!componentType) return
-  
+
   // 获取画布背景的实际位置（组件应该相对于canvas-background定位）
   const canvasBackground = document.querySelector('.canvas-background') as HTMLElement
   if (!canvasBackground) return
-  
+
   const canvasRect = canvasBackground.getBoundingClientRect()
-  
+
   // 计算相对于画布背景的精确位置
   // 注意：getBoundingClientRect返回的是实际渲染位置，已经包含了缩放
   // 所以我们需要将鼠标位置转换为画布坐标系中的位置
   const scale = canvasScale.value
   const offsetX = (event.clientX - canvasRect.left) / scale
   const offsetY = (event.clientY - canvasRect.top) / scale
-  
+
   // 添加新组件到画布，放置在鼠标位置
   editorStore.addComponent(componentType, {
     left: Math.max(0, offsetX),
-    top: Math.max(0, offsetY)
+    top: Math.max(0, offsetY),
   })
 }
 
@@ -187,18 +201,18 @@ let dragStartX = 0
 let dragStartY = 0
 let originalLeft = 0
 let originalTop = 0
-let dragStartStyle: ComponentData['style'] | null = null  // 拖拽开始时的完整样式快照
+let dragStartStyle: ComponentData['style'] | null = null // 拖拽开始时的完整样式快照
 
 const startDrag = (component: ComponentData, event: MouseEvent) => {
   isDragging = true
-  
+
   // 记录拖拽开始时的鼠标位置和组件位置
   dragStartX = event.clientX
   dragStartY = event.clientY
   originalLeft = component.style.left
   originalTop = component.style.top
-  dragStartStyle = { ...component.style }  // 保存完整样式快照
-  
+  dragStartStyle = { ...component.style } // 保存完整样式快照
+
   document.addEventListener('mousemove', handleDrag)
   document.addEventListener('mouseup', stopDrag)
   event.preventDefault()
@@ -206,29 +220,29 @@ const startDrag = (component: ComponentData, event: MouseEvent) => {
 
 const handleDrag = (event: MouseEvent) => {
   if (!isDragging || !currentComponent.value) return
-  
+
   // 计算鼠标移动的偏移量（考虑缩放）
   const deltaX = (event.clientX - dragStartX) / canvasScale.value
   const deltaY = (event.clientY - dragStartY) / canvasScale.value
-  
+
   // 计算新位置
   let newLeft = originalLeft + deltaX
   let newTop = originalTop + deltaY
-  
+
   // 网格吸附功能
   if (snapToGrid.value) {
     newLeft = Math.round(newLeft / 10) * 10
     newTop = Math.round(newTop / 10) * 10
   }
-  
+
   // 确保位置不超出画布边界
   newLeft = Math.max(0, newLeft)
   newTop = Math.max(0, newTop)
-  
+
   // 使用静默更新，不记录历史（拖拽过程中高频调用）
   editorStore.updateComponentStyleSilent(currentComponent.value.id, {
     left: newLeft,
-    top: newTop
+    top: newTop,
   })
 }
 
@@ -238,14 +252,13 @@ const stopDrag = () => {
     const currentStyle = currentComponent.value.style
     // 只有位置真正变化才记录历史
     if (currentStyle.left !== dragStartStyle.left || currentStyle.top !== dragStartStyle.top) {
-      editorStore.batchUpdateComponentStyle(
-        currentComponent.value.id,
-        dragStartStyle,
-        { left: currentStyle.left, top: currentStyle.top }
-      )
+      editorStore.batchUpdateComponentStyle(currentComponent.value.id, dragStartStyle, {
+        left: currentStyle.left,
+        top: currentStyle.top,
+      })
     }
   }
-  
+
   isDragging = false
   dragStartStyle = null
   document.removeEventListener('mousemove', handleDrag)
@@ -260,7 +273,7 @@ let originalWidth = 0
 let originalHeight = 0
 let originalLeftResize = 0
 let originalTopResize = 0
-let resizeStartStyle: ComponentData['style'] | null = null  // 缩放开始时的完整样式快照
+let resizeStartStyle: ComponentData['style'] | null = null // 缩放开始时的完整样式快照
 
 const startResize = (component: ComponentData, direction: string, event: MouseEvent) => {
   isResizing = true
@@ -271,8 +284,8 @@ const startResize = (component: ComponentData, direction: string, event: MouseEv
   originalHeight = component.style.height
   originalLeftResize = component.style.left
   originalTopResize = component.style.top
-  resizeStartStyle = { ...component.style }  // 保存完整样式快照
-  
+  resizeStartStyle = { ...component.style } // 保存完整样式快照
+
   document.addEventListener('mousemove', handleResize)
   document.addEventListener('mouseup', stopResize)
   event.preventDefault()
@@ -281,15 +294,15 @@ const startResize = (component: ComponentData, direction: string, event: MouseEv
 
 const handleResize = (event: MouseEvent) => {
   if (!isResizing || !currentComponent.value) return
-  
+
   const deltaX = (event.clientX - resizeStartX) / canvasScale.value
   const deltaY = (event.clientY - resizeStartY) / canvasScale.value
-  
+
   let newWidth = originalWidth
   let newHeight = originalHeight
   let newLeft = originalLeftResize
   let newTop = originalTopResize
-  
+
   switch (resizeDirection) {
     case 'tl':
       newWidth = Math.max(20, originalWidth - deltaX)
@@ -326,13 +339,13 @@ const handleResize = (event: MouseEvent) => {
       newWidth = Math.max(20, originalWidth + deltaX)
       break
   }
-  
+
   // 使用静默更新，不记录历史（缩放过程中高频调用）
   editorStore.updateComponentStyleSilent(currentComponent.value.id, {
     width: newWidth,
     height: newHeight,
     left: newLeft,
-    top: newTop
+    top: newTop,
   })
 }
 
@@ -340,26 +353,22 @@ const stopResize = () => {
   // 缩放结束时，如果样式有变化，记录一次历史
   if (isResizing && currentComponent.value && resizeStartStyle) {
     const currentStyle = currentComponent.value.style
-    const hasChanged = 
+    const hasChanged =
       currentStyle.width !== resizeStartStyle.width ||
       currentStyle.height !== resizeStartStyle.height ||
       currentStyle.left !== resizeStartStyle.left ||
       currentStyle.top !== resizeStartStyle.top
-    
+
     if (hasChanged) {
-      editorStore.batchUpdateComponentStyle(
-        currentComponent.value.id,
-        resizeStartStyle,
-        {
-          width: currentStyle.width,
-          height: currentStyle.height,
-          left: currentStyle.left,
-          top: currentStyle.top
-        }
-      )
+      editorStore.batchUpdateComponentStyle(currentComponent.value.id, resizeStartStyle, {
+        width: currentStyle.width,
+        height: currentStyle.height,
+        left: currentStyle.left,
+        top: currentStyle.top,
+      })
     }
   }
-  
+
   isResizing = false
   resizeStartStyle = null
   document.removeEventListener('mousemove', handleResize)
@@ -371,7 +380,7 @@ onMounted(() => {
   if (!currentPage.value) {
     editorStore.createNewPage()
   }
-  
+
   // 添加拖放区域初始化检查
   const canvasContainer = document.querySelector('.canvas-container') as HTMLElement
   if (canvasContainer) {
@@ -465,14 +474,50 @@ onUnmounted(() => {
   cursor: nwse-resize;
 }
 
-.handle-tl { top: -4px; left: -4px; cursor: nw-resize; }
-.handle-tr { top: -4px; right: -4px; cursor: ne-resize; }
-.handle-bl { bottom: -4px; left: -4px; cursor: sw-resize; }
-.handle-br { bottom: -4px; right: -4px; cursor: se-resize; }
-.handle-t { top: -4px; left: 50%; margin-left: -4px; cursor: n-resize; }
-.handle-r { right: -4px; top: 50%; margin-top: -4px; cursor: e-resize; }
-.handle-b { bottom: -4px; left: 50%; margin-left: -4px; cursor: s-resize; }
-.handle-l { left: -4px; top: 50%; margin-top: -4px; cursor: w-resize; }
+.handle-tl {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+.handle-tr {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+.handle-bl {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+.handle-br {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}
+.handle-t {
+  top: -4px;
+  left: 50%;
+  margin-left: -4px;
+  cursor: n-resize;
+}
+.handle-r {
+  right: -4px;
+  top: 50%;
+  margin-top: -4px;
+  cursor: e-resize;
+}
+.handle-b {
+  bottom: -4px;
+  left: 50%;
+  margin-left: -4px;
+  cursor: s-resize;
+}
+.handle-l {
+  left: -4px;
+  top: 50%;
+  margin-top: -4px;
+  cursor: w-resize;
+}
 
 .guidelines {
   position: absolute;

@@ -1,11 +1,6 @@
 <template>
   <div class="image-component" :style="containerStyle">
-    <img
-      v-if="src"
-      :src="src"
-      :alt="(component.props.alt as string) ?? ''"
-      class="image-content"
-    />
+    <img v-if="src" :src="src" :alt="(component.props.alt as string) ?? ''" class="image-content" />
     <div v-else class="image-placeholder">
       <el-icon><Picture /></el-icon>
       <span>请设置图片地址</span>

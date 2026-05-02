@@ -21,7 +21,9 @@ describe('useHistoryStore', () => {
     it('执行命令后 undoStack 增加一条，redoStack 清空', () => {
       const store = useHistoryStore()
       let count = 0
-      const cmd = createMockCommand(() => { count++ })
+      const cmd = createMockCommand(() => {
+        count++
+      })
 
       store.executeCommand(cmd)
 
@@ -36,10 +38,10 @@ describe('useHistoryStore', () => {
       const cmd2 = createMockCommand()
 
       store.executeCommand(cmd1)
-      store.undo()                  // 产生一条 redo 记录
+      store.undo() // 产生一条 redo 记录
       expect(store.redoStack.length).toBe(1)
 
-      store.executeCommand(cmd2)    // 新命令应清空 redo
+      store.executeCommand(cmd2) // 新命令应清空 redo
       expect(store.redoStack.length).toBe(0)
     })
 
@@ -61,7 +63,9 @@ describe('useHistoryStore', () => {
     it('undo 调用最后一条命令的 undo 方法，并移入 redoStack', () => {
       const store = useHistoryStore()
       let undoCalled = false
-      const cmd = createMockCommand(undefined, () => { undoCalled = true })
+      const cmd = createMockCommand(undefined, () => {
+        undoCalled = true
+      })
 
       store.executeCommand(cmd)
       store.undo()
@@ -93,11 +97,13 @@ describe('useHistoryStore', () => {
     it('redo 重新执行命令，并移回 undoStack', () => {
       const store = useHistoryStore()
       let execCount = 0
-      const cmd = createMockCommand(() => { execCount++ })
+      const cmd = createMockCommand(() => {
+        execCount++
+      })
 
-      store.executeCommand(cmd)   // execCount = 1
+      store.executeCommand(cmd) // execCount = 1
       store.undo()
-      store.redo()                // execCount = 2
+      store.redo() // execCount = 2
 
       expect(execCount).toBe(2)
       expect(store.undoStack.length).toBe(1)
@@ -152,12 +158,12 @@ describe('useHistoryStore', () => {
         () => log.push('undo-2'),
       )
 
-      store.executeCommand(cmd1)   // exec-1
-      store.executeCommand(cmd2)   // exec-2
-      store.undo()                 // undo-2
-      store.undo()                 // undo-1
-      store.redo()                 // exec-1
-      store.redo()                 // exec-2
+      store.executeCommand(cmd1) // exec-1
+      store.executeCommand(cmd2) // exec-2
+      store.undo() // undo-2
+      store.undo() // undo-1
+      store.redo() // exec-1
+      store.redo() // exec-2
 
       expect(log).toEqual(['exec-1', 'exec-2', 'undo-2', 'undo-1', 'exec-1', 'exec-2'])
     })

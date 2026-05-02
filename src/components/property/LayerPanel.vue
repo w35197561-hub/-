@@ -11,7 +11,7 @@
         class="layer-item"
         :class="{
           'layer-item--selected': layer.id === currentComponentId,
-          'layer-item--dragging-over': dragOverId === layer.id
+          'layer-item--dragging-over': dragOverId === layer.id,
         }"
         draggable="true"
         @click="handleSelectLayer(layer.id)"
@@ -89,7 +89,7 @@ const layers = computed(() => {
       id: c.id,
       type: c.type,
       name: getComponentName(c, idx),
-      zIndex: c.style.zIndex
+      zIndex: c.style.zIndex,
     }))
 })
 
@@ -338,7 +338,9 @@ const handleDragEnd = () => {
   border-radius: 3px;
   color: #666;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .layer-action-btn:hover {

@@ -38,12 +38,12 @@ export async function chatWithAI(
     pageTitle?: string
     componentCount?: number
     components?: Array<{ id: string; type: string; props: Record<string, unknown> }>
-  }
+  },
 ): Promise<AiChatResult> {
   const res = await fetch('/api/ai/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, canvasContext })
+    body: JSON.stringify({ messages, canvasContext }),
   })
 
   const json = (await res.json()) as {

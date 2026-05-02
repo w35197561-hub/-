@@ -49,8 +49,7 @@ const columns = computed(() => {
   return keys.map((key, index) => ({ key, label: `列 ${index + 1}` }))
 })
 
-const getSlotChildren = (slotKey: string) =>
-  props.component.slots?.[slotKey] ?? []
+const getSlotChildren = (slotKey: string) => props.component.slots?.[slotKey] ?? []
 
 // 子组件外层 wrapper 样式（独立函数，避免模板中的内联对象导致重渲染）
 const childWrapperStyle = (child: ComponentData) => ({
@@ -120,7 +119,9 @@ const { dragOverSlot, handleDragOver, handleDragLeave, handleDrop, handleChildMo
   border-radius: 6px;
   background: #fafafa;
   min-height: 80px;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .column-body.is-drag-over {

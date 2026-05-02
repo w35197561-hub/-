@@ -1,14 +1,28 @@
 <template>
   <!-- 设计态：静态占位 -->
   <div v-if="!isPreview" :style="wrapperStyle" class="timepicker-display">
-    <svg class="timepicker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg
+      class="timepicker-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
       <rect x="3" y="4" width="18" height="18" rx="2" />
       <line x1="16" y1="2" x2="16" y2="6" />
       <line x1="8" y1="2" x2="8" y2="6" />
       <line x1="3" y1="10" x2="21" y2="10" />
     </svg>
-    <span class="timepicker-placeholder">{{ component.props.placeholder ?? '请选择日期时间' }}</span>
-    <svg class="timepicker-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <span class="timepicker-placeholder">{{
+      component.props.placeholder ?? '请选择日期时间'
+    }}</span>
+    <svg
+      class="timepicker-arrow"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
       <polyline points="6 9 12 15 18 9" />
     </svg>
   </div>
@@ -21,7 +35,13 @@
     class="timepicker-display timepicker-interactive"
     @click="togglePanel"
   >
-    <svg class="timepicker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg
+      class="timepicker-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
       <rect x="3" y="4" width="18" height="18" rx="2" />
       <line x1="16" y1="2" x2="16" y2="6" />
       <line x1="8" y1="2" x2="8" y2="6" />
@@ -53,7 +73,9 @@
               :key="y"
               :class="['timepicker-col-item', { active: y === selectedYear }]"
               @click.stop="selectYear(y)"
-            >{{ y }}</li>
+            >
+              {{ y }}
+            </li>
           </ul>
         </div>
         <!-- 月 -->
@@ -65,7 +87,9 @@
               :key="m"
               :class="['timepicker-col-item', { active: m === selectedMonth }]"
               @click.stop="selectMonth(m)"
-            >{{ m }}</li>
+            >
+              {{ m }}
+            </li>
           </ul>
         </div>
         <!-- 日 -->
@@ -77,7 +101,9 @@
               :key="d"
               :class="['timepicker-col-item', { active: d === selectedDay }]"
               @click.stop="selectDay(d)"
-            >{{ d }}</li>
+            >
+              {{ d }}
+            </li>
           </ul>
         </div>
         <!-- 分隔线 -->
@@ -91,7 +117,9 @@
               :key="h"
               :class="['timepicker-col-item', { active: h === selectedHour }]"
               @click.stop="selectHour(h)"
-            >{{ h }}</li>
+            >
+              {{ h }}
+            </li>
           </ul>
         </div>
         <!-- 分 -->
@@ -103,7 +131,9 @@
               :key="m"
               :class="['timepicker-col-item', { active: m === selectedMinute }]"
               @click.stop="selectMinute(m)"
-            >{{ m }}</li>
+            >
+              {{ m }}
+            </li>
           </ul>
         </div>
         <!-- 秒 -->
@@ -115,14 +145,18 @@
               :key="s"
               :class="['timepicker-col-item', { active: s === selectedSecond }]"
               @click.stop="selectSecond(s)"
-            >{{ s }}</li>
+            >
+              {{ s }}
+            </li>
           </ul>
         </div>
       </div>
 
       <div class="timepicker-footer">
         <button class="timepicker-btn timepicker-btn-cancel" @click.stop="cancelPanel">取消</button>
-        <button class="timepicker-btn timepicker-btn-confirm" @click.stop="confirmPanel">确定</button>
+        <button class="timepicker-btn timepicker-btn-confirm" @click.stop="confirmPanel">
+          确定
+        </button>
       </div>
     </div>
   </div>
@@ -141,17 +175,17 @@ const rootEl = ref<HTMLElement | null>(null)
 
 // ---- 静态数据 ----
 const currentYear = new Date().getFullYear()
-const years  = Array.from({ length: 21 }, (_, i) => String(currentYear - 10 + i))
+const years = Array.from({ length: 21 }, (_, i) => String(currentYear - 10 + i))
 const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'))
-const hours   = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
 const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
 const seconds = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
 
 // ---- 临时选中状态 ----
-const selectedYear   = ref(String(currentYear))
-const selectedMonth  = ref('01')
-const selectedDay    = ref('01')
-const selectedHour   = ref('00')
+const selectedYear = ref(String(currentYear))
+const selectedMonth = ref('01')
+const selectedDay = ref('01')
+const selectedHour = ref('00')
 const selectedMinute = ref('00')
 const selectedSecond = ref('00')
 
@@ -172,10 +206,10 @@ watch(days, (list) => {
 const displayValue = ref((props.component.props.value as string) ?? '')
 
 // ---- 列表 ref ----
-const yearList   = ref<HTMLElement | null>(null)
-const monthList  = ref<HTMLElement | null>(null)
-const dayList    = ref<HTMLElement | null>(null)
-const hourList   = ref<HTMLElement | null>(null)
+const yearList = ref<HTMLElement | null>(null)
+const monthList = ref<HTMLElement | null>(null)
+const dayList = ref<HTMLElement | null>(null)
+const hourList = ref<HTMLElement | null>(null)
 const minuteList = ref<HTMLElement | null>(null)
 const secondList = ref<HTMLElement | null>(null)
 
@@ -184,17 +218,17 @@ const parseValue = (val: string) => {
   // 支持 "YYYY-MM-DD HH:mm:ss" 或 "HH:mm:ss"
   const dtMatch = val.match(/^(\d{4})-(\d{2})-(\d{2})\s(\d{2}):(\d{2}):(\d{2})$/)
   if (dtMatch) {
-    selectedYear.value   = dtMatch[1]
-    selectedMonth.value  = dtMatch[2]
-    selectedDay.value    = dtMatch[3]
-    selectedHour.value   = dtMatch[4]
+    selectedYear.value = dtMatch[1]
+    selectedMonth.value = dtMatch[2]
+    selectedDay.value = dtMatch[3]
+    selectedHour.value = dtMatch[4]
     selectedMinute.value = dtMatch[5]
     selectedSecond.value = dtMatch[6]
     return
   }
   const tMatch = val.match(/^(\d{2}):(\d{2}):(\d{2})$/)
   if (tMatch) {
-    selectedHour.value   = tMatch[1]
+    selectedHour.value = tMatch[1]
     selectedMinute.value = tMatch[2]
     selectedSecond.value = tMatch[3]
   }
@@ -202,7 +236,12 @@ const parseValue = (val: string) => {
 
 watch(
   () => props.component.props.value as string,
-  (val) => { if (val) { displayValue.value = val; parseValue(val) } },
+  (val) => {
+    if (val) {
+      displayValue.value = val
+      parseValue(val)
+    }
+  },
   { immediate: true },
 )
 
@@ -220,29 +259,43 @@ const togglePanel = () => {
   if (panelOpen.value) {
     if (displayValue.value) parseValue(displayValue.value)
     nextTick(() => {
-      scrollTo(yearList.value,   selectedYear.value,   years)
-      scrollTo(monthList.value,  selectedMonth.value,  months)
-      scrollTo(dayList.value,    selectedDay.value,    days.value)
-      scrollTo(hourList.value,   selectedHour.value,   hours)
+      scrollTo(yearList.value, selectedYear.value, years)
+      scrollTo(monthList.value, selectedMonth.value, months)
+      scrollTo(dayList.value, selectedDay.value, days.value)
+      scrollTo(hourList.value, selectedHour.value, hours)
       scrollTo(minuteList.value, selectedMinute.value, minutes)
       scrollTo(secondList.value, selectedSecond.value, seconds)
     })
   }
 }
 
-const selectYear   = (v: string) => { selectedYear.value = v }
-const selectMonth  = (v: string) => { selectedMonth.value = v }
-const selectDay    = (v: string) => { selectedDay.value = v }
-const selectHour   = (v: string) => { selectedHour.value = v }
-const selectMinute = (v: string) => { selectedMinute.value = v }
-const selectSecond = (v: string) => { selectedSecond.value = v }
+const selectYear = (v: string) => {
+  selectedYear.value = v
+}
+const selectMonth = (v: string) => {
+  selectedMonth.value = v
+}
+const selectDay = (v: string) => {
+  selectedDay.value = v
+}
+const selectHour = (v: string) => {
+  selectedHour.value = v
+}
+const selectMinute = (v: string) => {
+  selectedMinute.value = v
+}
+const selectSecond = (v: string) => {
+  selectedSecond.value = v
+}
 
 const confirmPanel = () => {
   displayValue.value = `${selectedYear.value}-${selectedMonth.value}-${selectedDay.value} ${selectedHour.value}:${selectedMinute.value}:${selectedSecond.value}`
   panelOpen.value = false
 }
 
-const cancelPanel = () => { panelOpen.value = false }
+const cancelPanel = () => {
+  panelOpen.value = false
+}
 
 const onClickOutside = (e: MouseEvent) => {
   if (rootEl.value && !rootEl.value.contains(e.target as Node)) {
@@ -390,7 +443,9 @@ const wrapperStyle = computed(() => ({
   font-size: 13px;
   color: #333;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 
 .timepicker-col-item:hover {

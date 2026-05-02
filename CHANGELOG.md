@@ -6,6 +6,9 @@
 
 ## 2026-05-02
 
+### fix(ci): 修复 TypeScript 类型错误、单元测试断言及代码格式问题
+
+
 ### fix(ci): 移除 job 级别不支持的 hashFiles 条件判断
 
 

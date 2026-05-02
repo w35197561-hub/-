@@ -4,21 +4,16 @@
     <LayerPanel />
     <div class="panel-header">
       <h3>属性配置</h3>
-      <el-button 
-        v-if="currentComponent" 
-        type="danger" 
-        size="small" 
-        @click="deleteCurrentComponent"
-      >
+      <el-button v-if="currentComponent" type="danger" size="small" @click="deleteCurrentComponent">
         删除组件
       </el-button>
     </div>
-    
+
     <div v-if="!currentComponent" class="empty-state">
       <el-icon><InfoFilled /></el-icon>
       <p>请选择要配置的组件</p>
     </div>
-    
+
     <div v-else class="property-content">
       <el-scrollbar>
         <div class="property-section">
@@ -81,7 +76,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="property-section">
           <h4>图层管理</h4>
           <!-- 当前 z-index 信息展示 -->
@@ -137,7 +132,7 @@
             整理层级
           </el-button>
         </div>
-        
+
         <!-- 样式设置 -->
         <div class="property-section" v-if="componentConfig?.styleSetters?.length">
           <h4>样式设置</h4>
@@ -148,13 +143,13 @@
                 v-if="s.setter === 'NumberSetter'"
                 :model-value="getStyleVal(s.field) as number"
                 v-bind="s.setterProps"
-                @update:model-value="val => setStyleVal(s.field, val)"
+                @update:model-value="(val) => setStyleVal(s.field, val)"
                 @change="updateComponentStyle"
               />
               <el-color-picker
                 v-else-if="s.setter === 'ColorSetter'"
                 :model-value="getStyleVal(s.field) as string"
-                @update:model-value="val => setStyleVal(s.field, val)"
+                @update:model-value="(val) => setStyleVal(s.field, val)"
                 @change="updateComponentStyle"
               />
             </div>
@@ -172,14 +167,14 @@
                   v-if="s.setter === 'NumberSetter'"
                   :model-value="getPropVal(s.field) as number"
                   v-bind="resolveSetterProps(s)"
-                  @update:model-value="val => setPropVal(s.field, val)"
+                  @update:model-value="(val) => setPropVal(s.field, val)"
                   @change="updateComponentProps"
                 />
                 <el-input
                   v-else-if="s.setter === 'InputSetter'"
                   :model-value="getPropVal(s.field) as string"
                   v-bind="resolveSetterProps(s)"
-                  @update:model-value="val => setPropVal(s.field, val)"
+                  @update:model-value="(val) => setPropVal(s.field, val)"
                   @change="updateComponentProps"
                 />
                 <el-input
@@ -187,46 +182,68 @@
                   :model-value="getPropVal(s.field) as string"
                   type="textarea"
                   :rows="3"
-                  @update:model-value="val => setPropVal(s.field, val)"
+                  @update:model-value="(val) => setPropVal(s.field, val)"
                   @change="updateComponentProps"
                 />
                 <el-color-picker
                   v-else-if="s.setter === 'ColorSetter'"
                   :model-value="getPropVal(s.field) as string"
-                  @update:model-value="val => setPropVal(s.field, val)"
+                  @update:model-value="(val: string | null) => setPropVal(s.field, val)"
                   @change="updateComponentProps"
                 />
                 <el-select
                   v-else-if="s.setter === 'SelectSetter'"
                   :model-value="getPropVal(s.field)"
-                  @update:model-value="val => { setPropVal(s.field, val); updateComponentProps() }"
+                  @update:model-value="
+                    (val: unknown) => {
+                      setPropVal(s.field, val)
+                      updateComponentProps()
+                    }
+                  "
                 >
                   <template v-if="resolveSetterProps(s).options">
                     <el-option
-                      v-for="opt in (resolveSetterProps(s).options as Array<{label:string;value:string}>)"
-                      :key="opt.value" :label="opt.label" :value="opt.value"
+                      v-for="opt in resolveSetterProps(s).options as Array<{
+                        label: string
+                        value: string
+                      }>"
+                      :key="opt.value"
+                      :label="opt.label"
+                      :value="opt.value"
                     />
                   </template>
                   <template v-else>
                     <el-option
-                      v-for="opt in (currentComponent.props[s.optionsField!] as Array<{key:string;label:string}> || [])"
-                      :key="opt.key" :label="opt.label" :value="opt.key"
+                      v-for="opt in (currentComponent.props[s.optionsField!] as Array<{
+                        key: string
+                        label: string
+                      }>) || []"
+                      :key="opt.key"
+                      :label="opt.label"
+                      :value="opt.key"
                     />
                   </template>
                 </el-select>
                 <div v-else-if="s.setter === 'StringListSetter'" class="string-list-setter">
                   <div
-                    v-for="(item, idx) in (getPropVal(s.field) as string[] ?? [])"
+                    v-for="(item, idx) in (getPropVal(s.field) as string[]) ?? []"
                     :key="idx"
                     class="string-list-row"
                   >
                     <el-input
                       :model-value="item"
-                      @update:model-value="val => updateListItem(s.field, idx, String(val))"
+                      @update:model-value="(val: string) => updateListItem(s.field, idx, val)"
                     />
-                    <el-button :icon="Minus" circle size="small" @click="removeListItem(s.field, idx)" />
+                    <el-button
+                      :icon="Minus"
+                      circle
+                      size="small"
+                      @click="removeListItem(s.field, idx)"
+                    />
                   </div>
-                  <el-button :icon="Plus" size="small" @click="addListItem(s.field)">添加选项</el-button>
+                  <el-button :icon="Plus" size="small" @click="addListItem(s.field)"
+                    >添加选项</el-button
+                  >
                 </div>
               </div>
             </template>
@@ -242,25 +259,21 @@ import { computed, ref, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { componentConfigs } from '../material/componentConfigs'
 import LayerPanel from './LayerPanel.vue'
-import {
-  InfoFilled,
-  ArrowUp,
-  ArrowDown,
-  DArrowRight,
-  Plus,
-  Minus
-} from '@element-plus/icons-vue'
+import { InfoFilled, ArrowUp, ArrowDown, DArrowRight, Plus, Minus } from '@element-plus/icons-vue'
 
 const editorStore = useEditorStore()
 
 const currentComponent = computed(() => editorStore.currentComponent)
 
 const componentConfig = computed(() =>
-  currentComponent.value ? componentConfigs[currentComponent.value.type] : null
+  currentComponent.value ? componentConfigs[currentComponent.value.type] : null,
 )
 
-
-const resolveSetterProps = (s: { setterProps?: Record<string, unknown> | ((props: Record<string, unknown>) => Record<string, unknown>) }) => {
+const resolveSetterProps = (s: {
+  setterProps?:
+    | Record<string, unknown>
+    | ((props: Record<string, unknown>) => Record<string, unknown>)
+}) => {
   if (!s.setterProps) return {}
   if (typeof s.setterProps === 'function')
     return s.setterProps((currentComponent.value?.props ?? {}) as Record<string, unknown>)
@@ -268,7 +281,9 @@ const resolveSetterProps = (s: { setterProps?: Record<string, unknown> | ((props
 }
 
 const getPropVal = (field: string): unknown =>
-  currentComponent.value ? (currentComponent.value.props as Record<string, unknown>)[field] : undefined
+  currentComponent.value
+    ? (currentComponent.value.props as Record<string, unknown>)[field]
+    : undefined
 
 const setPropVal = (field: string, val: unknown) => {
   if (!currentComponent.value) return
@@ -276,7 +291,9 @@ const setPropVal = (field: string, val: unknown) => {
 }
 
 const getStyleVal = (field: string): unknown =>
-  currentComponent.value ? (currentComponent.value.style as Record<string, unknown>)[field] : undefined
+  currentComponent.value
+    ? (currentComponent.value.style as Record<string, unknown>)[field]
+    : undefined
 
 const setStyleVal = (field: string, val: unknown) => {
   if (!currentComponent.value) return
@@ -286,13 +303,13 @@ const setStyleVal = (field: string, val: unknown) => {
 // 当前页面所有组件的层级列表
 const allZIndices = computed(() => {
   if (!editorStore.currentPage) return []
-  return editorStore.currentPage.components.map(c => c.style.zIndex)
+  return editorStore.currentPage.components.map((c) => c.style.zIndex)
 })
 
 const totalLayers = computed(() => editorStore.currentPage?.components.length ?? 0)
 
-const maxZ = computed(() => allZIndices.value.length ? Math.max(...allZIndices.value) : 1)
-const minZ = computed(() => allZIndices.value.length ? Math.min(...allZIndices.value) : 1)
+const maxZ = computed(() => (allZIndices.value.length ? Math.max(...allZIndices.value) : 1))
+const minZ = computed(() => (allZIndices.value.length ? Math.min(...allZIndices.value) : 1))
 
 const isOnTop = computed(() => {
   if (!currentComponent.value) return true
@@ -308,8 +325,10 @@ const isOnBottom = computed(() => {
 const customZIndex = ref(1)
 watch(
   () => currentComponent.value?.style.zIndex,
-  (val) => { if (val !== undefined) customZIndex.value = val },
-  { immediate: true }
+  (val) => {
+    if (val !== undefined) customZIndex.value = val
+  },
+  { immediate: true },
 )
 
 const applyCustomZIndex = (val: number | null) => {

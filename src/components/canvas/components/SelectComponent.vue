@@ -2,13 +2,25 @@
   <!-- 设计态：静态占位 -->
   <div v-if="!isPreview" :style="wrapperStyle" class="select-display">
     <span class="select-placeholder">{{ component.props.placeholder ?? '请选择' }}</span>
-    <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg
+      class="select-arrow"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
       <polyline points="6 9 12 15 18 9" />
     </svg>
   </div>
 
   <!-- 运行态：真实可交互下拉 -->
-  <div v-else ref="rootEl" :style="wrapperStyle" class="select-display select-interactive" @click="toggle">
+  <div
+    v-else
+    ref="rootEl"
+    :style="wrapperStyle"
+    class="select-display select-interactive"
+    @click="toggle"
+  >
     <span :class="['select-value', { 'select-placeholder': !selected }]">
       {{ selected || (component.props.placeholder ?? '请选择') }}
     </span>
@@ -48,9 +60,7 @@ const open = ref(false)
 const selected = ref('')
 const rootEl = ref<HTMLElement | null>(null)
 
-const options = computed(
-  () => (props.component.props.options as string[] | undefined) ?? [],
-)
+const options = computed(() => (props.component.props.options as string[] | undefined) ?? [])
 
 const wrapperStyle = computed(() => ({
   width: '100%',
