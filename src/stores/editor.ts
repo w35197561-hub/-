@@ -445,7 +445,10 @@ export const useEditorStore = defineStore('editor', () => {
 
     document.addEventListener('mousemove', moveHandler)
     document.addEventListener('mouseup', upHandler)
-    event.preventDefault()
+    const tag = (event.target as HTMLElement).tagName
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+      event.preventDefault()
+    }
     event.stopPropagation()
 
     // 保留参数，方便后续扩展（如跨slot拖动）

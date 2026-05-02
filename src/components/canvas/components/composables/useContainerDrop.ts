@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import type { ComponentData } from '@/types'
 import { ComponentType } from '@/types'
@@ -14,11 +14,13 @@ export function useContainerDrop(
   getSlotKey: () => string,
 ) {
   const editorStore = useEditorStore()
+  const isPreview = inject('isPreview', false)
 
   // 当前正在 dragover 的 slot key（或用布尔值表示单区域容器）
   const dragOverSlot = ref<string | null>(null)
 
   const handleDragOver = (slotKey: string, event: DragEvent) => {
+    if (isPreview) return
     dragOverSlot.value = slotKey
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'copy'
@@ -30,6 +32,7 @@ export function useContainerDrop(
   }
 
   const handleDrop = (slotKey: string, event: DragEvent) => {
+    if (isPreview) return
     dragOverSlot.value = null
     if (!event.dataTransfer) return
 
@@ -57,6 +60,7 @@ export function useContainerDrop(
   }
 
   const handleChildMouseDown = (child: ComponentData, slotKey: string, event: MouseEvent) => {
+    if (isPreview) return
     editorStore.selectComponent(child.id)
     editorStore.startChildDrag(child, containerId, event, slotKey)
   }
