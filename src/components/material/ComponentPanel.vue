@@ -43,6 +43,7 @@ import {
   Select,
   TrendCharts,
   Grid,
+  Minus,
 } from '@element-plus/icons-vue'
 
 const componentGroups = [
@@ -58,6 +59,7 @@ const componentGroups = [
       { type: ComponentType.RADIO_GROUP,  name: '单选按钮', icon: Select },
       { type: ComponentType.SELECT,         name: '下拉复选',   icon: ArrowDown },
       { type: ComponentType.CHECKBOX_GROUP, name: '多选复选框', icon: Grid },
+      { type: ComponentType.DIVIDER,        name: '分割线',    icon: Minus },
     ],
   },
   {

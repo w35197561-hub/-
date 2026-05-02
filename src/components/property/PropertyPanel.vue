@@ -201,10 +201,18 @@
                   :model-value="getPropVal(s.field)"
                   @update:model-value="val => { setPropVal(s.field, val); updateComponentProps() }"
                 >
-                  <el-option
-                    v-for="opt in (currentComponent.props[s.optionsField!] as Array<{key:string;label:string}> || [])"
-                    :key="opt.key" :label="opt.label" :value="opt.key"
-                  />
+                  <template v-if="resolveSetterProps(s).options">
+                    <el-option
+                      v-for="opt in (resolveSetterProps(s).options as Array<{label:string;value:string}>)"
+                      :key="opt.value" :label="opt.label" :value="opt.value"
+                    />
+                  </template>
+                  <template v-else>
+                    <el-option
+                      v-for="opt in (currentComponent.props[s.optionsField!] as Array<{key:string;label:string}> || [])"
+                      :key="opt.key" :label="opt.label" :value="opt.key"
+                    />
+                  </template>
                 </el-select>
                 <div v-else-if="s.setter === 'StringListSetter'" class="string-list-setter">
                   <div

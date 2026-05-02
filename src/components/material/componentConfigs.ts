@@ -145,6 +145,29 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     ],
   },
 
+  [ComponentType.DIVIDER]: {
+    defaultProps: {
+      text: '',
+      borderStyle: 'solid',
+    },
+    defaultStyle: { width: 200, height: 20, borderWidth: 1, borderColor: '#dcdfe6' },
+    propSetters: [
+      { label: '文字标签', setter: 'InputSetter', field: 'text' },
+      {
+        label: '线条样式', setter: 'SelectSetter', field: 'borderStyle',
+        setterProps: { options: [
+          { label: '实线', value: 'solid' },
+          { label: '虚线', value: 'dashed' },
+          { label: '点线', value: 'dotted' },
+        ]},
+      },
+    ],
+    styleSetters: [
+      { label: '线条颜色', setter: 'ColorSetter',  field: 'borderColor' },
+      { label: '线条粗细', setter: 'NumberSetter', field: 'borderWidth', setterProps: { min: 1, max: 10, step: 1 } },
+    ],
+  },
+
   [ComponentType.CHECKBOX_GROUP]: {
     defaultProps: {
       options: ['选项一', '选项二', '选项三'],

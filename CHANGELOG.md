@@ -6,6 +6,9 @@
 
 ## 2026-04-30
 
+### feat(components): 新增 CheckboxGroup 多选复选框组件
+
+
 ### feat(components): 新增 RadioGroup 单选按钮组，重构组件面板布局
 新增 RadioGroupComponent（原生 radio + label，disabled），属性面板支持 StringListSetter 编辑选项、InputSetter 设置默认选中。ComponentPanel 改为两列网格 + 基础/容器分类布局。SelectComponent 改为 div 模拟下拉外观（占位文本 + 箭头），解决 select multiple 渲染为列表框的问题。
 
