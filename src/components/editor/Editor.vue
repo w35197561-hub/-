@@ -18,9 +18,9 @@
           </el-button>
         </el-button-group>
         
-        <el-button @click="handlePreview" type="primary">
-          <el-icon><View /></el-icon>
-          预览
+        <el-button @click="livePreviewVisible = true" type="primary">
+          <el-icon><Monitor /></el-icon>
+          实时预览
         </el-button>
         
         <el-button @click="handleExport" type="success">
@@ -51,6 +51,16 @@
       <PropertyPanel />
     </div>
     
+    <!-- 实时预览弹窗 -->
+    <el-dialog
+      v-model="livePreviewVisible"
+      title="实时预览"
+      width="90%"
+      top="4vh"
+    >
+      <LivePreviewPanel />
+    </el-dialog>
+
     <!-- 页面列表弹窗 -->
     <el-dialog
       v-model="pageListVisible"
@@ -88,18 +98,18 @@
 <script setup lang="ts">
 // eslint-disable-next-line vue/multi-word-component-names
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useEditorStore } from '@/stores/editor'
 import { useHistoryStore } from '@/stores/history'
 import ComponentPanel from '../material/ComponentPanel.vue'
 import EditorCanvas from '../canvas/EditorCanvas.vue'
 import PropertyPanel from '../property/PropertyPanel.vue'
+import LivePreviewPanel from './LivePreviewPanel.vue'
 import AIPanel from './AIPanel.vue'
 import {
   RefreshLeft,
   RefreshRight,
-  View,
+  Monitor,
   Download,
   Document,
   Plus,
@@ -108,11 +118,12 @@ import {
 import { savePage, createPage, fetchPageList, fetchPage } from '@/services/api'
 import type { PageListItem } from '@/services/api'
 
-const router = useRouter()
 const editorStore = useEditorStore()
 const historyStore = useHistoryStore()
 
+
 const pageListVisible = ref(false)
+const livePreviewVisible = ref(false)
 const aiPanelVisible = ref(false)
 const isSaving = ref(false)
 const pageList = ref<PageListItem[]>([])
@@ -127,10 +138,6 @@ const handleUndo = () => {
 
 const handleRedo = () => {
   historyStore.redo()
-}
-
-const handlePreview = () => {
-  router.push({ name: 'preview' })
 }
 
 const handleExport = () => {

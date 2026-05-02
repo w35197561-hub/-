@@ -6,6 +6,9 @@
 
 ## 2026-05-02
 
+### feat(preview): 用实时预览弹窗替换全屏预览路由
+
+
 ### feat(components): TimePicker 扩展支持年月日选择，格式改为 YYYY-MM-DD HH:mm:ss
 
 
