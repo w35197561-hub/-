@@ -277,6 +277,45 @@ describe('selectComponent', () => {
   })
 })
 
+// ── TimePicker 专项 ───────────────────────────────────────────
+describe('addComponent - TimePicker', () => {
+  it('携带正确的默认 props', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.TIME_PICKER)
+    const props = editorStore.currentComponent?.props
+    expect(props?.placeholder).toBe('请选择时间')
+    expect(props?.value).toBe('')
+    expect(props?.disabled).toBe(false)
+  })
+
+  it('携带正确的默认样式（width / height / borderRadius / backgroundColor）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.TIME_PICKER)
+    const style = editorStore.currentComponent?.style
+    expect(style?.width).toBe(200)
+    expect(style?.height).toBe(40)
+    expect(style?.borderRadius).toBe(4)
+    expect(style?.backgroundColor).toBe('#ffffff')
+  })
+
+  it('添加后 undo 移除组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.TIME_PICKER)
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    historyStore.undo()
+    expect(editorStore.currentPage?.components).toHaveLength(0)
+  })
+
+  it('undo 后 redo 恢复组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.TIME_PICKER)
+    historyStore.undo()
+    historyStore.redo()
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    expect(editorStore.currentComponent?.type).toBe(ComponentType.TIME_PICKER)
+  })
+})
+
 // ── exportPageData / loadPageData ─────────────────────────────
 describe('exportPageData / loadPageData', () => {
   it('导出的 JSON 可以再次加载', () => {

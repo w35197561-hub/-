@@ -62,6 +62,7 @@ export enum ComponentType {
   RADIO_GROUP = 'RadioGroup',
   CHECKBOX_GROUP = 'CheckboxGroup',
   DIVIDER = 'Divider',
+  TIME_PICKER = 'TimePicker',
 }
 
 export type SetterType = 'InputSetter' | 'TextareaSetter' | 'NumberSetter' | 'ColorSetter' | 'SelectSetter' | 'StringListSetter'

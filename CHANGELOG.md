@@ -6,6 +6,9 @@
 
 ## 2026-05-02
 
+### feat(components): 新增 TimePicker 时间选择组件，补写单元测试
+
+
 ### feat(preview): 新增全屏预览页，实现组件设计态/运行态双模式
 
 
