@@ -143,8 +143,6 @@ jobs:
     name: "E2E — Playwright"
     runs-on: ubuntu-latest
     needs: [build]
-    # 只在存在 playwright.config.ts 时才跑（避免未配置时报错）
-    if: hashFiles('playwright.config.ts') != ''
 
     steps:
       - uses: actions/checkout@v4
