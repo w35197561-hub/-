@@ -67,8 +67,10 @@ const columns = computed<TableColumn[]>(() => {
   const rawColumns = props.component.props.columns as string[]
   if (!Array.isArray(rawColumns)) return []
   return rawColumns.map((col) => {
-    const [title, dataIndex] = col.split(':')
-    return { title: title ?? col, dataIndex: dataIndex ?? title ?? col }
+    const parts = col.split(':')
+    const title = parts[0] ?? col
+    const dataIndex = parts[1] ?? title
+    return { title, dataIndex }
   })
 })
 

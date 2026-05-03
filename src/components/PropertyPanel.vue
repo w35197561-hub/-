@@ -257,17 +257,41 @@
             </div>
 
             <template v-if="currentComponent.type === ComponentType.TABLE">
+              <!-- 列字段编辑器 -->
               <div class="property-item">
-                <label>列定义（每行格式：标题:字段名）</label>
-                <el-input
-                  v-model="localColumnsText"
-                  type="textarea"
-                  :rows="4"
-                  placeholder="姓名:name&#10;年龄:age&#10;城市:city"
-                  @input="syncTableColumns"
-                  @change="commitTableColumns"
-                />
+                <label>子字段</label>
+                <div class="col-list">
+                  <div
+                    v-for="(col, idx) in localTableColumns"
+                    :key="col.dataIndex + idx"
+                    class="col-item"
+                    :class="{ 'col-item--drag-over': dragOverIdx === idx }"
+                    draggable="true"
+                    @dragstart="onColDragStart(idx)"
+                    @dragover.prevent="onColDragOver(idx)"
+                    @dragleave="dragOverIdx = null"
+                    @drop="onColDrop(idx)"
+                    @dragend="dragOverIdx = null"
+                  >
+                    <span class="col-handle">⠿</span>
+                    <button class="col-type-btn" @click="toggleColType(idx)" :title="col.colType === 'number' ? '数字列' : '文本列'">
+                      <span v-if="col.colType === 'number'" class="col-type-icon col-type-num">123</span>
+                      <span v-else class="col-type-icon col-type-text">T</span>
+                    </button>
+                    <input
+                      class="col-title-input"
+                      :value="col.title"
+                      @input="updateColTitle(idx, ($event.target as HTMLInputElement).value)"
+                      @blur="commitColumns"
+                    />
+                    <button class="col-action-btn" title="复制" @click="duplicateCol(idx)">⧉</button>
+                    <button class="col-action-btn col-action-del" title="删除" @click="removeCol(idx)">🗑</button>
+                  </div>
+                </div>
+                <button class="col-add-btn" @click="addCol">+ 添加列</button>
               </div>
+
+              <!-- 数据源 -->
               <div class="property-item">
                 <label>数据源（JSON 数组）</label>
                 <el-input
@@ -279,22 +303,18 @@
                   @change="commitTableDataSource"
                 />
               </div>
+
+              <!-- 边框 / 斑马纹 -->
               <div class="property-item">
                 <label>边框</label>
-                <el-select
-                  :model-value="tableBordered"
-                  @change="updateTableBordered"
-                >
+                <el-select :model-value="tableBordered" @change="updateTableBordered">
                   <el-option label="有边框" :value="true" />
                   <el-option label="无边框" :value="false" />
                 </el-select>
               </div>
               <div class="property-item">
                 <label>斑马纹</label>
-                <el-select
-                  :model-value="tableStriped"
-                  @change="updateTableStriped"
-                >
+                <el-select :model-value="tableStriped" @change="updateTableStriped">
                   <el-option label="斑马纹" :value="true" />
                   <el-option label="无斑马纹" :value="false" />
                 </el-select>
@@ -381,49 +401,106 @@ const deleteCurrentComponent = () => {
   editorStore.deleteComponent(currentComponent.value.id)
 }
 
-// Table — 本地中间状态（string[] ↔ 多行文本 需要转换，无法直接 v-model）
-const localColumnsText = ref('')
+// ── Table 列编辑器 ────────────────────────────────────────────────
+interface ColItem { title: string; dataIndex: string; colType: 'text' | 'number' }
+
+const parseColumns = (raw: unknown): ColItem[] => {
+  if (!Array.isArray(raw)) return []
+  return (raw as string[]).map((s) => {
+    const parts = s.split(':')
+    const title = parts[0] || ''
+    const dataIndex = parts[1] || title
+    const colType = parts[2] === 'number' ? 'number' : 'text'
+    return { title, dataIndex, colType } as ColItem
+  })
+}
+
+const serializeColumns = (cols: ColItem[]): string[] =>
+  cols.map((c) => `${c.title}:${c.dataIndex}:${c.colType}`)
+
+const localTableColumns = ref<ColItem[]>([])
 const localDataSource = ref('')
+const dragSrcIdx = ref<number | null>(null)
+const dragOverIdx = ref<number | null>(null)
 
 watch(
   () => currentComponent.value?.props.columns,
-  (cols) => {
-    localColumnsText.value = Array.isArray(cols) ? (cols as string[]).join('\n') : ''
-  },
+  (cols) => { localTableColumns.value = parseColumns(cols) },
   { immediate: true },
 )
 
 watch(
   () => currentComponent.value?.props.dataSource,
-  (ds) => {
-    localDataSource.value = (ds as string) ?? ''
-  },
+  (ds) => { localDataSource.value = (ds as string) ?? '' },
   { immediate: true },
 )
 
-// @input：每次按键直接写入 store（实时更新表格），不走 Command
-const syncTableColumns = () => {
+// 实时写入 store（不记历史）
+const flushColumns = () => {
   if (!currentComponent.value) return
-  const cols = localColumnsText.value
-    .split('\n')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0)
-  Object.assign(currentComponent.value.props, { columns: cols })
+  Object.assign(currentComponent.value.props, { columns: serializeColumns(localTableColumns.value) })
 }
 
+// 失焦时写 Command（记历史）
+const commitColumns = () => {
+  if (!currentComponent.value) return
+  editorStore.updateComponentProps(currentComponent.value.id, {
+    columns: serializeColumns(localTableColumns.value),
+  })
+}
+
+const updateColTitle = (idx: number, val: string) => {
+  const col = localTableColumns.value[idx]
+  if (!col) return
+  if (!col.dataIndex || col.dataIndex === col.title) col.dataIndex = val
+  col.title = val
+  flushColumns()
+}
+
+const toggleColType = (idx: number) => {
+  const col = localTableColumns.value[idx]
+  if (!col) return
+  col.colType = col.colType === 'text' ? 'number' : 'text'
+  commitColumns()
+}
+
+const duplicateCol = (idx: number) => {
+  const src = localTableColumns.value[idx]
+  if (!src) return
+  localTableColumns.value.splice(idx + 1, 0, { ...src, dataIndex: src.dataIndex + '_copy' })
+  commitColumns()
+}
+
+const removeCol = (idx: number) => {
+  localTableColumns.value.splice(idx, 1)
+  commitColumns()
+}
+
+const addCol = () => {
+  const n = localTableColumns.value.length + 1
+  localTableColumns.value.push({ title: `列${n}`, dataIndex: `col${n}`, colType: 'text' })
+  commitColumns()
+}
+
+// 拖拽排序
+const onColDragStart = (idx: number) => { dragSrcIdx.value = idx }
+const onColDragOver = (idx: number) => { dragOverIdx.value = idx }
+const onColDrop = (idx: number) => {
+  const src = dragSrcIdx.value
+  if (src === null || src === idx) return
+  const cols = [...localTableColumns.value]
+  const [item] = cols.splice(src, 1) as [ColItem]
+  cols.splice(idx, 0, item)
+  localTableColumns.value = cols
+  dragSrcIdx.value = null
+  dragOverIdx.value = null
+  commitColumns()
+}
+
+// dataSource 同步
 const syncTableDataSource = () => {
   if (!currentComponent.value) return
   Object.assign(currentComponent.value.props, { dataSource: localDataSource.value })
-}
-
-// @change（blur）：写入 Command，确保 undo/redo 可用
-const commitTableColumns = () => {
-  if (!currentComponent.value) return
-  const cols = localColumnsText.value
-    .split('\n')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0)
-  editorStore.updateComponentProps(currentComponent.value.id, { columns: cols })
 }
 
 const commitTableDataSource = () => {
@@ -540,6 +617,110 @@ const updateTableStriped = (value: boolean) => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* ── Table 列编辑器 ─────────────────────────────────── */
+.col-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.col-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: default;
+  transition: border-color 0.15s;
+}
+
+.col-item--drag-over {
+  border-color: #409eff;
+  background: #ecf5ff;
+}
+
+.col-handle {
+  color: #c0c4cc;
+  cursor: grab;
+  font-size: 14px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.col-type-btn {
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background: #f5f7fa;
+  padding: 2px 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.col-type-btn:hover {
+  border-color: #409eff;
+}
+
+.col-type-icon {
+  font-size: 11px;
+  font-weight: 700;
+  display: block;
+  min-width: 22px;
+  text-align: center;
+}
+
+.col-type-text { color: #606266; }
+.col-type-num  { color: #409eff; }
+
+.col-title-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: #303133;
+  background: transparent;
+  min-width: 0;
+}
+
+.col-title-input:focus {
+  border-bottom: 1px solid #409eff;
+}
+
+.col-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #909399;
+  font-size: 14px;
+  flex-shrink: 0;
+  padding: 2px;
+  line-height: 1;
+}
+
+.col-action-btn:hover { color: #409eff; }
+.col-action-del:hover { color: #f56c6c; }
+
+.col-add-btn {
+  width: 100%;
+  padding: 8px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 6px;
+  background: #fafafa;
+  color: #606266;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.col-add-btn:hover {
+  border-color: #409eff;
+  color: #409eff;
+  background: #ecf5ff;
 }
 
 .zindex-info {

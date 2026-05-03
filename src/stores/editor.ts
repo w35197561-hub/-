@@ -216,7 +216,7 @@ export const useEditorStore = defineStore('editor', () => {
         activeTab: 'tab1'
       },
       [ComponentType.TABLE]: {
-        columns: ['姓名:name', '年龄:age', '城市:city'],
+        columns: ['姓名:name:text', '年龄:age:number', '城市:city:text'],
         dataSource: '[{"name":"张三","age":25,"city":"北京"},{"name":"李四","age":30,"city":"上海"}]',
         bordered: true,
         striped: false
@@ -374,7 +374,7 @@ export const useEditorStore = defineStore('editor', () => {
         activeTab: 'tab1'
       },
       [ComponentType.TABLE]: {
-        columns: ['姓名:name', '年龄:age', '城市:city'],
+        columns: ['姓名:name:text', '年龄:age:number', '城市:city:text'],
         dataSource: '[{"name":"张三","age":25,"city":"北京"},{"name":"李四","age":30,"city":"上海"}]',
         bordered: true,
         striped: false
