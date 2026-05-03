@@ -182,7 +182,8 @@ export const useEditorStore = defineStore('editor', () => {
 
     const typeStyleMap: Partial<Record<ComponentType, { width: number; height: number }>> = {
       [ComponentType.FORM]: { width: 520, height: 260 },
-      [ComponentType.TABS]: { width: 560, height: 320 }
+      [ComponentType.TABS]: { width: 560, height: 320 },
+      [ComponentType.TABLE]: { width: 500, height: 200 },
     }
 
     // 从initialProps中提取style相关的属性
@@ -213,7 +214,20 @@ export const useEditorStore = defineStore('editor', () => {
           { key: 'tab2', label: 'Tab 2' }
         ],
         activeTab: 'tab1'
-      }
+      },
+      [ComponentType.TABLE]: {
+        columns: [
+          { title: '姓名', dataIndex: 'name' },
+          { title: '年龄', dataIndex: 'age' },
+          { title: '城市', dataIndex: 'city' },
+        ],
+        dataSource: [
+          { name: '张三', age: 25, city: '北京' },
+          { name: '李四', age: 30, city: '上海' },
+        ],
+        bordered: true,
+        striped: false,
+      },
     }
 
     const component: ComponentData = {
@@ -365,7 +379,20 @@ export const useEditorStore = defineStore('editor', () => {
           { key: 'tab2', label: 'Tab 2' }
         ],
         activeTab: 'tab1'
-      }
+      },
+      [ComponentType.TABLE]: {
+        columns: [
+          { title: '姓名', dataIndex: 'name' },
+          { title: '年龄', dataIndex: 'age' },
+          { title: '城市', dataIndex: 'city' },
+        ],
+        dataSource: [
+          { name: '张三', age: 25, city: '北京' },
+          { name: '李四', age: 30, city: '上海' },
+        ],
+        bordered: true,
+        striped: false,
+      },
     }
 
     const child: ComponentData = {

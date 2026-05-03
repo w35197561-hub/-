@@ -55,7 +55,8 @@ export enum ComponentType {
   INPUT = 'Input',
   FORM = 'Form',
   CHART = 'Chart',
-  TABS = 'Tabs'
+  TABS = 'Tabs',
+  TABLE = 'Table',
 }
 
 export interface Command {
