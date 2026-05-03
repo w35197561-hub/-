@@ -293,15 +293,44 @@
 
               <!-- 数据源 -->
               <div class="property-item">
-                <label>数据源（JSON 数组）</label>
-                <el-input
-                  v-model="localDataSource"
-                  type="textarea"
-                  :rows="4"
-                  placeholder='[{"name":"张三","age":25}]'
-                  @input="syncTableDataSource"
-                  @change="commitTableDataSource"
-                />
+                <label>数据行</label>
+                <div class="col-list">
+                  <div
+                    v-for="(row, rIdx) in localTableRows"
+                    :key="rIdx"
+                    class="row-item"
+                    :class="{ 'col-item--drag-over': rowDragOverIdx === rIdx }"
+                    draggable="true"
+                    @dragstart="onRowDragStart(rIdx)"
+                    @dragover.prevent="onRowDragOver(rIdx)"
+                    @dragleave="rowDragOverIdx = null"
+                    @drop="onRowDrop(rIdx)"
+                    @dragend="rowDragOverIdx = null"
+                  >
+                    <div class="row-item-header">
+                      <span class="col-handle">⠿</span>
+                      <span class="row-item-label">第 {{ rIdx + 1 }} 行</span>
+                      <button class="col-action-btn" title="复制" @click="duplicateRow(rIdx)">⧉</button>
+                      <button class="col-action-btn col-action-del" title="删除" @click="removeRow(rIdx)">🗑</button>
+                    </div>
+                    <div class="row-item-fields">
+                      <div
+                        v-for="col in localTableColumns"
+                        :key="col.dataIndex"
+                        class="row-field"
+                      >
+                        <span class="row-field-label">{{ col.title }}</span>
+                        <input
+                          class="col-title-input"
+                          :value="String(row[col.dataIndex] ?? '')"
+                          @input="updateRowCell(rIdx, col.dataIndex, ($event.target as HTMLInputElement).value)"
+                          @blur="commitRows"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button class="col-add-btn" @click="addRow">+ 添加行</button>
               </div>
 
               <!-- 边框 / 斑马纹 -->
@@ -419,9 +448,26 @@ const serializeColumns = (cols: ColItem[]): string[] =>
   cols.map((c) => `${c.title}:${c.dataIndex}:${c.colType}`)
 
 const localTableColumns = ref<ColItem[]>([])
-const localDataSource = ref('')
 const dragSrcIdx = ref<number | null>(null)
 const dragOverIdx = ref<number | null>(null)
+
+// ── 行数据 ────────────────────────────────────────────────────────
+type RowItem = Record<string, unknown>
+
+const localTableRows = ref<RowItem[]>([])
+const rowDragSrcIdx = ref<number | null>(null)
+const rowDragOverIdx = ref<number | null>(null)
+
+const parseRows = (raw: unknown): RowItem[] => {
+  try {
+    const parsed = JSON.parse(raw as string)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+const serializeRows = (rows: RowItem[]): string => JSON.stringify(rows)
 
 watch(
   () => currentComponent.value?.props.columns,
@@ -431,7 +477,7 @@ watch(
 
 watch(
   () => currentComponent.value?.props.dataSource,
-  (ds) => { localDataSource.value = (ds as string) ?? '' },
+  (ds) => { localTableRows.value = parseRows(ds) },
   { immediate: true },
 )
 
@@ -497,15 +543,58 @@ const onColDrop = (idx: number) => {
   commitColumns()
 }
 
-// dataSource 同步
-const syncTableDataSource = () => {
+// 行：实时写入（不记历史）
+const flushRows = () => {
   if (!currentComponent.value) return
-  Object.assign(currentComponent.value.props, { dataSource: localDataSource.value })
+  Object.assign(currentComponent.value.props, { dataSource: serializeRows(localTableRows.value) })
 }
 
-const commitTableDataSource = () => {
+// 行：失焦写 Command（记历史）
+const commitRows = () => {
   if (!currentComponent.value) return
-  editorStore.updateComponentProps(currentComponent.value.id, { dataSource: localDataSource.value })
+  editorStore.updateComponentProps(currentComponent.value.id, {
+    dataSource: serializeRows(localTableRows.value),
+  })
+}
+
+const updateRowCell = (rIdx: number, key: string, val: string) => {
+  const row = localTableRows.value[rIdx]
+  if (!row) return
+  row[key] = val
+  flushRows()
+}
+
+const duplicateRow = (rIdx: number) => {
+  const src = localTableRows.value[rIdx]
+  if (!src) return
+  localTableRows.value.splice(rIdx + 1, 0, { ...src })
+  commitRows()
+}
+
+const removeRow = (rIdx: number) => {
+  localTableRows.value.splice(rIdx, 1)
+  commitRows()
+}
+
+const addRow = () => {
+  const empty: RowItem = {}
+  localTableColumns.value.forEach((c) => { empty[c.dataIndex] = '' })
+  localTableRows.value.push(empty)
+  commitRows()
+}
+
+const onRowDragStart = (idx: number) => { rowDragSrcIdx.value = idx }
+const onRowDragOver = (idx: number) => { rowDragOverIdx.value = idx }
+const onRowDrop = (idx: number) => {
+  const src = rowDragSrcIdx.value
+  if (src === null || src === idx) return
+  const rows = [...localTableRows.value]
+  const [item] = rows.splice(src, 1) as [RowItem]
+  rows.splice(idx, 0, item)
+  localTableRows.value = rows
+  rowDragSrcIdx.value = null
+  rowDragOverIdx.value = null
+  commitRows()
 }
 
 const tableBordered = computed(() => {
@@ -721,6 +810,56 @@ const updateTableStriped = (value: boolean) => {
   border-color: #409eff;
   color: #409eff;
   background: #ecf5ff;
+}
+
+/* ── 数据行编辑器 ───────────────────────────────────── */
+.row-item {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.row-item.col-item--drag-over {
+  border-color: #409eff;
+  background: #ecf5ff;
+}
+
+.row-item-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.row-item-label {
+  flex: 1;
+  font-size: 12px;
+  color: #909399;
+}
+
+.row-item-fields {
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.row-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.row-field-label {
+  font-size: 11px;
+  color: #909399;
+  width: 48px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .zindex-info {
