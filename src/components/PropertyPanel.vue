@@ -260,21 +260,23 @@
               <div class="property-item">
                 <label>列定义（每行格式：标题:字段名）</label>
                 <el-input
-                  :model-value="tableColumnsText"
+                  v-model="localColumnsText"
                   type="textarea"
                   :rows="4"
                   placeholder="姓名:name&#10;年龄:age&#10;城市:city"
-                  @change="updateTableColumns"
+                  @input="syncTableColumns"
+                  @change="commitTableColumns"
                 />
               </div>
               <div class="property-item">
                 <label>数据源（JSON 数组）</label>
                 <el-input
-                  :model-value="tableDataSource"
+                  v-model="localDataSource"
                   type="textarea"
                   :rows="4"
                   placeholder='[{"name":"张三","age":25}]'
-                  @change="updateTableDataSource"
+                  @input="syncTableDataSource"
+                  @change="commitTableDataSource"
                 />
               </div>
               <div class="property-item">
@@ -379,30 +381,54 @@ const deleteCurrentComponent = () => {
   editorStore.deleteComponent(currentComponent.value.id)
 }
 
-// Table 列定义：string[] -> textarea 显示（每行一条）
-const tableColumnsText = computed(() => {
-  if (!currentComponent.value || currentComponent.value.type !== ComponentType.TABLE) return ''
-  const cols = currentComponent.value.props.columns as string[] | undefined
-  return Array.isArray(cols) ? cols.join('\n') : ''
-})
+// Table — 本地中间状态（string[] ↔ 多行文本 需要转换，无法直接 v-model）
+const localColumnsText = ref('')
+const localDataSource = ref('')
 
-const updateTableColumns = (value: string) => {
+watch(
+  () => currentComponent.value?.props.columns,
+  (cols) => {
+    localColumnsText.value = Array.isArray(cols) ? (cols as string[]).join('\n') : ''
+  },
+  { immediate: true },
+)
+
+watch(
+  () => currentComponent.value?.props.dataSource,
+  (ds) => {
+    localDataSource.value = (ds as string) ?? ''
+  },
+  { immediate: true },
+)
+
+// @input：每次按键直接写入 store（实时更新表格），不走 Command
+const syncTableColumns = () => {
   if (!currentComponent.value) return
-  const cols = value
+  const cols = localColumnsText.value
+    .split('\n')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+  Object.assign(currentComponent.value.props, { columns: cols })
+}
+
+const syncTableDataSource = () => {
+  if (!currentComponent.value) return
+  Object.assign(currentComponent.value.props, { dataSource: localDataSource.value })
+}
+
+// @change（blur）：写入 Command，确保 undo/redo 可用
+const commitTableColumns = () => {
+  if (!currentComponent.value) return
+  const cols = localColumnsText.value
     .split('\n')
     .map((s) => s.trim())
     .filter((s) => s.length > 0)
   editorStore.updateComponentProps(currentComponent.value.id, { columns: cols })
 }
 
-const tableDataSource = computed(() => {
-  if (!currentComponent.value || currentComponent.value.type !== ComponentType.TABLE) return ''
-  return (currentComponent.value.props.dataSource as string | undefined) ?? ''
-})
-
-const updateTableDataSource = (value: string) => {
+const commitTableDataSource = () => {
   if (!currentComponent.value) return
-  editorStore.updateComponentProps(currentComponent.value.id, { dataSource: value })
+  editorStore.updateComponentProps(currentComponent.value.id, { dataSource: localDataSource.value })
 }
 
 const tableBordered = computed(() => {
