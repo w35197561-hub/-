@@ -133,7 +133,7 @@ cd server && npm test         # 后端集成测试
 ### 核心数据类型（`src/types/index.ts`）
 
 **ComponentType 枚举（当前已有）：**
-`Text` / `Image` / `Button` / `Input` / `Form`（容器）/ `Chart` / `Tabs`（容器）/ `Table`
+`Text` / `Image` / `Button` / `Input` / `Form`（容器）/ `Chart` / `Tabs`（容器）
 
 **ComponentStyle：** `top, left, width, height, zIndex, rotate`（必填）+ `fontSize, color, backgroundColor, borderWidth, borderColor, borderRadius`（可选，数值均为 `number`，渲染时拼接 `px`）
 

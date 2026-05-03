@@ -13,7 +13,6 @@ import ButtonComponent from './ButtonComponent.vue'
 import InputComponent from './InputComponent.vue'
 import FormComponent from './FormComponent.vue'
 import TabsComponent from './TabsComponent.vue'
-import TableComponent from './TableComponent.vue'
 
 const props = defineProps<{
   component: ComponentData
@@ -28,7 +27,6 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.FORM]: FormComponent,
   [ComponentType.CHART]: TextComponent, // Chart 组件占位，后续接入真实图表库
   [ComponentType.TABS]: TabsComponent,
-  [ComponentType.TABLE]: TableComponent,
 }
 
 const resolvedComponent = computed(

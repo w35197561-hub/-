@@ -34,8 +34,7 @@ import {
   CircleCheck,
   EditPen,
   Tickets,
-  Menu,
-  Grid,
+  Menu
 } from '@element-plus/icons-vue'
 
 const componentTypes = ref([
@@ -44,8 +43,7 @@ const componentTypes = ref([
   { type: ComponentType.BUTTON, name: '按钮', icon: CircleCheck },
   { type: ComponentType.INPUT, name: '输入框', icon: EditPen },
   { type: ComponentType.FORM, name: '表单容器', icon: Tickets },
-  { type: ComponentType.TABS, name: 'Tabs容器', icon: Menu },
-  { type: ComponentType.TABLE, name: '表格', icon: Grid },
+  { type: ComponentType.TABS, name: 'Tabs容器', icon: Menu }
 ])
 
 const handleDragStart = (componentType: ComponentType, event: DragEvent) => {

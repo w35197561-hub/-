@@ -106,8 +106,7 @@ const getComponentName = (c: ComponentData, idx: number): string => {
     [ComponentType.INPUT]: '输入框',
     [ComponentType.FORM]: '表单容器',
     [ComponentType.CHART]: '图表',
-    [ComponentType.TABS]: '标签页',
-    [ComponentType.TABLE]: '表格',
+    [ComponentType.TABS]: '标签页'
   }
   const baseName = typeNames[c.type] || c.type
   // 尝试取 props 中有意义的标识
@@ -123,8 +122,7 @@ const getTypeIcon = (type: ComponentType): string => {
     [ComponentType.INPUT]: '▭',
     [ComponentType.FORM]: '⊞',
     [ComponentType.CHART]: '📊',
-    [ComponentType.TABS]: '⧉',
-    [ComponentType.TABLE]: '⊟',
+    [ComponentType.TABS]: '⧉'
   }
   return icons[type] || '□'
 }

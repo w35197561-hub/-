@@ -85,44 +85,6 @@ describe('addComponent', () => {
     expect(comps[0].style.zIndex).toBe(1)
     expect(comps[1].style.zIndex).toBe(2)
   })
-
-  it('TABLE 组件携带正确的默认 props（columns/dataSource/bordered/striped）', () => {
-    const { editorStore } = setup()
-    editorStore.addComponent(ComponentType.TABLE)
-    const comp = editorStore.currentComponent
-    expect(comp?.type).toBe(ComponentType.TABLE)
-    expect(Array.isArray(comp?.props.columns)).toBe(true)
-    expect(Array.isArray(comp?.props.dataSource)).toBe(true)
-    expect(comp?.props.bordered).toBe(true)
-    expect(comp?.props.striped).toBe(false)
-  })
-
-  it('TABLE 组件默认尺寸为 500×200', () => {
-    const { editorStore } = setup()
-    editorStore.addComponent(ComponentType.TABLE)
-    const style = editorStore.currentComponent?.style
-    expect(style?.width).toBe(500)
-    expect(style?.height).toBe(200)
-  })
-
-  it('添加 TABLE 组件后可以 undo 恢复', () => {
-    const { editorStore, historyStore } = setup()
-    editorStore.addComponent(ComponentType.TABLE)
-    expect(editorStore.currentPage?.components).toHaveLength(1)
-
-    historyStore.undo()
-    expect(editorStore.currentPage?.components).toHaveLength(0)
-    expect(editorStore.currentComponent).toBeNull()
-  })
-
-  it('TABLE undo 后可以 redo 再次恢复', () => {
-    const { editorStore, historyStore } = setup()
-    editorStore.addComponent(ComponentType.TABLE)
-    historyStore.undo()
-    historyStore.redo()
-    expect(editorStore.currentPage?.components).toHaveLength(1)
-    expect(editorStore.currentComponent?.type).toBe(ComponentType.TABLE)
-  })
 })
 
 // ── deleteComponent ───────────────────────────────────────────

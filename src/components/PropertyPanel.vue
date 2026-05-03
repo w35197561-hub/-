@@ -255,29 +255,6 @@
                 />
               </el-select>
             </div>
-
-            <template v-if="currentComponent.type === 'Table'">
-              <div class="property-item">
-                <label>边框</label>
-                <el-select
-                  v-model="currentComponent.props.bordered"
-                  @change="updateComponentProps"
-                >
-                  <el-option label="有边框" :value="true" />
-                  <el-option label="无边框" :value="false" />
-                </el-select>
-              </div>
-              <div class="property-item">
-                <label>斑马纹</label>
-                <el-select
-                  v-model="currentComponent.props.striped"
-                  @change="updateComponentProps"
-                >
-                  <el-option label="斑马纹" :value="true" />
-                  <el-option label="无斑马纹" :value="false" />
-                </el-select>
-              </div>
-            </template>
           </div>
         </div>
       </el-scrollbar>

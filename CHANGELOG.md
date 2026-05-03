@@ -4,14 +4,6 @@
 
 ---
 
-## 2026-05-02
-
-### feat(components): 新增 Table 表格组件
-
-新增 TableComponent，支持 columns/dataSource/bordered/striped 配置，实现设计态静态展示和运行态可交互双模式。同步更新 ComponentType 枚举、editor.ts defaultProps、ComponentRenderer、ComponentPanel、LayerPanel 六处注册点，并补写 4 个 TABLE addComponent undo/redo 单元测试。
-
----
-
 ## 2026-04-29
 
 ### chore: 迁移 .codewiz-spec 至 Claude Code 规范结构
