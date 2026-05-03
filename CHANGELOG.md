@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-05-02
+
+### feat(components): 新增 Table 表格组件
+
+新增 TableComponent，支持动态列（StringListSetter 编辑，格式"标题:字段名"）和动态行（TextareaSetter 填写 JSON 数组），实现设计态/运行态双模式。审查修复了三处问题：TableComponent.vue 的 `userSelect` 类型错误（加 `as 'text' | 'none'`）；PropertyPanel.vue 中 dataSource/bordered/striped 直接 v-model 绑定 props 绕过 Command 模式（改为独立 getter + updateComponentProps handler）；模板中使用魔法字符串 `'Table'` 改为 `ComponentType.TABLE`。补写了 addComponent(TABLE) 的 undo/redo 单元测试。
+
+---
+
 ## 2026-04-29
 
 ### chore: 迁移 .codewiz-spec 至 Claude Code 规范结构

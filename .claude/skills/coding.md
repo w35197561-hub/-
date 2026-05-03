@@ -41,6 +41,27 @@
 - 禁止遗留 `console.log` / `console.error` / `debugger`
 - 禁止硬编码魔法字符串，使用常量或枚举
 
+## 新增组件自查清单 §2 — 配置项设计原则
+
+在填写 `componentConfigs.ts` 中的 `propSetters` / `styleSetters` 时，严格遵循以下原则：
+
+### 精简原则：只加有意义的配置项
+
+每一项 setter 必须对该组件有**实际使用场景**，不得套用通用模板。判断标准：
+
+- **加**：用户在设计时有理由调整这个属性（如 Select 的 placeholder、Table 的 bordered）
+- **不加**：该属性对该组件无意义或外观上不可见（如 Table 的 borderRadius、Divider 的 fontSize）
+
+常见误加项（按组件类型判断是否需要）：
+- `borderRadius`：仅适用于有圆角需求的组件（Button、Input、Select 等），Table / Divider / RadioGroup 不需要
+- `borderWidth` / `borderColor`：仅适用于允许用户自定义边框的组件，容器类组件通常不需要
+- `fontSize`：仅适用于有文字内容的组件，纯布局/数据组件不需要
+
+### 方案确认原则（主 Agent 职责）
+
+coder agent 被调用前，主 Agent 必须先向用户描述组件设计方案（props、propSetters、styleSetters 的具体内容），
+等用户确认或给出修改意见后，再 spawn coder agent 执行。
+
 ## 变更记录
 
 每步完成后更新 `.claude/specs/{功能名}/changes.md`：

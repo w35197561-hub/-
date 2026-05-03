@@ -255,6 +255,49 @@
                 />
               </el-select>
             </div>
+
+            <template v-if="currentComponent.type === ComponentType.TABLE">
+              <div class="property-item">
+                <label>列定义（每行格式：标题:字段名）</label>
+                <el-input
+                  :model-value="tableColumnsText"
+                  type="textarea"
+                  :rows="4"
+                  placeholder="姓名:name&#10;年龄:age&#10;城市:city"
+                  @change="updateTableColumns"
+                />
+              </div>
+              <div class="property-item">
+                <label>数据源（JSON 数组）</label>
+                <el-input
+                  :model-value="tableDataSource"
+                  type="textarea"
+                  :rows="4"
+                  placeholder='[{"name":"张三","age":25}]'
+                  @change="updateTableDataSource"
+                />
+              </div>
+              <div class="property-item">
+                <label>边框</label>
+                <el-select
+                  :model-value="tableBordered"
+                  @change="updateTableBordered"
+                >
+                  <el-option label="有边框" :value="true" />
+                  <el-option label="无边框" :value="false" />
+                </el-select>
+              </div>
+              <div class="property-item">
+                <label>斑马纹</label>
+                <el-select
+                  :model-value="tableStriped"
+                  @change="updateTableStriped"
+                >
+                  <el-option label="斑马纹" :value="true" />
+                  <el-option label="无斑马纹" :value="false" />
+                </el-select>
+              </div>
+            </template>
           </div>
         </div>
       </el-scrollbar>
@@ -265,6 +308,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
+import { ComponentType } from '@/types'
 import LayerPanel from './LayerPanel.vue'
 import {
   InfoFilled,
@@ -333,6 +377,52 @@ const moveLayer = (direction: 'up' | 'down' | 'top' | 'bottom') => {
 const deleteCurrentComponent = () => {
   if (!currentComponent.value) return
   editorStore.deleteComponent(currentComponent.value.id)
+}
+
+// Table 列定义：string[] -> textarea 显示（每行一条）
+const tableColumnsText = computed(() => {
+  if (!currentComponent.value || currentComponent.value.type !== ComponentType.TABLE) return ''
+  const cols = currentComponent.value.props.columns as string[] | undefined
+  return Array.isArray(cols) ? cols.join('\n') : ''
+})
+
+const updateTableColumns = (value: string) => {
+  if (!currentComponent.value) return
+  const cols = value
+    .split('\n')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+  editorStore.updateComponentProps(currentComponent.value.id, { columns: cols })
+}
+
+const tableDataSource = computed(() => {
+  if (!currentComponent.value || currentComponent.value.type !== ComponentType.TABLE) return ''
+  return (currentComponent.value.props.dataSource as string | undefined) ?? ''
+})
+
+const updateTableDataSource = (value: string) => {
+  if (!currentComponent.value) return
+  editorStore.updateComponentProps(currentComponent.value.id, { dataSource: value })
+}
+
+const tableBordered = computed(() => {
+  if (!currentComponent.value || currentComponent.value.type !== ComponentType.TABLE) return true
+  return (currentComponent.value.props.bordered as boolean | undefined) ?? true
+})
+
+const updateTableBordered = (value: boolean) => {
+  if (!currentComponent.value) return
+  editorStore.updateComponentProps(currentComponent.value.id, { bordered: value })
+}
+
+const tableStriped = computed(() => {
+  if (!currentComponent.value || currentComponent.value.type !== ComponentType.TABLE) return false
+  return (currentComponent.value.props.striped as boolean | undefined) ?? false
+})
+
+const updateTableStriped = (value: boolean) => {
+  if (!currentComponent.value) return
+  editorStore.updateComponentProps(currentComponent.value.id, { striped: value })
 }
 </script>
 

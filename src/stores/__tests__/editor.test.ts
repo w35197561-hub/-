@@ -237,6 +237,39 @@ describe('selectComponent', () => {
   })
 })
 
+// ── Table 组件 ────────────────────────────────────────────────
+describe('addComponent - Table', () => {
+  it('添加 Table 组件后默认 props 包含 columns/dataSource/bordered/striped', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.TABLE)
+    const comp = editorStore.currentComponent
+    expect(comp?.type).toBe(ComponentType.TABLE)
+    expect(Array.isArray(comp?.props.columns)).toBe(true)
+    expect(typeof comp?.props.dataSource).toBe('string')
+    expect(comp?.props.bordered).toBe(true)
+    expect(comp?.props.striped).toBe(false)
+  })
+
+  it('添加 Table 组件后可以 undo 恢复', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.TABLE)
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+
+    historyStore.undo()
+    expect(editorStore.currentPage?.components).toHaveLength(0)
+    expect(editorStore.currentComponent).toBeNull()
+  })
+
+  it('undo 后可以 redo 恢复 Table 组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.TABLE)
+    historyStore.undo()
+    historyStore.redo()
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    expect(editorStore.currentPage?.components[0].type).toBe(ComponentType.TABLE)
+  })
+})
+
 // ── exportPageData / loadPageData ─────────────────────────────
 describe('exportPageData / loadPageData', () => {
   it('导出的 JSON 可以再次加载', () => {

@@ -133,7 +133,7 @@ cd server && npm test         # 后端集成测试
 ### 核心数据类型（`src/types/index.ts`）
 
 **ComponentType 枚举（当前已有）：**
-`Text` / `Image` / `Button` / `Input` / `Form`（容器）/ `Chart` / `Tabs`（容器）
+`Text` / `Image` / `Button` / `Input` / `Form`（容器）/ `Chart` / `Tabs`（容器）/ `Table`
 
 **ComponentStyle：** `top, left, width, height, zIndex, rotate`（必填）+ `fontSize, color, backgroundColor, borderWidth, borderColor, borderRadius`（可选，数值均为 `number`，渲染时拼接 `px`）
 
@@ -203,16 +203,21 @@ historyStore.executeCommand(command)
 
 ## 多 Agent 流程
 
-新增组件由两个子 Agent 顺序承接：
+新增组件由主 Agent 确认设计后，由两个子 Agent 顺序承接：
 
 ```
-coder → reviewer
+主 Agent 设计确认 → coder → reviewer
 ```
 
-| Agent | 文件 | 职责 | 触发时机 |
-|-------|------|------|----------|
-| coder | `.claude/agents/coder.md` | 按 6 步流程新增组件 | 用户要求新增某个组件类型 |
+| 阶段 | 执行者 | 职责 | 触发时机 |
+|------|--------|------|----------|
+| 设计确认 | 主 Agent | 向用户描述组件方案（props / propSetters / styleSetters），**等用户确认后**再 spawn coder | 用户提出新增组件需求时 |
+| coder | `.claude/agents/coder.md` | 按 6 步流程实现组件 | 用户确认方案后 |
 | reviewer | `.claude/agents/reviewer.md` | 代码审查 → 提交推送 | 编码完成后 |
+
+**设计确认要点：**
+- 每个 propSetter / styleSetter 必须有实际使用场景，不加无意义的通用项（如 Table 不需要 borderRadius）
+- 方案以列表形式呈现，让用户能快速判断增删
 
 ---
 
