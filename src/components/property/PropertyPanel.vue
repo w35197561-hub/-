@@ -401,7 +401,6 @@
                   <el-option label="弹出提示" value="alert" />
                   <el-option label="跳转链接" value="link" />
                   <el-option label="显示/隐藏组件" value="toggleVisible" />
-                  <el-option label="提交表单" value="submitForm" />
                 </el-select>
                 <el-button
                   :icon="Minus"

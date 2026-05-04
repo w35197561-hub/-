@@ -25,8 +25,8 @@
 
 如有不一致，先更新 CLAUDE.md，再继续提交流程。
 
-### Step 4：展示并确认
-将生成的 commit message 展示给用户，询问是否直接使用或修改。
+### Step 4：展示并等待用户确认
+将生成的 commit message 展示给用户，**必须等用户明确确认后才能执行提交**，不得自动提交。用户确认后再进入 Step 5。
 
 ### Step 5：执行提交
 调用脚本完成 `git add → git commit → git push`：

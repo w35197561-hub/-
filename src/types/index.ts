@@ -40,7 +40,7 @@ export interface ValidationRule {
   message?: string
 }
 
-export type ActionType = 'alert' | 'link' | 'toggleVisible' | 'submitForm'
+export type ActionType = 'alert' | 'link' | 'toggleVisible'
 
 export interface ActionConfig {
   type: ActionType

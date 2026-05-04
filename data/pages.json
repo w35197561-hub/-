@@ -1,0 +1,92 @@
+{
+  "page_1777886825505": {
+    "id": "page_1777886825505",
+    "title": "新页面",
+    "components": [
+      {
+        "id": "comp_1777886829069_0hw0ba",
+        "type": "Input",
+        "style": {
+          "top": 90,
+          "left": 210,
+          "width": 200,
+          "height": 40,
+          "zIndex": 1,
+          "rotate": 0,
+          "fontSize": 14,
+          "borderWidth": 1,
+          "borderRadius": 4
+        },
+        "props": {
+          "placeholder": "请输入内容",
+          "type": "text",
+          "rules": [
+            {
+              "type": "required",
+              "message": ""
+            }
+          ]
+        },
+        "isContainer": false
+      },
+      {
+        "id": "comp_1777886831515_hz2ifz",
+        "type": "Textarea",
+        "style": {
+          "top": 192,
+          "left": 110,
+          "width": 200,
+          "height": 100,
+          "zIndex": 2,
+          "rotate": 0,
+          "fontSize": 14,
+          "borderRadius": 4
+        },
+        "props": {
+          "placeholder": "请输入内容",
+          "rows": 4,
+          "maxlength": 500
+        },
+        "isContainer": false
+      },
+      {
+        "id": "comp_1777886898690_4hex0s",
+        "type": "Button",
+        "style": {
+          "top": 396,
+          "left": 237,
+          "width": 200,
+          "height": 50,
+          "zIndex": 3,
+          "rotate": 0,
+          "fontSize": 14,
+          "color": "#ffffff",
+          "backgroundColor": "#409eff",
+          "borderRadius": 4
+        },
+        "props": {
+          "content": "按钮"
+        },
+        "isContainer": false,
+        "events": [
+          {
+            "type": "click",
+            "actions": [
+              {
+                "type": "submitForm",
+                "params": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "style": {
+      "width": 1200,
+      "height": 800,
+      "backgroundColor": "#ffffff"
+    },
+    "createdAt": "2026-05-04T09:45:13.658Z",
+    "updatedAt": "2026-05-04T09:45:13.658Z"
+  }
+}
