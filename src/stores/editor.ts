@@ -123,8 +123,10 @@ export const useEditorStore = defineStore('editor', () => {
     return `comp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
   }
 
-  // 预览时隐藏的组件 ID（不写入 PageData，关闭预览后清空）
+  // 预览运行时状态（不写入 PageData，关闭预览后清空）
   const previewHiddenIds = ref<string[]>([])
+  const previewValues = ref<Record<string, unknown>>({})
+  const validationErrors = ref<Record<string, string>>({})
 
   const setPreviewHidden = (componentId: string, hidden: boolean) => {
     if (hidden) {
@@ -136,8 +138,22 @@ export const useEditorStore = defineStore('editor', () => {
     }
   }
 
+  const setPreviewValue = (componentId: string, value: unknown) => {
+    previewValues.value = { ...previewValues.value, [componentId]: value }
+  }
+
+  const setValidationError = (componentId: string, message: string) => {
+    validationErrors.value = { ...validationErrors.value, [componentId]: message }
+  }
+
+  const clearValidationErrors = () => {
+    validationErrors.value = {}
+  }
+
   const clearPreviewState = () => {
     previewHiddenIds.value = []
+    previewValues.value = {}
+    validationErrors.value = {}
   }
 
   const createNewPage = (title: string = '新页面') => {
@@ -785,7 +801,12 @@ export const useEditorStore = defineStore('editor', () => {
     normalizeZIndex,
     getMaxZIndex,
     previewHiddenIds: computed(() => previewHiddenIds.value),
+    previewValues: computed(() => previewValues.value),
+    validationErrors: computed(() => validationErrors.value),
     setPreviewHidden,
+    setPreviewValue,
+    setValidationError,
+    clearValidationErrors,
     clearPreviewState,
     updateComponentEvents,
     exportPageData,

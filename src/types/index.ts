@@ -32,7 +32,15 @@ export interface ComponentData {
   isContainer?: boolean
 }
 
-export type ActionType = 'alert' | 'link' | 'toggleVisible'
+export type RuleType = 'required' | 'minLength' | 'maxLength' | 'min' | 'max' | 'pattern'
+
+export interface ValidationRule {
+  type: RuleType
+  value?: string | number
+  message?: string
+}
+
+export type ActionType = 'alert' | 'link' | 'toggleVisible' | 'submitForm'
 
 export interface ActionConfig {
   type: ActionType

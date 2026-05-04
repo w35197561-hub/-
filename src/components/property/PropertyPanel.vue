@@ -329,6 +329,56 @@
           </div>
         </div>
 
+        <!-- 输入组件校验规则 -->
+        <div
+          class="property-section"
+          v-if="[ComponentType.INPUT, ComponentType.TEXTAREA, ComponentType.NUMBER_INPUT].includes(currentComponent.type)"
+        >
+          <h4>校验规则</h4>
+          <div class="action-list">
+            <div v-for="(rule, rIdx) in componentRules" :key="rIdx" class="action-card">
+              <div class="action-card-header">
+                <el-select
+                  :model-value="rule.type"
+                  size="small"
+                  style="flex: 1"
+                  @update:model-value="(v: string) => updateRule(rIdx, 'type', v)"
+                >
+                  <el-option label="必填" value="required" />
+                  <template v-if="currentComponent.type !== ComponentType.NUMBER_INPUT">
+                    <el-option label="最小长度" value="minLength" />
+                    <el-option label="最大长度" value="maxLength" />
+                  </template>
+                  <template v-if="currentComponent.type === ComponentType.NUMBER_INPUT">
+                    <el-option label="最小值" value="min" />
+                    <el-option label="最大值" value="max" />
+                  </template>
+                  <el-option v-if="currentComponent.type === ComponentType.INPUT" label="正则匹配" value="pattern" />
+                </el-select>
+                <el-button :icon="Minus" size="small" type="danger" link @click="removeRule(rIdx)" />
+              </div>
+              <div v-if="rule.type !== 'required'" class="action-param-row">
+                <label>{{ rule.type === 'pattern' ? '正则' : '数值' }}</label>
+                <el-input
+                  :model-value="String(rule.value ?? '')"
+                  size="small"
+                  @update:model-value="(v: string) => updateRule(rIdx, 'value', rule.type === 'minLength' || rule.type === 'maxLength' || rule.type === 'min' || rule.type === 'max' ? Number(v) : v)"
+                />
+              </div>
+              <div class="action-param-row">
+                <label>提示语</label>
+                <el-input
+                  :model-value="rule.message ?? ''"
+                  size="small"
+                  placeholder="默认提示"
+                  @update:model-value="(v: string) => updateRule(rIdx, 'message', v)"
+                />
+              </div>
+            </div>
+            <el-button :icon="Plus" size="small" @click="addRule">添加规则</el-button>
+          </div>
+        </div>
+
         <!-- Button 交互事件 -->
         <div
           class="property-section"
@@ -351,6 +401,7 @@
                   <el-option label="弹出提示" value="alert" />
                   <el-option label="跳转链接" value="link" />
                   <el-option label="显示/隐藏组件" value="toggleVisible" />
+                  <el-option label="提交表单" value="submitForm" />
                 </el-select>
                 <el-button
                   :icon="Minus"
@@ -442,7 +493,7 @@ import { computed, ref, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { componentConfigs } from '../material/componentConfigs'
 import { ComponentType } from '@/types'
-import type { ComponentEvent, ActionConfig, ActionType } from '@/types'
+import type { ComponentEvent, ActionConfig, ActionType, ValidationRule, RuleType } from '@/types'
 import LayerPanel from './LayerPanel.vue'
 import { InfoFilled, ArrowUp, ArrowDown, DArrowRight, Plus, Minus } from '@element-plus/icons-vue'
 
@@ -632,6 +683,32 @@ const addTableRow = () => {
   const emptyRow: Record<string, unknown> = {}
   tableColumns.value.forEach((c) => { emptyRow[c.field] = '' })
   saveTableRows([...tableRows.value, emptyRow])
+}
+
+// ---- 校验规则 helpers ----
+const componentRules = computed<ValidationRule[]>(() => {
+  if (!currentComponent.value) return []
+  return (currentComponent.value.props.rules as ValidationRule[]) ?? []
+})
+
+const saveRules = (rules: ValidationRule[]) => {
+  setPropVal('rules', rules)
+  updateComponentProps()
+}
+
+const addRule = () => {
+  saveRules([...componentRules.value, { type: 'required' as RuleType, message: '' }])
+}
+
+const removeRule = (idx: number) => {
+  saveRules(componentRules.value.filter((_, i) => i !== idx))
+}
+
+const updateRule = (idx: number, key: keyof ValidationRule, value: unknown) => {
+  const updated = componentRules.value.map((r, i) =>
+    i === idx ? { ...r, [key]: value } : r,
+  )
+  saveRules(updated)
 }
 
 // ---- Button action helpers ----
