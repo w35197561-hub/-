@@ -7,8 +7,8 @@
 - Props 固定为 `defineProps<{ component: ComponentData }>()`，不得随意扩展
 - 样式通过 `useComponentStyle(component.style)` composable 获取，禁止在模板中写大段内联样式对象
 - CSS 固定 `width:100%; height:100%; box-sizing:border-box`
-- 容器组件（Form/Tabs）的拖放逻辑通过 `useContainerDrop(containerId, getSlotKey)` 复用，不得重复实现
 - 子组件 wrapper 样式抽为独立的 `computed`，避免模板内联对象导致不必要的重渲染
+- **canvas 组件禁止使用 `el-*` 组件**，必须用原生 HTML 元素（`<input>`、`<textarea>`、`<select>`、`<button>` 等）。原因：`el-*` 是多层 div 包裹的 Vue 组件，`:style` 只作用于最外层，无法将 backgroundColor、fontSize 等样式传入实际的交互元素，导致属性面板修改无效果。
 
 ## TypeScript 规范
 
@@ -34,12 +34,142 @@
 - key 用 `[ComponentType.XXX]` 枚举写法，**禁止字符串 key**
 - 新增枚举值后若未补全 componentMap，TypeScript 编译期报错
 
+## Props 渲染规范
+
+画布组件模板里渲染用户可编辑的 prop 时，**必须用 `??` 而不是 `||`**：
+
+```vue
+<!-- ❌ 错误：用户清空内容后画布仍显示默认文字 -->
+{{ component.props.content || '文本内容' }}
+
+<!-- ✅ 正确：清空后画布也跟着空 -->
+{{ component.props.content ?? '' }}
+```
+
+`||` 把空字符串 `''` 视为 falsy 会触发回退；`??` 只在 `null`/`undefined` 时回退。
+
+**例外**：结构性属性不受此限制，仍可用 `||`：
+- `input` 的 `:type="props.type || 'text'"` — 浏览器需要有效 type 值，空值行为异常
+
 ## 禁止事项
 
 - 禁止手动硬编码组件 ID，必须用 `createComponentId()`
 - 禁止直接修改 `currentPage.value` 或 `currentComponent.value` 绕过 Command
 - 禁止遗留 `console.log` / `console.error` / `debugger`
 - 禁止硬编码魔法字符串，使用常量或枚举
+
+## 新增组件自查清单
+
+完成 6 步流程后，必须逐项确认：
+
+### 0. 编码前必做：搜索 + props/setters 分析（强制）
+
+**在写任何代码之前**，先用 `WebSearch` 搜索该组件在 Element Plus 中的常用属性，搜索词格式：
+
+```
+Element Plus <组件名> props 常用属性 <当前年份>
+```
+
+搜索完成后，必须完成以下分析，**不得跳过**：
+
+**① 整理常用 props 清单**（来自文档或搜索结果）：列出该组件最常用的 5~10 个属性及其类型和含义。
+
+**② 区分 defaultProps vs setter**：
+
+| 判断维度 | 放 `defaultProps`（仅初始值） | 放 `propSetters`（面板可编辑） |
+|---|---|---|
+| 用户是否需要在属性面板修改？ | 否 | **是** |
+| 是结构性/程序性数据？（如 `type="submit"`） | 是 | 否 |
+| 是复杂嵌套数组对象？（如 `tabs:[{key,label}]`） | 是，选合适 setter 或跳过 | 视 setter 支持情况 |
+| 用户清空后画布是否应该跟着空？ | — | 是则用 `??`，不是则用 `\|\|` |
+
+**③ 确认每个 prop 对应的 setter 类型**（参考下方 setter 表）。
+
+**④ 确认 `defaultStyle` 中所有被 styleSetter 引用的字段都有初始值**（如 `borderRadius: 0`），否则属性面板显示空白。
+
+**⑤ styleSetters 精准暴露**：只暴露对该组件视觉有实际效果的样式属性，不套模板。
+
+| 样式属性 | 适用组件 | 不适用 |
+|---------|---------|--------|
+| fontSize / color | 有文字内容的组件（Text/Button/Input/Textarea） | Image/Select/容器 |
+| borderWidth / borderColor | 自绘边框的组件（Image/Input） | 使用 el-* 组件自管边框的（Textarea/Select/NumberInput） |
+| borderRadius | 几乎所有组件 | — |
+| backgroundColor | 几乎所有组件 | — |
+
+---
+
+### 1. 特征判断（决定额外规则）
+
+画布是"展示态"，组件只负责渲染，用户交互无法持久化。按以下三个问题逐一判断，命中则执行对应规则，**可同时命中多个**：
+
+**① 该组件有原生浏览器交互行为？**（点击、输入、选择、切换等）
+
+→ 是：canvas 模板中必须加 `disabled` 或 `readonly`
+- `input` / `textarea` 用 `readonly`
+- `select` / `button` / `checkbox` / `el-select` 等用 `disabled`
+
+```vue
+<!-- ✅ input 类 -->
+<input :value="component.props.value" readonly />
+
+<!-- ✅ select / button 类 -->
+<el-select disabled />
+```
+
+**② 该组件能包含其他可拖拽子组件？**（容器）
+
+→ 是：必须满足以下三点：
+- `isContainer: true`
+- `slots` 或 `children` 字段存放子组件
+- 拖放逻辑通过 `useContainerDrop(containerId, getSlotKey)` 复用，禁止自行实现
+
+**③ 该组件主要触发动作/事件？**（按钮、链接等）
+
+→ 是：在 `componentConfigs` 的 `propSetters` 中为事件类型提供配置入口（如 `onClick` 的行为类型）
+
+---
+
+### 2. 在 componentConfigs.ts 中声明组件配置（必须）
+
+新增组件必须在 `src/components/material/componentConfigs.ts` 中添加一条记录，替代原来分散在 `editor.ts` 中的 `defaultProps` / `typeStyleMap` 硬编码：
+
+```typescript
+[ComponentType.XXX]: {
+  defaultProps: { /* 所有 props 初始值 */ },
+  defaultStyle: { width: 200, height: 50, /* 其余按需 */ },  // 可选
+  propSetters: [
+    { label: '显示名', setter: 'NumberSetter', field: 'propKey', setterProps: { min: 0 } },
+    { label: '文本',   setter: 'TextareaSetter', field: 'content' },
+    { label: '颜色',   setter: 'ColorSetter',    field: 'color' },
+  ],
+  styleSetters: [
+    { label: '字体大小', setter: 'NumberSetter', field: 'fontSize', setterProps: { min: 8, max: 72 } },
+    { label: '边框颜色', setter: 'ColorSetter',  field: 'borderColor' },
+  ],
+}
+```
+
+**setter 选取规则：**
+- `defaultProps` 中的所有字段默认都给 setter，除非满足以下条件才排除：
+  - 框架内部用、用户感知不到（如 `isContainer`）
+  - 结构性数据、面板无法简单编辑（如 `tabs: [{key,label}]`）
+  - 由其他机制控制（如容器内部状态）
+
+**可用 setter 类型：**
+
+| SetterType | 对应控件 | 适用场景 |
+|---|---|---|
+| `NumberSetter` | `el-input-number` | 数值（宽度、大小、步长…） |
+| `InputSetter` | `el-input` | 单行文本 |
+| `TextareaSetter` | `el-input` type="textarea" | 多行文本 |
+| `ColorSetter` | `el-color-picker` | 颜色值 |
+| `SelectSetter` | `el-select` | 枚举选择，需配合 `optionsField` |
+| `StringListSetter` | 多行 `el-input` + ➕/➖ 按钮 | 字符串数组（如下拉选项列表），存 `string[]` |
+
+声明后，`editor.ts` 会自动读取 `defaultProps` 和 `defaultStyle`，`PropertyPanel.vue` 会自动渲染对应控件，**无需改动这两个文件**。
+
+### 3. 属性面板验证
+- 拖入组件后打开属性面板，确认 propSetters / styleSetters 各字段有合理初始值，无空白项
 
 ## 变更记录
 
@@ -50,11 +180,10 @@
 
 ### 变更文件
 - src/types/index.ts — 枚举新增 XXX
-- src/stores/editor.ts — defaultProps 新增 XXX
-- src/components/components/XxxComponent.vue — 新建组件
-- src/components/components/ComponentRenderer.vue — componentMap 注册
-- src/components/ComponentPanel.vue — componentTypes 注册
-- src/components/PropertyPanel.vue — 属性配置 UI（如有）
+- src/components/material/componentConfigs.ts — 新增组件配置
+- src/components/canvas/components/XxxComponent.vue — 新建组件
+- src/components/canvas/components/ComponentRenderer.vue — componentMap 注册
+- src/components/material/ComponentPanel.vue — componentTypes 注册
 
 ### 验证清单
 - [ ] TypeScript 编译无报错

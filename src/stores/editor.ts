@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import type { PageData, ComponentData, Command } from '@/types'
 import { ComponentType } from '@/types'
 import { useHistoryStore } from './history'
+import { componentConfigs } from '@/components/material/componentConfigs'
 
 export const useEditorStore = defineStore('editor', () => {
   const currentPage = ref<PageData | null>(null)
@@ -48,10 +49,12 @@ export const useEditorStore = defineStore('editor', () => {
     const startX = event.clientX
     const startY = event.clientY
     // 记录所有选中组件的初始位置
-    const originMap = selectedComponentIds.value.map(id => {
-      const comp = getComponentById(id)
-      return comp ? { id, left: comp.style.left, top: comp.style.top } : null
-    }).filter(Boolean) as { id: string; left: number; top: number }[]
+    const originMap = selectedComponentIds.value
+      .map((id) => {
+        const comp = getComponentById(id)
+        return comp ? { id, left: comp.style.left, top: comp.style.top } : null
+      })
+      .filter(Boolean) as { id: string; left: number; top: number }[]
 
     const moveHandler = (moveEvent: MouseEvent) => {
       const deltaX = (moveEvent.clientX - startX) / canvasScale.value
@@ -79,10 +82,12 @@ export const useEditorStore = defineStore('editor', () => {
       })
       if (hasMoved) {
         const oldStyles = originMap.map(({ id, left, top }) => ({ id, left, top }))
-        const newStyles = originMap.map(({ id }) => {
-          const comp = getComponentById(id)
-          return comp ? { id, left: comp.style.left, top: comp.style.top } : null
-        }).filter(Boolean) as { id: string; left: number; top: number }[]
+        const newStyles = originMap
+          .map(({ id }) => {
+            const comp = getComponentById(id)
+            return comp ? { id, left: comp.style.left, top: comp.style.top } : null
+          })
+          .filter(Boolean) as { id: string; left: number; top: number }[]
         const command: Command = {
           execute: () => {
             newStyles.forEach(({ id, left, top }) => {
@@ -101,7 +106,7 @@ export const useEditorStore = defineStore('editor', () => {
                 comp.style.top = top
               }
             })
-          }
+          },
         }
         historyStore.executeCommand(command)
       }
@@ -126,15 +131,15 @@ export const useEditorStore = defineStore('editor', () => {
       style: {
         width: 1200,
         height: 800,
-        backgroundColor: '#ffffff'
-      }
+        backgroundColor: '#ffffff',
+      },
     }
   }
 
   // 获取当前页面最大 zIndex
   const getMaxZIndex = (): number => {
     if (!currentPage.value?.components.length) return 0
-    return Math.max(...currentPage.value.components.map(c => c.style.zIndex || 1))
+    return Math.max(...currentPage.value.components.map((c) => c.style.zIndex || 1))
   }
 
   // 归一化所有组件的 zIndex（使其连续从 1 开始）
@@ -146,7 +151,7 @@ export const useEditorStore = defineStore('editor', () => {
 
     // 按当前 zIndex 排序
     const sorted = [...components].sort((a, b) => (a.style.zIndex || 1) - (b.style.zIndex || 1))
-    const oldZIndices = components.map(c => ({ id: c.id, zIndex: c.style.zIndex }))
+    const oldZIndices = components.map((c) => ({ id: c.id, zIndex: c.style.zIndex }))
     const newZIndices = sorted.map((c, i) => ({ id: c.id, zIndex: i + 1 }))
 
     const command: Command = {
@@ -161,7 +166,7 @@ export const useEditorStore = defineStore('editor', () => {
           const comp = getComponentById(id)
           if (comp) comp.style.zIndex = zIndex
         })
-      }
+      },
     }
     historyStore.executeCommand(command)
   }
@@ -177,57 +182,41 @@ export const useEditorStore = defineStore('editor', () => {
       width: 200,
       height: 50,
       zIndex: getMaxZIndex() + 1,
-      rotate: 0
-    }
-
-    const typeStyleMap: Partial<Record<ComponentType, { width: number; height: number }>> = {
-      [ComponentType.FORM]: { width: 520, height: 260 },
-      [ComponentType.TABS]: { width: 560, height: 320 }
+      rotate: 0,
     }
 
     // 从initialProps中提取style相关的属性
-    const { left, top, width, height, zIndex, rotate, ...otherProps } = initialProps as Record<string, unknown>
-    
-    // 合并style，优先使用传入的位置参数
+    const { left, top, width, height, zIndex, rotate, ...otherProps } = initialProps as Record<
+      string,
+      unknown
+    >
+
     const finalStyle = {
       ...defaultStyle,
-      ...(typeStyleMap[type] || {}),
+      ...(componentConfigs[type].defaultStyle ?? {}),
       ...(left !== undefined && { left: left as number }),
       ...(top !== undefined && { top: top as number }),
       ...(width !== undefined && { width: width as number }),
       ...(height !== undefined && { height: height as number }),
       ...(zIndex !== undefined && { zIndex: zIndex as number }),
-      ...(rotate !== undefined && { rotate: rotate as number })
+      ...(rotate !== undefined && { rotate: rotate as number }),
     }
 
-    const defaultProps: Record<ComponentType, Record<string, unknown>> = {
-      [ComponentType.TEXT]: { content: '文本内容' },
-      [ComponentType.IMAGE]: { src: '' },
-      [ComponentType.BUTTON]: { content: '按钮' },
-      [ComponentType.INPUT]: { placeholder: '请输入内容' },
-      [ComponentType.FORM]: { title: '表单容器', columns: ['col1', 'col2'] },
-      [ComponentType.CHART]: { type: 'bar' },
-      [ComponentType.TABS]: {
-        tabs: [
-          { key: 'tab1', label: 'Tab 1' },
-          { key: 'tab2', label: 'Tab 2' }
-        ],
-        activeTab: 'tab1'
-      }
-    }
+    const resolvedDefaultProps = componentConfigs[type].defaultProps
 
     const component: ComponentData = {
       id: createComponentId(),
       type,
       style: finalStyle,
-      props: { ...defaultProps[type], ...otherProps },
+      props: { ...resolvedDefaultProps, ...otherProps },
       isContainer: type === ComponentType.FORM || type === ComponentType.TABS,
       children: type === ComponentType.FORM ? [] : undefined,
-      slots: type === ComponentType.FORM
-        ? { col1: [], col2: [] }
-        : type === ComponentType.TABS
-          ? { tab1: [], tab2: [] }
-          : undefined
+      slots:
+        type === ComponentType.FORM
+          ? { col1: [], col2: [] }
+          : type === ComponentType.TABS
+            ? { tab1: [], tab2: [] }
+            : undefined,
     }
 
     // 创建命令对象
@@ -238,14 +227,14 @@ export const useEditorStore = defineStore('editor', () => {
       },
       undo: () => {
         if (!currentPage.value) return
-        const index = currentPage.value.components.findIndex(comp => comp.id === component.id)
+        const index = currentPage.value.components.findIndex((comp) => comp.id === component.id)
         if (index !== -1) {
           currentPage.value.components.splice(index, 1)
         }
         if (currentComponent.value?.id === component.id) {
           currentComponent.value = null
         }
-      }
+      },
     }
 
     historyStore.executeCommand(command)
@@ -256,13 +245,13 @@ export const useEditorStore = defineStore('editor', () => {
     const map = new Map<string, ComponentData>()
 
     const traverse = (list: ComponentData[]) => {
-      list.forEach(c => {
+      list.forEach((c) => {
         map.set(c.id, c)
         if (c.children?.length) {
           traverse(c.children)
         }
         if (c.slots) {
-          Object.values(c.slots).forEach(slotChildren => {
+          Object.values(c.slots).forEach((slotChildren) => {
             if (slotChildren.length) {
               traverse(slotChildren)
             }
@@ -283,21 +272,23 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   const findParentContainer = (
-    componentId: string
+    componentId: string,
   ): { parent: ComponentData | null; slotKey: string | null; index: number } => {
     if (!currentPage.value) {
       return { parent: null, slotKey: null, index: -1 }
     }
 
-    const traverse = (list: ComponentData[]): { parent: ComponentData | null; slotKey: string | null; index: number } => {
-      const directIndex = list.findIndex(item => item.id === componentId)
+    const traverse = (
+      list: ComponentData[],
+    ): { parent: ComponentData | null; slotKey: string | null; index: number } => {
+      const directIndex = list.findIndex((item) => item.id === componentId)
       if (directIndex !== -1) {
         return { parent: null, slotKey: null, index: directIndex }
       }
 
       for (const node of list) {
         if (node.children?.length) {
-          const childIndex = node.children.findIndex(item => item.id === componentId)
+          const childIndex = node.children.findIndex((item) => item.id === componentId)
           if (childIndex !== -1) {
             return { parent: node, slotKey: 'children', index: childIndex }
           }
@@ -310,7 +301,7 @@ export const useEditorStore = defineStore('editor', () => {
 
         if (node.slots) {
           for (const [key, slotChildren] of Object.entries(node.slots)) {
-            const slotIndex = slotChildren.findIndex(item => item.id === componentId)
+            const slotIndex = slotChildren.findIndex((item) => item.id === componentId)
             if (slotIndex !== -1) {
               return { parent: node, slotKey: key, index: slotIndex }
             }
@@ -335,7 +326,7 @@ export const useEditorStore = defineStore('editor', () => {
     containerId: string,
     type: ComponentType,
     initialProps: Record<string, unknown> = {},
-    slotKey: string = 'children'
+    slotKey: string = 'children',
   ) => {
     const container = getComponentById(containerId)
     if (!container) return
@@ -347,47 +338,38 @@ export const useEditorStore = defineStore('editor', () => {
       width: 180,
       height: 40,
       zIndex: 1,
-      rotate: 0
+      rotate: 0,
     }
 
-    const { left, top, width, height, zIndex, rotate, ...otherProps } = initialProps as Record<string, unknown>
+    const { left, top, width, height, zIndex, rotate, ...otherProps } = initialProps as Record<
+      string,
+      unknown
+    >
 
-    const childDefaultProps: Record<ComponentType, Record<string, unknown>> = {
-      [ComponentType.TEXT]: { content: '文本内容' },
-      [ComponentType.IMAGE]: { src: '' },
-      [ComponentType.BUTTON]: { content: '按钮' },
-      [ComponentType.INPUT]: { placeholder: '请输入内容' },
-      [ComponentType.FORM]: { title: '表单容器', columns: ['col1', 'col2'] },
-      [ComponentType.CHART]: { type: 'bar' },
-      [ComponentType.TABS]: {
-        tabs: [
-          { key: 'tab1', label: 'Tab 1' },
-          { key: 'tab2', label: 'Tab 2' }
-        ],
-        activeTab: 'tab1'
-      }
-    }
+    const resolvedChildDefaultProps = componentConfigs[type].defaultProps
 
     const child: ComponentData = {
       id: createComponentId(),
       type,
       style: {
         ...defaultStyle,
+        ...(componentConfigs[type].defaultStyle ?? {}),
         ...(left !== undefined && { left: left as number }),
         ...(top !== undefined && { top: top as number }),
         ...(width !== undefined && { width: width as number }),
         ...(height !== undefined && { height: height as number }),
         ...(zIndex !== undefined && { zIndex: zIndex as number }),
-        ...(rotate !== undefined && { rotate: rotate as number })
+        ...(rotate !== undefined && { rotate: rotate as number }),
       },
-      props: { ...childDefaultProps[type], ...otherProps },
+      props: { ...resolvedChildDefaultProps, ...otherProps },
       isContainer: type === ComponentType.FORM || type === ComponentType.TABS,
       children: type === ComponentType.FORM ? [] : undefined,
-      slots: type === ComponentType.FORM
-        ? { col1: [], col2: [] }
-        : type === ComponentType.TABS
-          ? { tab1: [], tab2: [] }
-          : undefined
+      slots:
+        type === ComponentType.FORM
+          ? { col1: [], col2: [] }
+          : type === ComponentType.TABS
+            ? { tab1: [], tab2: [] }
+            : undefined,
     }
 
     const command: Command = {
@@ -409,19 +391,17 @@ export const useEditorStore = defineStore('editor', () => {
         currentComponent.value = child
       },
       undo: () => {
-        const removeFrom = slotKey === 'children'
-          ? container.children
-          : container.slots?.[slotKey]
+        const removeFrom = slotKey === 'children' ? container.children : container.slots?.[slotKey]
 
         if (!removeFrom) return
-        const index = removeFrom.findIndex(item => item.id === child.id)
+        const index = removeFrom.findIndex((item) => item.id === child.id)
         if (index !== -1) {
           removeFrom.splice(index, 1)
         }
         if (currentComponent.value?.id === child.id) {
           currentComponent.value = null
         }
-      }
+      },
     }
 
     historyStore.executeCommand(command)
@@ -431,7 +411,7 @@ export const useEditorStore = defineStore('editor', () => {
     child: ComponentData,
     parentId: string,
     event: MouseEvent,
-    slotKey: string = 'children'
+    slotKey: string = 'children',
   ) => {
     const historyStore = useHistoryStore()
     const startX = event.clientX
@@ -466,7 +446,7 @@ export const useEditorStore = defineStore('editor', () => {
           },
           undo: () => {
             Object.assign(child.style, oldStyle)
-          }
+          },
         }
         historyStore.executeCommand(command)
       }
@@ -477,7 +457,10 @@ export const useEditorStore = defineStore('editor', () => {
 
     document.addEventListener('mousemove', moveHandler)
     document.addEventListener('mouseup', upHandler)
-    event.preventDefault()
+    const tag = (event.target as HTMLElement).tagName
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+      event.preventDefault()
+    }
     event.stopPropagation()
 
     // 保留参数，方便后续扩展（如跨slot拖动）
@@ -486,7 +469,10 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   // 静默更新样式（不记录历史，用于拖拽过程中的实时更新）
-  const updateComponentStyleSilent = (componentId: string, styleUpdates: Partial<ComponentData['style']>) => {
+  const updateComponentStyleSilent = (
+    componentId: string,
+    styleUpdates: Partial<ComponentData['style']>,
+  ) => {
     const component = getComponentById(componentId)
     if (component) {
       Object.assign(component.style, styleUpdates)
@@ -495,9 +481,9 @@ export const useEditorStore = defineStore('editor', () => {
 
   // 批量更新样式（记录一次历史，用于拖拽结束时）
   const batchUpdateComponentStyle = (
-    componentId: string, 
-    oldStyle: ComponentData['style'], 
-    newStyle: Partial<ComponentData['style']>
+    componentId: string,
+    oldStyle: ComponentData['style'],
+    newStyle: Partial<ComponentData['style']>,
   ) => {
     const component = getComponentById(componentId)
     if (!component) return
@@ -512,13 +498,16 @@ export const useEditorStore = defineStore('editor', () => {
       },
       undo: () => {
         Object.assign(component.style, finalOldStyle)
-      }
+      },
     }
 
     historyStore.executeCommand(command)
   }
 
-  const updateComponentStyle = (componentId: string, styleUpdates: Partial<ComponentData['style']>) => {
+  const updateComponentStyle = (
+    componentId: string,
+    styleUpdates: Partial<ComponentData['style']>,
+  ) => {
     if (!currentPage.value) return
 
     const component = getComponentById(componentId)
@@ -534,13 +523,16 @@ export const useEditorStore = defineStore('editor', () => {
       },
       undo: () => {
         Object.assign(component.style, oldStyle)
-      }
+      },
     }
 
     historyStore.executeCommand(command)
   }
 
-  const updateComponentProps = (componentId: string, propUpdates: Partial<ComponentData['props']>) => {
+  const updateComponentProps = (
+    componentId: string,
+    propUpdates: Partial<ComponentData['props']>,
+  ) => {
     if (!currentPage.value) return
 
     const component = getComponentById(componentId)
@@ -556,7 +548,7 @@ export const useEditorStore = defineStore('editor', () => {
       },
       undo: () => {
         Object.assign(component.props, oldProps)
-      }
+      },
     }
 
     historyStore.executeCommand(command)
@@ -579,7 +571,7 @@ export const useEditorStore = defineStore('editor', () => {
 
     const component = targetList[parentInfo.index]
     if (!component) return
-    
+
     const wasSelected = currentComponent.value?.id === componentId
 
     // 创建命令对象
@@ -595,7 +587,7 @@ export const useEditorStore = defineStore('editor', () => {
         if (wasSelected) {
           currentComponent.value = component
         }
-      }
+      },
     }
 
     historyStore.executeCommand(command)
@@ -610,17 +602,17 @@ export const useEditorStore = defineStore('editor', () => {
     if (!comp) return
 
     const currentZIndex = comp.style.zIndex
-    const allZIndices = components.map(c => c.style.zIndex).sort((a, b) => a - b)
+    const allZIndices = components.map((c) => c.style.zIndex).sort((a, b) => a - b)
     const uniqueZIndices = [...new Set(allZIndices)]
 
     let targetZIndex = currentZIndex
 
     if (direction === 'up') {
       // 找到比当前大的最小 zIndex
-      const higherZ = uniqueZIndices.find(z => z > currentZIndex)
+      const higherZ = uniqueZIndices.find((z) => z > currentZIndex)
       if (higherZ !== undefined) {
         // 与该层的组件交换 zIndex
-        const higherComp = components.find(c => c.style.zIndex === higherZ)
+        const higherComp = components.find((c) => c.style.zIndex === higherZ)
         if (higherComp) {
           const oldZ = currentZIndex
           const newZ = higherZ
@@ -632,7 +624,7 @@ export const useEditorStore = defineStore('editor', () => {
             undo: () => {
               comp.style.zIndex = oldZ
               higherComp.style.zIndex = newZ
-            }
+            },
           }
           historyStore.executeCommand(command)
           return
@@ -640,10 +632,10 @@ export const useEditorStore = defineStore('editor', () => {
       }
     } else if (direction === 'down') {
       // 找到比当前小的最大 zIndex
-      const lowerZs = uniqueZIndices.filter(z => z < currentZIndex)
+      const lowerZs = uniqueZIndices.filter((z) => z < currentZIndex)
       const lowerZ = lowerZs[lowerZs.length - 1]
       if (lowerZ !== undefined) {
-        const lowerComp = components.find(c => c.style.zIndex === lowerZ)
+        const lowerComp = components.find((c) => c.style.zIndex === lowerZ)
         if (lowerComp) {
           const oldZ = currentZIndex
           const newZ = lowerZ
@@ -655,7 +647,7 @@ export const useEditorStore = defineStore('editor', () => {
             undo: () => {
               comp.style.zIndex = oldZ
               lowerComp.style.zIndex = newZ
-            }
+            },
           }
           historyStore.executeCommand(command)
           return
@@ -665,10 +657,12 @@ export const useEditorStore = defineStore('editor', () => {
       targetZIndex = getMaxZIndex() + 1
     } else if (direction === 'bottom') {
       // 将所有组件 zIndex +1，然后将目标设为 1
-      const oldZIndices = components.map(c => ({ id: c.id, zIndex: c.style.zIndex }))
+      const oldZIndices = components.map((c) => ({ id: c.id, zIndex: c.style.zIndex }))
       const command: Command = {
         execute: () => {
-          components.forEach(c => { if (c.id !== componentId) c.style.zIndex += 1 })
+          components.forEach((c) => {
+            if (c.id !== componentId) c.style.zIndex += 1
+          })
           comp.style.zIndex = 1
         },
         undo: () => {
@@ -676,7 +670,7 @@ export const useEditorStore = defineStore('editor', () => {
             const c = getComponentById(id)
             if (c) c.style.zIndex = zIndex
           })
-        }
+        },
       }
       historyStore.executeCommand(command)
       return
@@ -686,8 +680,12 @@ export const useEditorStore = defineStore('editor', () => {
       const oldZ = currentZIndex
       const newZ = targetZIndex
       const command: Command = {
-        execute: () => { comp.style.zIndex = newZ },
-        undo: () => { comp.style.zIndex = oldZ }
+        execute: () => {
+          comp.style.zIndex = newZ
+        },
+        undo: () => {
+          comp.style.zIndex = oldZ
+        },
       }
       historyStore.executeCommand(command)
     }
@@ -705,8 +703,12 @@ export const useEditorStore = defineStore('editor', () => {
     if (oldZ === newZ) return
 
     const command: Command = {
-      execute: () => { comp.style.zIndex = newZ },
-      undo: () => { comp.style.zIndex = oldZ }
+      execute: () => {
+        comp.style.zIndex = newZ
+      },
+      undo: () => {
+        comp.style.zIndex = oldZ
+      },
     }
     historyStore.executeCommand(command)
   }
@@ -750,8 +752,8 @@ export const useEditorStore = defineStore('editor', () => {
     getMaxZIndex,
     exportPageData,
     loadPageData,
-    setCanvasScale: (scale: number) => canvasScale.value = scale,
-    setSnapToGrid: (enabled: boolean) => snapToGrid.value = enabled,
-    setShowGuidelines: (enabled: boolean) => showGuidelines.value = enabled
+    setCanvasScale: (scale: number) => (canvasScale.value = scale),
+    setSnapToGrid: (enabled: boolean) => (snapToGrid.value = enabled),
+    setShowGuidelines: (enabled: boolean) => (showGuidelines.value = enabled),
   }
 })

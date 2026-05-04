@@ -40,6 +40,7 @@ describe('addComponent', () => {
     expect(style?.top).toBe(100)
     expect(style?.left).toBe(100)
     expect(style?.zIndex).toBe(1)
+    expect(style?.fontSize).toBe(14)
   })
 
   it('可通过 initialProps 覆盖默认位置', () => {
@@ -84,6 +85,45 @@ describe('addComponent', () => {
     const comps = editorStore.currentPage!.components
     expect(comps[0].style.zIndex).toBe(1)
     expect(comps[1].style.zIndex).toBe(2)
+  })
+})
+
+// ── NumberInput 专项 ──────────────────────────────────────────
+describe('addComponent - NumberInput', () => {
+  it('携带正确的默认 props', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.NUMBER_INPUT)
+    const props = editorStore.currentComponent?.props
+    expect(props?.min).toBe(0)
+    expect(props?.max).toBe(100)
+    expect(props?.step).toBe(1)
+    expect(props?.value).toBe(0)
+  })
+
+  it('携带正确的默认样式（fontSize / borderWidth / borderRadius）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.NUMBER_INPUT)
+    const style = editorStore.currentComponent?.style
+    expect(style?.fontSize).toBe(14)
+    expect(style?.borderWidth).toBe(1)
+    expect(style?.borderRadius).toBe(4)
+  })
+
+  it('添加后 undo 移除组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.NUMBER_INPUT)
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    historyStore.undo()
+    expect(editorStore.currentPage?.components).toHaveLength(0)
+  })
+
+  it('undo 后 redo 恢复组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.NUMBER_INPUT)
+    historyStore.undo()
+    historyStore.redo()
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    expect(editorStore.currentComponent?.type).toBe(ComponentType.NUMBER_INPUT)
   })
 })
 
@@ -234,6 +274,45 @@ describe('selectComponent', () => {
     editorStore.clearSelectedComponents()
     expect(editorStore.selectedComponentIds).toHaveLength(0)
     expect(editorStore.currentComponent).toBeNull()
+  })
+})
+
+// ── TimePicker 专项 ───────────────────────────────────────────
+describe('addComponent - TimePicker', () => {
+  it('携带正确的默认 props', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.TIME_PICKER)
+    const props = editorStore.currentComponent?.props
+    expect(props?.placeholder).toBe('请选择日期时间')
+    expect(props?.value).toBe('')
+    expect(props?.disabled).toBe(false)
+  })
+
+  it('携带正确的默认样式（width / height / borderRadius / backgroundColor）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.TIME_PICKER)
+    const style = editorStore.currentComponent?.style
+    expect(style?.width).toBe(290)
+    expect(style?.height).toBe(40)
+    expect(style?.borderRadius).toBe(4)
+    expect(style?.backgroundColor).toBe('#ffffff')
+  })
+
+  it('添加后 undo 移除组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.TIME_PICKER)
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    historyStore.undo()
+    expect(editorStore.currentPage?.components).toHaveLength(0)
+  })
+
+  it('undo 后 redo 恢复组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.TIME_PICKER)
+    historyStore.undo()
+    historyStore.redo()
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    expect(editorStore.currentComponent?.type).toBe(ComponentType.TIME_PICKER)
   })
 })
 

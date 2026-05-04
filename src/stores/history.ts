@@ -13,17 +13,17 @@ export const useHistoryStore = defineStore('history', () => {
   const executeCommand = (command: Command) => {
     command.execute()
     undoStack.value.push(command)
-    
+
     if (undoStack.value.length > maxHistorySize.value) {
       undoStack.value.shift()
     }
-    
+
     redoStack.value.length = 0
   }
 
   const undo = () => {
     if (!canUndo()) return
-    
+
     const command = undoStack.value.pop()
     if (command) {
       command.undo()
@@ -33,7 +33,7 @@ export const useHistoryStore = defineStore('history', () => {
 
   const redo = () => {
     if (!canRedo()) return
-    
+
     const command = redoStack.value.pop()
     if (command) {
       command.execute()
@@ -55,6 +55,6 @@ export const useHistoryStore = defineStore('history', () => {
     executeCommand,
     undo,
     redo,
-    clearHistory
+    clearHistory,
   }
 })

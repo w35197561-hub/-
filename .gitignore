@@ -44,3 +44,8 @@ server/.env
 # Playwright
 playwright-report/
 test-results/
+/screenshots/
+playwright-verify.cjs
+
+# Vitest JSON report (临时产物，不提交)
+vitest-report/

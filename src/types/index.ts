@@ -55,7 +55,44 @@ export enum ComponentType {
   INPUT = 'Input',
   FORM = 'Form',
   CHART = 'Chart',
-  TABS = 'Tabs'
+  TABS = 'Tabs',
+  NUMBER_INPUT = 'NumberInput',
+  SELECT = 'Select',
+  TEXTAREA = 'Textarea',
+  RADIO_GROUP = 'RadioGroup',
+  CHECKBOX_GROUP = 'CheckboxGroup',
+  DIVIDER = 'Divider',
+  TIME_PICKER = 'TimePicker',
+}
+
+export type SetterType =
+  | 'InputSetter'
+  | 'TextareaSetter'
+  | 'NumberSetter'
+  | 'ColorSetter'
+  | 'SelectSetter'
+  | 'StringListSetter'
+
+export interface PropSetter {
+  label: string
+  setter: SetterType
+  field: string
+  setterProps?: Record<string, unknown> | ((props: ComponentProps) => Record<string, unknown>)
+  optionsField?: string
+}
+
+export interface StyleSetter {
+  label: string
+  setter: SetterType
+  field: keyof ComponentStyle
+  setterProps?: Record<string, unknown>
+}
+
+export interface ComponentConfig {
+  defaultProps: ComponentProps
+  defaultStyle?: Partial<ComponentStyle>
+  propSetters: PropSetter[]
+  styleSetters?: StyleSetter[]
 }
 
 export interface Command {

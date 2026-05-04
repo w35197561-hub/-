@@ -23,23 +23,34 @@
 vue-yuan-drag/
 ├── src/                              # 前端
 │   ├── components/
-│   │   ├── Editor.vue                # 编辑器主布局（左中右三栏）
-│   │   ├── EditorCanvas.vue          # 画布（拖拽、缩放、对齐）
-│   │   ├── ComponentPanel.vue        # 左侧组件面板（拖出组件）
-│   │   ├── PropertyPanel.vue         # 右侧属性面板（编辑 props/style）
-│   │   ├── LayerPanel.vue            # 图层管理面板
-│   │   ├── AIPanel.vue               # AI 对话面板
-│   │   └── components/               # 可渲染组件
-│   │       ├── ComponentRenderer.vue # 组件分发器（componentMap）
-│   │       ├── TextComponent.vue
-│   │       ├── ImageComponent.vue
-│   │       ├── ButtonComponent.vue
-│   │       ├── InputComponent.vue
-│   │       ├── FormComponent.vue     # 容器组件（含 slots）
-│   │       ├── TabsComponent.vue     # 容器组件（含 slots）
-│   │       └── composables/
-│   │           ├── useComponentStyle.ts   # 样式 computed 封装
-│   │           └── useContainerDrop.ts    # 容器拖放逻辑复用
+│   │   ├── editor/                   # 编辑器外壳
+│   │   │   ├── Editor.vue            # 主布局（左中右三栏）
+│   │   │   └── AIPanel.vue           # AI 对话面板
+│   │   ├── material/                 # 物料层（左侧组件面板）
+│   │   │   ├── ComponentPanel.vue    # 拖出组件
+│   │   │   └── componentConfigs.ts   # 各组件配置（defaultProps/defaultStyle/propSetters/styleSetters）
+│   │   ├── canvas/                   # 画布层
+│   │   │   ├── EditorCanvas.vue      # 画布（拖拽、缩放、对齐）
+│   │   │   └── components/           # 可渲染组件
+│   │   │       ├── ComponentRenderer.vue  # 组件分发器（componentMap）
+│   │   │       ├── TextComponent.vue
+│   │   │       ├── ImageComponent.vue
+│   │   │       ├── ButtonComponent.vue
+│   │   │       ├── InputComponent.vue
+│   │   │       ├── NumberInputComponent.vue
+│   │   │       ├── SelectComponent.vue
+│   │   │       ├── TextareaComponent.vue
+│   │   │       ├── RadioGroupComponent.vue
+│   │   │       ├── CheckboxGroupComponent.vue
+│   │   │       ├── DividerComponent.vue
+│   │   │       ├── FormComponent.vue      # 容器组件（含 slots）
+│   │   │       ├── TabsComponent.vue      # 容器组件（含 slots）
+│   │   │       └── composables/
+│   │   │           ├── useComponentStyle.ts   # 样式 computed 封装（返回 computed，非普通对象）
+│   │   │           └── useContainerDrop.ts    # 容器拖放逻辑复用
+│   │   └── property/                 # 属性层（右侧面板）
+│   │       ├── PropertyPanel.vue     # 属性配置面板
+│   │       └── LayerPanel.vue        # 图层管理面板
 │   ├── stores/
 │   │   ├── editor.ts                 # 编辑器状态（页面、组件、画布）
 │   │   ├── history.ts                # 撤销/重做（Command 模式）
@@ -50,7 +61,8 @@ vue-yuan-drag/
 │   ├── types/index.ts                # 所有核心类型
 │   ├── router/index.ts
 │   └── views/
-│       └── HomeView.vue              # 编辑器入口页
+│       ├── HomeView.vue              # 编辑器入口页
+│       └── PreviewView.vue           # 全屏预览页（/preview，可交互运行态）
 │
 └── server/                           # 后端（Express + TypeScript）
     └── src/
@@ -81,9 +93,11 @@ npm run lint         # oxlint + eslint（自动修复）
 npm run format       # prettier 格式化
 
 # 测试
-npm test                      # 前端单元测试（单次）
+npm test                      # 前端单元测试（单次，不写日志）
+npm run test:log              # 前端单元测试 + 写入 docs/test-log.md
 npm run test:watch            # 前端测试（监听）
 npm run test:coverage         # 前端测试 + 覆盖率
+npm run test:e2e              # E2E 测试 + 写入 docs/test-log.md（失败时截图保存至 docs/screenshots/）
 cd server && npm test         # 后端集成测试
 ```
 
@@ -133,15 +147,15 @@ cd server && npm test         # 后端集成测试
 ### 核心数据类型（`src/types/index.ts`）
 
 **ComponentType 枚举（当前已有）：**
-`Text` / `Image` / `Button` / `Input` / `Form`（容器）/ `Chart` / `Tabs`（容器）
+`Text` / `Image` / `Button` / `Input` / `NumberInput` / `Select` / `Textarea` / `RadioGroup` / `CheckboxGroup` / `Divider` / `Form`（容器）/ `Chart` / `Tabs`（容器）/ `TimePicker`
 
 **ComponentStyle：** `top, left, width, height, zIndex, rotate`（必填）+ `fontSize, color, backgroundColor, borderWidth, borderColor, borderRadius`（可选，数值均为 `number`，渲染时拼接 `px`）
 
-默认尺寸：顶层组件 `200×50`，Form `520×260`，Tabs `560×320`，子组件 `180×40`
+默认尺寸：顶层组件 `200×50`，子组件 `180×40`（组件特定尺寸在 `componentConfigs.ts` 的 `defaultStyle` 中声明）
 
 **ComponentProps：** `content?, src?, type?, placeholder?, [key: string]: unknown`（可自由扩展）
 
-各类型默认 props：`Text→{content:'文本内容'}` / `Image→{src:''}` / `Button→{content:'按钮'}` / `Input→{placeholder:'请输入内容'}` / `Form→{title:'表单容器',columns:['col1','col2']}` / `Tabs→{tabs:[{key,label}×2], activeTab:'tab1'}`
+各类型默认 props 和默认 style 统一在 `src/components/componentConfigs.ts` 中声明，不再硬编码于 `editor.ts`。
 
 **ComponentData（核心）：**
 ```typescript
@@ -159,7 +173,7 @@ interface ComponentData {
 
 **PageData：** `{ id, title, components: ComponentData[], style: { width:1200, height:800, backgroundColor:'#fff' } }`
 
-### Vue 组件文件规范（`src/components/components/`）
+### Vue 组件文件规范（`src/components/canvas/components/`）
 
 - Props 固定为 `defineProps<{ component: ComponentData }>()`
 - 样式通过 `computed` 对象绑定，使用 `useComponentStyle(component.style)` composable 获取基础样式
@@ -167,14 +181,30 @@ interface ComponentData {
 - 子组件 wrapper 样式抽为独立函数，避免模板内联对象导致额外重渲染
 - CSS 固定 `width:100%; height:100%; box-sizing:border-box`
 
+### 设计态 / 运行态双模式
+
+所有可交互组件通过 `provide/inject` 区分设计态（编辑器）和运行态（预览页）：
+
+```
+PreviewView.vue         → provide('isPreview', true)
+XxxComponent.vue        → const isPreview = inject('isPreview', false)
+```
+
+- **设计态**（默认，`isPreview = false`）：组件禁止交互（`disabled` / `readonly`），配合画布拖拽/选中不冲突
+- **运行态**（`isPreview = true`）：组件开启原生交互，用本地 `ref` 维护临时状态
+
+**新增有交互需求的组件时，必须同时实现两套行为：**
+- 纯展示型（Input/Textarea/NumberInput/Radio/Checkbox）：绑定 `:disabled="!isPreview"` 或 `:readonly="!isPreview"`，预览时用本地 `ref` + 事件处理
+- 视觉占位型（Select 等假组件）：`v-if="!isPreview"` 渲染静态占位，`v-else` 渲染真实可交互实现
+
 ### 新增组件的完整流程（6 步）
 
-1. **`src/types/index.ts`** → `ComponentType` 枚举加新值
-2. **`src/stores/editor.ts`** → `defaultProps`、`typeStyleMap`（可选）各加一项
-3. **`src/components/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范
-4. **`src/components/components/ComponentRenderer.vue`** → `componentMap` 加新枚举 key
-5. **`src/components/ComponentPanel.vue`** → `componentTypes` 数组加 `{ type, name, icon }`
-6. **`src/components/PropertyPanel.vue`** → （可选）加对应属性配置 UI
+1. **`src/types/index.ts`** → `ComponentType` 枚举加新值，并同步更新 `CLAUDE.md` 本文件的"ComponentType 枚举（当前已有）"列表
+2. **`src/components/material/componentConfigs.ts`** → 新增一条配置（`defaultProps`、`defaultStyle`、`propSetters`、`styleSetters`），详见 `.claude/skills/coding.md` 的"新增组件自查清单 §2"
+3. **`src/components/canvas/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范；**若组件有交互行为，必须实现设计态/运行态双模式**（见上方"设计态 / 运行态双模式"）
+4. **`src/components/canvas/components/ComponentRenderer.vue`** → `componentMap` 加新枚举 key
+5. **`src/components/material/ComponentPanel.vue`** → `componentTypes` 数组加 `{ type, name, icon }`
+6. **`src/components/property/LayerPanel.vue`** → `typeNames` 和 `typeIcons` 加入新类型（`PropertyPanel.vue` 无需改动，由 `componentConfigs` 自动驱动）
 
 ### Store 操作规范（`src/stores/editor.ts`）
 
