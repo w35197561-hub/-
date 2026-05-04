@@ -46,6 +46,7 @@ export interface PageData {
     height: number
     backgroundColor: string
   }
+  functions: Record<string, string>
 }
 
 export enum ComponentType {
@@ -63,6 +64,7 @@ export enum ComponentType {
   CHECKBOX_GROUP = 'CheckboxGroup',
   DIVIDER = 'Divider',
   TIME_PICKER = 'TimePicker',
+  TABLE = 'Table',
 }
 
 export type SetterType =

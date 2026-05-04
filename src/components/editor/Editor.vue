@@ -18,7 +18,12 @@
           </el-button>
         </el-button-group>
 
-        <el-button @click="livePreviewVisible = true" type="primary">
+        <el-button @click="codePanelVisible = true">
+          <el-icon><Tickets /></el-icon>
+          代码
+        </el-button>
+
+        <el-button @click="openPreview" type="primary">
           <el-icon><Monitor /></el-icon>
           实时预览
         </el-button>
@@ -56,6 +61,11 @@
       <LivePreviewPanel />
     </el-dialog>
 
+    <!-- 代码面板弹窗 -->
+    <el-dialog v-model="codePanelVisible" title="页面函数" width="800px" top="8vh">
+      <CodePanel />
+    </el-dialog>
+
     <!-- 页面列表弹窗 -->
     <el-dialog v-model="pageListVisible" title="打开页面" width="600px">
       <div v-if="pageList.length === 0" class="page-list-empty">
@@ -88,7 +98,7 @@
 
 <script setup lang="ts">
 // eslint-disable-next-line vue/multi-word-component-names
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, provide, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useEditorStore } from '@/stores/editor'
 import { useHistoryStore } from '@/stores/history'
@@ -96,6 +106,7 @@ import ComponentPanel from '../material/ComponentPanel.vue'
 import EditorCanvas from '../canvas/EditorCanvas.vue'
 import PropertyPanel from '../property/PropertyPanel.vue'
 import LivePreviewPanel from './LivePreviewPanel.vue'
+import CodePanel from './CodePanel.vue'
 import AIPanel from './AIPanel.vue'
 import {
   RefreshLeft,
@@ -105,6 +116,7 @@ import {
   Document,
   Plus,
   FolderOpened,
+  Tickets,
 } from '@element-plus/icons-vue'
 import { savePage, createPage, fetchPageList, fetchPage } from '@/services/api'
 import type { PageListItem } from '@/services/api'
@@ -114,13 +126,28 @@ const historyStore = useHistoryStore()
 
 const pageListVisible = ref(false)
 const livePreviewVisible = ref(false)
+const codePanelVisible = ref(false)
 const aiPanelVisible = ref(false)
 const isSaving = ref(false)
 const pageList = ref<PageListItem[]>([])
 
+const isPreview = ref(false)
+const pageFunctions = computed(() => editorStore.currentPage?.functions ?? {})
+
+provide('isPreview', isPreview)
+provide('pageFunctions', pageFunctions)
+
+watch(livePreviewVisible, (visible) => {
+  isPreview.value = visible
+})
+
 const currentPage = computed(() => editorStore.currentPage)
 const canUndo = computed(() => historyStore.canUndo())
 const canRedo = computed(() => historyStore.canRedo())
+
+const openPreview = () => {
+  livePreviewVisible.value = true
+}
 
 const handleUndo = () => {
   historyStore.undo()

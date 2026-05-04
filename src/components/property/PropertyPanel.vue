@@ -249,6 +249,109 @@
             </template>
           </div>
         </div>
+
+        <!-- Table 列配置 -->
+        <div
+          class="property-section"
+          v-if="currentComponent.type === ComponentType.TABLE"
+        >
+          <h4>列配置</h4>
+          <div class="table-columns-setter">
+            <div
+              v-for="(col, idx) in tableColumns"
+              :key="idx"
+              class="table-col-card"
+            >
+              <div class="table-col-row">
+                <label>标题</label>
+                <el-input
+                  :model-value="col.title"
+                  size="small"
+                  @update:model-value="(v: string) => updateTableColumn(idx, 'title', v)"
+                />
+              </div>
+              <div class="table-col-row">
+                <label>字段</label>
+                <el-input
+                  :model-value="col.field"
+                  size="small"
+                  @update:model-value="(v: string) => updateTableColumn(idx, 'field', v)"
+                />
+              </div>
+              <el-button
+                :icon="Minus"
+                size="small"
+                type="danger"
+                link
+                @click="removeTableColumn(idx)"
+              >删除列</el-button>
+            </div>
+            <el-button :icon="Plus" size="small" @click="addTableColumn">添加列</el-button>
+          </div>
+        </div>
+
+        <!-- Table 数据行配置 -->
+        <div
+          class="property-section"
+          v-if="currentComponent.type === ComponentType.TABLE"
+        >
+          <h4>数据行</h4>
+          <div class="table-rows-setter">
+            <div
+              v-for="(row, rIdx) in tableRows"
+              :key="rIdx"
+              class="table-row-card"
+            >
+              <div class="table-row-header">
+                <span>第 {{ rIdx + 1 }} 行</span>
+                <el-button
+                  :icon="Minus"
+                  size="small"
+                  type="danger"
+                  link
+                  @click="removeTableRow(rIdx)"
+                >删除</el-button>
+              </div>
+              <div
+                v-for="col in tableColumns"
+                :key="col.field"
+                class="table-col-row"
+              >
+                <label>{{ col.title || col.field }}</label>
+                <el-input
+                  :model-value="String(row[col.field] ?? '')"
+                  size="small"
+                  @update:model-value="(v: string) => updateTableCell(rIdx, col.field, v)"
+                />
+              </div>
+            </div>
+            <el-button :icon="Plus" size="small" @click="addTableRow">添加行</el-button>
+          </div>
+        </div>
+
+        <!-- Button 交互事件 -->
+        <div
+          class="property-section"
+          v-if="currentComponent.type === ComponentType.BUTTON"
+        >
+          <h4>交互事件</h4>
+          <div class="property-item">
+            <label>点击事件（onClick）</label>
+            <el-select
+              :model-value="boundOnClick"
+              clearable
+              placeholder="绑定函数"
+              @update:model-value="updateOnClick"
+            >
+              <el-option
+                v-for="name in pageFunctionNames"
+                :key="name"
+                :label="name"
+                :value="name"
+              />
+            </el-select>
+          </div>
+        </div>
       </el-scrollbar>
     </div>
   </div>
@@ -258,6 +361,8 @@
 import { computed, ref, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { componentConfigs } from '../material/componentConfigs'
+import { ComponentType } from '@/types'
+import type { ComponentEvent } from '@/types'
 import LayerPanel from './LayerPanel.vue'
 import { InfoFilled, ArrowUp, ArrowDown, DArrowRight, Plus, Minus } from '@element-plus/icons-vue'
 
@@ -379,6 +484,89 @@ const moveLayer = (direction: 'up' | 'down' | 'top' | 'bottom') => {
 const deleteCurrentComponent = () => {
   if (!currentComponent.value) return
   editorStore.deleteComponent(currentComponent.value.id)
+}
+
+// ---- TABLE helpers ----
+interface TableColDef { title: string; field: string }
+
+const tableColumns = computed<TableColDef[]>(() => {
+  if (currentComponent.value?.type !== ComponentType.TABLE) return []
+  const raw = currentComponent.value.props.columns as string[] | undefined
+  if (!Array.isArray(raw)) return []
+  return raw.map((s) => {
+    const parts = s.split(':')
+    return { title: parts[0] ?? '', field: parts[1] ?? parts[0] ?? '' }
+  })
+})
+
+const tableRows = computed<Record<string, unknown>[]>(() => {
+  if (currentComponent.value?.type !== ComponentType.TABLE) return []
+  try {
+    const parsed = JSON.parse(currentComponent.value.props.dataSource as string)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+})
+
+const saveTableColumns = (cols: TableColDef[]) => {
+  if (!currentComponent.value) return
+  setPropVal('columns', cols.map((c) => `${c.title}:${c.field}`))
+  updateComponentProps()
+}
+
+const saveTableRows = (rows: Record<string, unknown>[]) => {
+  if (!currentComponent.value) return
+  setPropVal('dataSource', JSON.stringify(rows))
+  updateComponentProps()
+}
+
+const updateTableColumn = (idx: number, key: 'title' | 'field', val: string) => {
+  const cols = tableColumns.value.map((c) => ({ ...c }))
+  cols[idx][key] = val
+  saveTableColumns(cols)
+}
+
+const removeTableColumn = (idx: number) => {
+  const cols = tableColumns.value.filter((_, i) => i !== idx)
+  saveTableColumns(cols)
+}
+
+const addTableColumn = () => {
+  const cols = [...tableColumns.value, { title: '新列', field: `col${tableColumns.value.length + 1}` }]
+  saveTableColumns(cols)
+}
+
+const updateTableCell = (rIdx: number, field: string, val: string) => {
+  const rows = tableRows.value.map((r) => ({ ...r }))
+  rows[rIdx][field] = val
+  saveTableRows(rows)
+}
+
+const removeTableRow = (rIdx: number) => {
+  const rows = tableRows.value.filter((_, i) => i !== rIdx)
+  saveTableRows(rows)
+}
+
+const addTableRow = () => {
+  const emptyRow: Record<string, unknown> = {}
+  tableColumns.value.forEach((c) => { emptyRow[c.field] = '' })
+  saveTableRows([...tableRows.value, emptyRow])
+}
+
+// ---- Button event helpers ----
+const pageFunctionNames = computed(() => Object.keys(editorStore.currentPage?.functions ?? {}))
+
+const boundOnClick = computed(() => {
+  if (!currentComponent.value) return null
+  return currentComponent.value.events?.find((e) => e.type === 'click')?.handler ?? null
+})
+
+const updateOnClick = (fnName: string | null) => {
+  if (!currentComponent.value) return
+  const existing = (currentComponent.value.events ?? []).filter((e: ComponentEvent) => e.type !== 'click')
+  const newEvents: ComponentEvent[] = fnName ? [...existing, { type: 'click', handler: fnName }] : existing
+  editorStore.updateComponentEvents(currentComponent.value.id, newEvents)
 }
 </script>
 
@@ -569,5 +757,43 @@ const deleteCurrentComponent = () => {
 
 .string-list-row .el-input {
   flex: 1;
+}
+
+.table-columns-setter,
+.table-rows-setter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.table-col-card,
+.table-row-card {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.table-col-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.table-col-row label {
+  font-size: 11px;
+  color: #888;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.table-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
 }
 </style>

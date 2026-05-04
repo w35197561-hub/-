@@ -5,7 +5,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject, ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import type { ComponentData } from '@/types'
 import { useComponentStyle } from './composables/useComponentStyle'
 
@@ -14,6 +15,12 @@ const props = defineProps<{
 }>()
 
 const { baseStyle } = useComponentStyle(props.component.style)
+
+const isPreview = inject<Ref<boolean>>('isPreview', ref(false))
+const pageFunctions = inject<ComputedRef<Record<string, string>>>(
+  'pageFunctions',
+  computed(() => ({})),
+)
 
 const computedStyle = computed(() => ({
   ...baseStyle.value,
@@ -24,7 +31,16 @@ const computedStyle = computed(() => ({
 }))
 
 const handleClick = () => {
-  // 事件系统预留：后续可通过 component.events 派发自定义行为
+  if (!isPreview.value) return
+  const onClickEvent = props.component.events?.find((e) => e.type === 'click')
+  if (!onClickEvent?.handler) return
+  const fnBody = pageFunctions.value[onClickEvent.handler]
+  if (fnBody === undefined) return
+  try {
+    new Function(fnBody)()
+  } catch (e) {
+    console.error('[Button] onClick error:', e)
+  }
 }
 </script>
 

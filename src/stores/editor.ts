@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { PageData, ComponentData, Command } from '@/types'
+import type { PageData, ComponentData, ComponentEvent, Command } from '@/types'
 import { ComponentType } from '@/types'
 import { useHistoryStore } from './history'
 import { componentConfigs } from '@/components/material/componentConfigs'
@@ -133,6 +133,7 @@ export const useEditorStore = defineStore('editor', () => {
         height: 800,
         backgroundColor: '#ffffff',
       },
+      functions: {},
     }
   }
 
@@ -717,9 +718,42 @@ export const useEditorStore = defineStore('editor', () => {
     return currentPage.value ? JSON.stringify(currentPage.value, null, 2) : null
   }
 
+  const updatePageFunctions = (functions: Record<string, string>) => {
+    if (!currentPage.value) return
+    const historyStore = useHistoryStore()
+    const oldFunctions = { ...currentPage.value.functions }
+    const newFunctions = { ...functions }
+    const command: Command = {
+      execute: () => {
+        if (currentPage.value) currentPage.value.functions = newFunctions
+      },
+      undo: () => {
+        if (currentPage.value) currentPage.value.functions = oldFunctions
+      },
+    }
+    historyStore.executeCommand(command)
+  }
+
+  const updateComponentEvents = (componentId: string, events: ComponentEvent[]) => {
+    const component = getComponentById(componentId)
+    if (!component) return
+    const historyStore = useHistoryStore()
+    const oldEvents = component.events ? [...component.events] : undefined
+    const newEvents = [...events]
+    const command: Command = {
+      execute: () => {
+        component.events = newEvents
+      },
+      undo: () => {
+        component.events = oldEvents
+      },
+    }
+    historyStore.executeCommand(command)
+  }
+
   /** 从外部数据（如后端返回）加载页面，替换当前画布 */
   const loadPageData = (page: PageData) => {
-    currentPage.value = page
+    currentPage.value = { functions: {}, ...page }
     currentComponent.value = null
     selectedComponentIds.value = []
     const historyStore = useHistoryStore()
@@ -750,6 +784,8 @@ export const useEditorStore = defineStore('editor', () => {
     setComponentZIndex,
     normalizeZIndex,
     getMaxZIndex,
+    updatePageFunctions,
+    updateComponentEvents,
     exportPageData,
     loadPageData,
     setCanvasScale: (scale: number) => (canvasScale.value = scale),

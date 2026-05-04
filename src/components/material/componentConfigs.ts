@@ -317,4 +317,29 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
       },
     ],
   },
+
+  [ComponentType.TABLE]: {
+    defaultProps: {
+      columns: ['姓名:name:text', '年龄:age:number', '城市:city:text'],
+      dataSource: '[{"name":"张三","age":25,"city":"北京"},{"name":"李四","age":30,"city":"上海"}]',
+      bordered: true,
+      striped: false,
+    },
+    defaultStyle: { fontSize: 14 },
+    propSetters: [
+      {
+        label: '边框',
+        setter: 'SelectSetter',
+        field: 'bordered',
+        setterProps: { options: [{ label: '有边框', value: true }, { label: '无边框', value: false }] },
+      },
+      {
+        label: '斑马纹',
+        setter: 'SelectSetter',
+        field: 'striped',
+        setterProps: { options: [{ label: '开启', value: true }, { label: '关闭', value: false }] },
+      },
+    ],
+    styleSetters: [],
+  },
 }
