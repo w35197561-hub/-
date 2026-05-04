@@ -147,7 +147,7 @@ cd server && npm test         # 后端集成测试
 ### 核心数据类型（`src/types/index.ts`）
 
 **ComponentType 枚举（当前已有）：**
-`Text` / `Image` / `Button` / `Input` / `NumberInput` / `Select` / `Textarea` / `RadioGroup` / `CheckboxGroup` / `Divider` / `Form`（容器）/ `Chart` / `Tabs`（容器）/ `TimePicker`
+`Text` / `Image` / `Button` / `Input` / `NumberInput` / `Select` / `Textarea` / `RadioGroup` / `CheckboxGroup` / `Divider` / `Form`（容器）/ `Chart` / `Tabs`（容器）/ `TimePicker` / `Table`
 
 **ComponentStyle：** `top, left, width, height, zIndex, rotate`（必填）+ `fontSize, color, backgroundColor, borderWidth, borderColor, borderRadius`（可选，数值均为 `number`，渲染时拼接 `px`）
 
@@ -164,7 +164,7 @@ interface ComponentData {
   type: ComponentType
   style: ComponentStyle
   props: ComponentProps
-  events?: ComponentEvent[]                // { type, handler }
+  events?: ComponentEvent[]                // { type: string, actions: ActionConfig[] }
   children?: ComponentData[]               // Form 用
   slots?: Record<string, ComponentData[]>  // Form: {col1,col2} / Tabs: {tab1,tab2}
   isContainer?: boolean                    // Form/Tabs 为 true
@@ -196,6 +196,37 @@ XxxComponent.vue        → const isPreview = inject('isPreview', false)
 **新增有交互需求的组件时，必须同时实现两套行为：**
 - 纯展示型（Input/Textarea/NumberInput/Radio/Checkbox）：绑定 `:disabled="!isPreview"` 或 `:readonly="!isPreview"`，预览时用本地 `ref` + 事件处理
 - 视觉占位型（Select 等假组件）：`v-if="!isPreview"` 渲染静态占位，`v-else` 渲染真实可交互实现
+
+### 事件系统（可视化动作配置）
+
+组件事件以数据驱动方式实现，不需要用户写代码。
+
+**数据结构：**
+```typescript
+// ComponentEvent：一种触发方式 + 该触发方式下的动作列表
+{ type: 'click', actions: ActionConfig[] }
+
+// ActionConfig：一个动作的类型 + 参数
+type ActionType = 'alert' | 'link' | 'toggleVisible'
+interface ActionConfig {
+  type: ActionType
+  params: { message?, url?, openInNew?, componentId?, operation? }
+}
+```
+
+**运行时状态（不写入 PageData）：**
+- `previewHiddenIds: string[]` — 预览时被隐藏的组件 ID，关闭预览自动清空
+
+**执行入口：** `src/components/canvas/composables/useActionExecutor.ts`
+- 组件在预览模式下触发事件时调用 `execute(actions)`
+- switch 按 `action.type` 分发，params 原样取用
+
+**新增动作类型步骤：**
+1. `src/types/index.ts` → `ActionType` 加新值，`ActionConfig.params` 加对应字段
+2. `useActionExecutor.ts` → switch 加新 case
+3. `PropertyPanel.vue` → Button 事件区域加对应参数表单
+
+**当前只有 Button 支持事件绑定**，其他组件如需支持，在组件内 inject `isPreview` 并调用 `useActionExecutor`。
 
 ### 新增组件的完整流程（6 步）
 
