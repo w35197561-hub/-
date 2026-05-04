@@ -335,21 +335,101 @@
           v-if="currentComponent.type === ComponentType.BUTTON"
         >
           <h4>交互事件</h4>
-          <div class="property-item">
-            <label>点击事件（onClick）</label>
-            <el-select
-              :model-value="boundOnClick"
-              clearable
-              placeholder="绑定函数"
-              @update:model-value="updateOnClick"
+          <div class="action-list">
+            <div
+              v-for="(action, aIdx) in clickActions"
+              :key="aIdx"
+              class="action-card"
             >
-              <el-option
-                v-for="name in pageFunctionNames"
-                :key="name"
-                :label="name"
-                :value="name"
-              />
-            </el-select>
+              <div class="action-card-header">
+                <el-select
+                  :model-value="action.type"
+                  size="small"
+                  style="flex: 1"
+                  @update:model-value="(v: ActionType) => updateActionType(aIdx, v)"
+                >
+                  <el-option label="弹出提示" value="alert" />
+                  <el-option label="跳转链接" value="link" />
+                  <el-option label="显示/隐藏组件" value="toggleVisible" />
+                </el-select>
+                <el-button
+                  :icon="Minus"
+                  size="small"
+                  type="danger"
+                  link
+                  @click="removeAction(aIdx)"
+                />
+              </div>
+
+              <!-- alert params -->
+              <template v-if="action.type === 'alert'">
+                <div class="action-param-row">
+                  <label>消息内容</label>
+                  <el-input
+                    :model-value="action.params.message ?? ''"
+                    size="small"
+                    @update:model-value="(v: string) => updateActionParam(aIdx, 'message', v)"
+                  />
+                </div>
+              </template>
+
+              <!-- link params -->
+              <template v-else-if="action.type === 'link'">
+                <div class="action-param-row">
+                  <label>URL</label>
+                  <el-input
+                    :model-value="action.params.url ?? ''"
+                    size="small"
+                    placeholder="https://"
+                    @update:model-value="(v: string) => updateActionParam(aIdx, 'url', v)"
+                  />
+                </div>
+                <div class="action-param-row">
+                  <label>打开方式</label>
+                  <el-select
+                    :model-value="action.params.openInNew ?? true"
+                    size="small"
+                    @update:model-value="(v: boolean) => updateActionParam(aIdx, 'openInNew', v)"
+                  >
+                    <el-option label="新窗口" :value="true" />
+                    <el-option label="当前窗口" :value="false" />
+                  </el-select>
+                </div>
+              </template>
+
+              <!-- toggleVisible params -->
+              <template v-else-if="action.type === 'toggleVisible'">
+                <div class="action-param-row">
+                  <label>目标组件</label>
+                  <el-select
+                    :model-value="action.params.componentId ?? ''"
+                    size="small"
+                    @update:model-value="(v: string) => updateActionParam(aIdx, 'componentId', v)"
+                  >
+                    <el-option
+                      v-for="comp in otherComponents"
+                      :key="comp.id"
+                      :label="`${comp.type} (${comp.id.slice(-6)})`"
+                      :value="comp.id"
+                    />
+                  </el-select>
+                </div>
+                <div class="action-param-row">
+                  <label>操作</label>
+                  <el-select
+                    :model-value="action.params.operation ?? 'toggle'"
+                    size="small"
+                    @update:model-value="(v: string) => updateActionParam(aIdx, 'operation', v)"
+                  >
+                    <el-option label="切换显示" value="toggle" />
+                    <el-option label="显示" value="show" />
+                    <el-option label="隐藏" value="hide" />
+                  </el-select>
+                </div>
+              </template>
+            </div>
+
+            <el-button :icon="Plus" size="small" @click="addAction">添加动作</el-button>
           </div>
         </div>
       </el-scrollbar>
@@ -362,7 +442,7 @@ import { computed, ref, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { componentConfigs } from '../material/componentConfigs'
 import { ComponentType } from '@/types'
-import type { ComponentEvent } from '@/types'
+import type { ComponentEvent, ActionConfig, ActionType } from '@/types'
 import LayerPanel from './LayerPanel.vue'
 import { InfoFilled, ArrowUp, ArrowDown, DArrowRight, Plus, Minus } from '@element-plus/icons-vue'
 
@@ -554,19 +634,46 @@ const addTableRow = () => {
   saveTableRows([...tableRows.value, emptyRow])
 }
 
-// ---- Button event helpers ----
-const pageFunctionNames = computed(() => Object.keys(editorStore.currentPage?.functions ?? {}))
-
-const boundOnClick = computed(() => {
-  if (!currentComponent.value) return null
-  return currentComponent.value.events?.find((e) => e.type === 'click')?.handler ?? null
+// ---- Button action helpers ----
+const otherComponents = computed(() => {
+  if (!editorStore.currentPage || !currentComponent.value) return []
+  return editorStore.currentPage.components.filter((c) => c.id !== currentComponent.value!.id)
 })
 
-const updateOnClick = (fnName: string | null) => {
+const clickActions = computed<ActionConfig[]>(() => {
+  if (!currentComponent.value) return []
+  return currentComponent.value.events?.find((e) => e.type === 'click')?.actions ?? []
+})
+
+const saveClickActions = (actions: ActionConfig[]) => {
   if (!currentComponent.value) return
   const existing = (currentComponent.value.events ?? []).filter((e: ComponentEvent) => e.type !== 'click')
-  const newEvents: ComponentEvent[] = fnName ? [...existing, { type: 'click', handler: fnName }] : existing
-  editorStore.updateComponentEvents(currentComponent.value.id, newEvents)
+  editorStore.updateComponentEvents(currentComponent.value.id, [
+    ...existing,
+    { type: 'click', actions },
+  ])
+}
+
+const addAction = () => {
+  saveClickActions([...clickActions.value, { type: 'alert', params: { message: '' } }])
+}
+
+const removeAction = (idx: number) => {
+  saveClickActions(clickActions.value.filter((_, i) => i !== idx))
+}
+
+const updateActionType = (idx: number, type: ActionType) => {
+  const updated = clickActions.value.map((a, i) =>
+    i === idx ? ({ type, params: {} } as ActionConfig) : a,
+  )
+  saveClickActions(updated)
+}
+
+const updateActionParam = (idx: number, key: string, value: unknown) => {
+  const updated = clickActions.value.map((a, i) =>
+    i === idx ? { ...a, params: { ...a.params, [key]: value } } : a,
+  )
+  saveClickActions(updated)
 }
 </script>
 
@@ -795,5 +902,39 @@ const updateOnClick = (fnName: string | null) => {
   justify-content: space-between;
   font-size: 12px;
   color: #666;
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-card {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-param-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-param-row label {
+  font-size: 11px;
+  color: #888;
+  width: 48px;
+  flex-shrink: 0;
 }
 </style>

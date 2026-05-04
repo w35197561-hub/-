@@ -6,21 +6,18 @@
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
-import type { ComputedRef, Ref } from 'vue'
+import type { Ref } from 'vue'
 import type { ComponentData } from '@/types'
 import { useComponentStyle } from './composables/useComponentStyle'
+import { useActionExecutor } from '../composables/useActionExecutor'
 
 const props = defineProps<{
   component: ComponentData
 }>()
 
 const { baseStyle } = useComponentStyle(props.component.style)
-
 const isPreview = inject<Ref<boolean>>('isPreview', ref(false))
-const pageFunctions = inject<ComputedRef<Record<string, string>>>(
-  'pageFunctions',
-  computed(() => ({})),
-)
+const { execute } = useActionExecutor()
 
 const computedStyle = computed(() => ({
   ...baseStyle.value,
@@ -32,15 +29,8 @@ const computedStyle = computed(() => ({
 
 const handleClick = () => {
   if (!isPreview.value) return
-  const onClickEvent = props.component.events?.find((e) => e.type === 'click')
-  if (!onClickEvent?.handler) return
-  const fnBody = pageFunctions.value[onClickEvent.handler]
-  if (fnBody === undefined) return
-  try {
-    new Function(fnBody)()
-  } catch (e) {
-    console.error('[Button] onClick error:', e)
-  }
+  const clickEvent = props.component.events?.find((e) => e.type === 'click')
+  if (clickEvent?.actions?.length) execute(clickEvent.actions)
 }
 </script>
 

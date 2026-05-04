@@ -32,9 +32,22 @@ export interface ComponentData {
   isContainer?: boolean
 }
 
+export type ActionType = 'alert' | 'link' | 'toggleVisible'
+
+export interface ActionConfig {
+  type: ActionType
+  params: {
+    message?: string
+    url?: string
+    openInNew?: boolean
+    componentId?: string
+    operation?: 'show' | 'hide' | 'toggle'
+  }
+}
+
 export interface ComponentEvent {
   type: string
-  handler: string
+  actions: ActionConfig[]
 }
 
 export interface PageData {
@@ -46,7 +59,6 @@ export interface PageData {
     height: number
     backgroundColor: string
   }
-  functions: Record<string, string>
 }
 
 export enum ComponentType {

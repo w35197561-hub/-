@@ -18,11 +18,6 @@
           </el-button>
         </el-button-group>
 
-        <el-button @click="codePanelVisible = true">
-          <el-icon><Tickets /></el-icon>
-          代码
-        </el-button>
-
         <el-button @click="openPreview" type="primary">
           <el-icon><Monitor /></el-icon>
           实时预览
@@ -59,11 +54,6 @@
     <!-- 实时预览弹窗 -->
     <el-dialog v-model="livePreviewVisible" title="实时预览" width="90%" top="4vh">
       <LivePreviewPanel />
-    </el-dialog>
-
-    <!-- 代码面板弹窗 -->
-    <el-dialog v-model="codePanelVisible" title="页面函数" width="800px" top="8vh">
-      <CodePanel />
     </el-dialog>
 
     <!-- 页面列表弹窗 -->
@@ -106,7 +96,6 @@ import ComponentPanel from '../material/ComponentPanel.vue'
 import EditorCanvas from '../canvas/EditorCanvas.vue'
 import PropertyPanel from '../property/PropertyPanel.vue'
 import LivePreviewPanel from './LivePreviewPanel.vue'
-import CodePanel from './CodePanel.vue'
 import AIPanel from './AIPanel.vue'
 import {
   RefreshLeft,
@@ -116,7 +105,6 @@ import {
   Document,
   Plus,
   FolderOpened,
-  Tickets,
 } from '@element-plus/icons-vue'
 import { savePage, createPage, fetchPageList, fetchPage } from '@/services/api'
 import type { PageListItem } from '@/services/api'
@@ -126,19 +114,15 @@ const historyStore = useHistoryStore()
 
 const pageListVisible = ref(false)
 const livePreviewVisible = ref(false)
-const codePanelVisible = ref(false)
 const aiPanelVisible = ref(false)
 const isSaving = ref(false)
 const pageList = ref<PageListItem[]>([])
 
-const isPreview = ref(false)
-const pageFunctions = computed(() => editorStore.currentPage?.functions ?? {})
-
-provide('isPreview', isPreview)
-provide('pageFunctions', pageFunctions)
+// 编辑器画布里的组件默认处于设计态（isPreview = false）
+provide('isPreview', ref(false))
 
 watch(livePreviewVisible, (visible) => {
-  isPreview.value = visible
+  if (!visible) editorStore.clearPreviewState()
 })
 
 const currentPage = computed(() => editorStore.currentPage)

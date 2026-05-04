@@ -19,6 +19,7 @@
           height: `${component.style.height}px`,
           zIndex: component.style.zIndex,
           transform: `rotate(${component.style.rotate}deg)`,
+          display: editorStore.previewHiddenIds.includes(component.id) ? 'none' : undefined,
         }"
       >
         <ComponentRenderer :component="component" />
@@ -28,11 +29,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, provide } from 'vue'
+import { computed, provide, ref } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import ComponentRenderer from '@/components/canvas/components/ComponentRenderer.vue'
 
-provide('isPreview', true)
+provide('isPreview', ref(true))
 
 const editorStore = useEditorStore()
 const page = computed(() => editorStore.currentPage)

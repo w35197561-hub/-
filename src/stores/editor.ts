@@ -123,6 +123,23 @@ export const useEditorStore = defineStore('editor', () => {
     return `comp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
   }
 
+  // 预览时隐藏的组件 ID（不写入 PageData，关闭预览后清空）
+  const previewHiddenIds = ref<string[]>([])
+
+  const setPreviewHidden = (componentId: string, hidden: boolean) => {
+    if (hidden) {
+      if (!previewHiddenIds.value.includes(componentId)) {
+        previewHiddenIds.value = [...previewHiddenIds.value, componentId]
+      }
+    } else {
+      previewHiddenIds.value = previewHiddenIds.value.filter((id) => id !== componentId)
+    }
+  }
+
+  const clearPreviewState = () => {
+    previewHiddenIds.value = []
+  }
+
   const createNewPage = (title: string = '新页面') => {
     currentPage.value = {
       id: `page_${Date.now()}`,
@@ -133,7 +150,6 @@ export const useEditorStore = defineStore('editor', () => {
         height: 800,
         backgroundColor: '#ffffff',
       },
-      functions: {},
     }
   }
 
@@ -718,22 +734,6 @@ export const useEditorStore = defineStore('editor', () => {
     return currentPage.value ? JSON.stringify(currentPage.value, null, 2) : null
   }
 
-  const updatePageFunctions = (functions: Record<string, string>) => {
-    if (!currentPage.value) return
-    const historyStore = useHistoryStore()
-    const oldFunctions = { ...currentPage.value.functions }
-    const newFunctions = { ...functions }
-    const command: Command = {
-      execute: () => {
-        if (currentPage.value) currentPage.value.functions = newFunctions
-      },
-      undo: () => {
-        if (currentPage.value) currentPage.value.functions = oldFunctions
-      },
-    }
-    historyStore.executeCommand(command)
-  }
-
   const updateComponentEvents = (componentId: string, events: ComponentEvent[]) => {
     const component = getComponentById(componentId)
     if (!component) return
@@ -753,7 +753,7 @@ export const useEditorStore = defineStore('editor', () => {
 
   /** 从外部数据（如后端返回）加载页面，替换当前画布 */
   const loadPageData = (page: PageData) => {
-    currentPage.value = { functions: {}, ...page }
+    currentPage.value = { ...page }
     currentComponent.value = null
     selectedComponentIds.value = []
     const historyStore = useHistoryStore()
@@ -784,7 +784,9 @@ export const useEditorStore = defineStore('editor', () => {
     setComponentZIndex,
     normalizeZIndex,
     getMaxZIndex,
-    updatePageFunctions,
+    previewHiddenIds: computed(() => previewHiddenIds.value),
+    setPreviewHidden,
+    clearPreviewState,
     updateComponentEvents,
     exportPageData,
     loadPageData,
