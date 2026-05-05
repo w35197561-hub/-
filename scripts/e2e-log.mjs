@@ -35,7 +35,7 @@ let passed = 0
 let failed = 0
 const failures = []
 let screenshotIndex = 0
-
+// eslint-disable-next-line no-control-regex
 const stripAnsi = (str) => str.replace(/\u001B\[[0-9;]*m/g, '')
 
 function collectSpecs(suites, describeChain = []) {
