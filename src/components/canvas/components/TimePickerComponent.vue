@@ -198,7 +198,7 @@ const days = computed(() => {
 // 切换月份时若当前日超出范围则修正
 watch(days, (list) => {
   if (!list.includes(selectedDay.value)) {
-    selectedDay.value = list[list.length - 1]
+    selectedDay.value = list[list.length - 1]!
   }
 })
 
@@ -218,19 +218,19 @@ const parseValue = (val: string) => {
   // 支持 "YYYY-MM-DD HH:mm:ss" 或 "HH:mm:ss"
   const dtMatch = val.match(/^(\d{4})-(\d{2})-(\d{2})\s(\d{2}):(\d{2}):(\d{2})$/)
   if (dtMatch) {
-    selectedYear.value = dtMatch[1]
-    selectedMonth.value = dtMatch[2]
-    selectedDay.value = dtMatch[3]
-    selectedHour.value = dtMatch[4]
-    selectedMinute.value = dtMatch[5]
-    selectedSecond.value = dtMatch[6]
+    selectedYear.value = dtMatch[1]!
+    selectedMonth.value = dtMatch[2]!
+    selectedDay.value = dtMatch[3]!
+    selectedHour.value = dtMatch[4]!
+    selectedMinute.value = dtMatch[5]!
+    selectedSecond.value = dtMatch[6]!
     return
   }
   const tMatch = val.match(/^(\d{2}):(\d{2}):(\d{2})$/)
   if (tMatch) {
-    selectedHour.value = tMatch[1]
-    selectedMinute.value = tMatch[2]
-    selectedSecond.value = tMatch[3]
+    selectedHour.value = tMatch[1]!
+    selectedMinute.value = tMatch[2]!
+    selectedSecond.value = tMatch[3]!
   }
 }
 

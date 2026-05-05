@@ -143,13 +143,13 @@
                 v-if="s.setter === 'NumberSetter'"
                 :model-value="getStyleVal(s.field) as number"
                 v-bind="s.setterProps"
-                @update:model-value="(val) => setStyleVal(s.field, val)"
+                @update:model-value="(val: number) => setStyleVal(s.field, val)"
                 @change="updateComponentStyle"
               />
               <el-color-picker
                 v-else-if="s.setter === 'ColorSetter'"
                 :model-value="getStyleVal(s.field) as string"
-                @update:model-value="(val) => setStyleVal(s.field, val)"
+                @update:model-value="(val: string | null) => setStyleVal(s.field, val)"
                 @change="updateComponentStyle"
               />
             </div>
@@ -167,14 +167,14 @@
                   v-if="s.setter === 'NumberSetter'"
                   :model-value="getPropVal(s.field) as number"
                   v-bind="resolveSetterProps(s)"
-                  @update:model-value="(val) => setPropVal(s.field, val)"
+                  @update:model-value="(val: number) => setPropVal(s.field, val)"
                   @change="updateComponentProps"
                 />
                 <el-input
                   v-else-if="s.setter === 'InputSetter'"
                   :model-value="getPropVal(s.field) as string"
                   v-bind="resolveSetterProps(s)"
-                  @update:model-value="(val) => setPropVal(s.field, val)"
+                  @update:model-value="(val: string) => setPropVal(s.field, val)"
                   @change="updateComponentProps"
                 />
                 <el-input
@@ -182,7 +182,7 @@
                   :model-value="getPropVal(s.field) as string"
                   type="textarea"
                   :rows="3"
-                  @update:model-value="(val) => setPropVal(s.field, val)"
+                  @update:model-value="(val: string) => setPropVal(s.field, val)"
                   @change="updateComponentProps"
                 />
                 <el-color-picker
@@ -662,7 +662,7 @@ const saveTableRows = (rows: Record<string, unknown>[]) => {
 
 const updateTableColumn = (idx: number, key: 'title' | 'field', val: string) => {
   const cols = tableColumns.value.map((c) => ({ ...c }))
-  cols[idx][key] = val
+  cols[idx]![key] = val
   saveTableColumns(cols)
 }
 
@@ -681,7 +681,7 @@ const addTableColumn = () => {
 
 const updateTableCell = (rIdx: number, field: string, val: string) => {
   const rows = tableRows.value.map((r) => ({ ...r }))
-  rows[rIdx][field] = val
+  rows[rIdx]![field] = val
   saveTableRows(rows)
 }
 

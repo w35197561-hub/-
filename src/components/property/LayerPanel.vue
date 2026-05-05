@@ -114,6 +114,7 @@ const getComponentName = (c: ComponentData, idx: number): string => {
     [ComponentType.CHECKBOX_GROUP]: '多选复选框',
     [ComponentType.DIVIDER]: '分割线',
     [ComponentType.TIME_PICKER]: '时间选择',
+    [ComponentType.TABLE]: '表格',
   }
   const baseName = typeNames[c.type] || c.type
   // 尝试取 props 中有意义的标识
@@ -137,6 +138,7 @@ const getTypeIcon = (type: ComponentType): string => {
     [ComponentType.CHECKBOX_GROUP]: '☑',
     [ComponentType.DIVIDER]: '―',
     [ComponentType.TIME_PICKER]: '⏱',
+    [ComponentType.TABLE]: '⊟',
   }
   return icons[type] || '□'
 }
