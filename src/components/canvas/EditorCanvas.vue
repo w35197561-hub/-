@@ -126,10 +126,6 @@ const showGuidelines = computed({
   set: (value) => editorStore.setShowGuidelines(value),
 })
 
-const selectComponent = (component: ComponentData) => {
-  editorStore.selectComponent(component.id)
-}
-
 const handleComponentMouseDown = (component: ComponentData, event: MouseEvent) => {
   // 支持 shift 多选
   editorStore.selectComponent(component.id, event.shiftKey)

@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-// eslint-disable-next-line vue/multi-word-component-names
+defineOptions({ name: 'PageEditor' })
 import { ref, computed, provide, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useEditorStore } from '@/stores/editor'

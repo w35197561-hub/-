@@ -23,7 +23,11 @@ vi.mock('../db', async () => {
 
   function readMap(): Record<string, unknown> {
     ensureDataFile()
-    try { return JSON.parse(fs.readFileSync(PAGES_FILE, 'utf-8')) } catch { return {} }
+    try {
+      return JSON.parse(fs.readFileSync(PAGES_FILE, 'utf-8'))
+    } catch {
+      return {}
+    }
   }
 
   function writeMap(map: Record<string, unknown>) {
@@ -32,12 +36,26 @@ vi.mock('../db', async () => {
   }
 
   return {
-    getAllPages: () => Object.values(readMap()).sort((a: any, b: any) =>
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    ),
-    getPageById: (id: string) => (readMap() as any)[id] ?? null,
-    savePage: (page: any) => { const m = readMap(); m[page.id] = page; writeMap(m); return page },
-    deletePage: (id: string) => { const m = readMap(); if (!m[id]) return false; delete m[id]; writeMap(m); return true },
+    getAllPages: () =>
+      Object.values(readMap()).sort(
+        (a, b) =>
+          new Date((b as Record<string, string>).updatedAt).getTime() -
+          new Date((a as Record<string, string>).updatedAt).getTime(),
+      ),
+    getPageById: (id: string) => readMap()[id] ?? null,
+    savePage: (page: Record<string, unknown>) => {
+      const m = readMap()
+      m[page.id as string] = page
+      writeMap(m)
+      return page
+    },
+    deletePage: (id: string) => {
+      const m = readMap()
+      if (!m[id]) return false
+      delete m[id]
+      writeMap(m)
+      return true
+    },
   }
 })
 
@@ -130,12 +148,14 @@ describe('POST /api/pages', () => {
   })
 
   it('可以保存带有组件的页面', async () => {
-    const components = [{
-      id: 'comp_1',
-      type: 'Text',
-      style: { top: 100, left: 100, width: 200, height: 50, zIndex: 1, rotate: 0 },
-      props: { content: '文本内容' }
-    }]
+    const components = [
+      {
+        id: 'comp_1',
+        type: 'Text',
+        style: { top: 100, left: 100, width: 200, height: 50, zIndex: 1, rotate: 0 },
+        props: { content: '文本内容' },
+      },
+    ]
     const res = await request(app).post('/api/pages').send({ title: '含组件页面', components })
     expect(res.body.data.components).toHaveLength(1)
     expect(res.body.data.components[0].type).toBe('Text')
@@ -178,17 +198,19 @@ describe('PUT /api/pages/:id', () => {
 
   it('保存页面数据后组件列表正确持久化', async () => {
     const created = await createTestPage('持久化测试')
-    const components = [{
-      id: 'comp_abc',
-      type: 'Button',
-      style: { top: 50, left: 50, width: 120, height: 40, zIndex: 1, rotate: 0 },
-      props: { content: '提交' }
-    }]
+    const components = [
+      {
+        id: 'comp_abc',
+        type: 'Button',
+        style: { top: 50, left: 50, width: 120, height: 40, zIndex: 1, rotate: 0 },
+        props: { content: '提交' },
+      },
+    ]
 
     await request(app).put(`/api/pages/${created.id}`).send({
       title: created.title,
       components,
-      style: created.style
+      style: created.style,
     })
 
     const res = await request(app).get(`/api/pages/${created.id}`)
@@ -199,7 +221,7 @@ describe('PUT /api/pages/:id', () => {
 
   it('updatedAt 在更新后发生变化', async () => {
     const created = await createTestPage()
-    await new Promise(r => setTimeout(r, 10)) // 确保时间戳不同
+    await new Promise((r) => setTimeout(r, 10)) // 确保时间戳不同
 
     const updateRes = await request(app).put(`/api/pages/${created.id}`).send({ title: '新标题' })
     expect(updateRes.body.data.updatedAt).not.toBe(created.updatedAt)
@@ -251,14 +273,26 @@ describe('完整页面生命周期', () => {
 
     // 2. 保存带组件的页面数据
     const components = [
-      { id: 'c1', type: 'Text', style: { top: 100, left: 100, width: 200, height: 50, zIndex: 1, rotate: 0 }, props: { content: '标题' } },
-      { id: 'c2', type: 'Button', style: { top: 200, left: 100, width: 120, height: 40, zIndex: 2, rotate: 0 }, props: { content: '提交' } },
+      {
+        id: 'c1',
+        type: 'Text',
+        style: { top: 100, left: 100, width: 200, height: 50, zIndex: 1, rotate: 0 },
+        props: { content: '标题' },
+      },
+      {
+        id: 'c2',
+        type: 'Button',
+        style: { top: 200, left: 100, width: 120, height: 40, zIndex: 2, rotate: 0 },
+        props: { content: '提交' },
+      },
     ]
-    await request(app).put(`/api/pages/${pageId}`).send({
-      title: '完整链路测试',
-      components,
-      style: { width: 1200, height: 800, backgroundColor: '#ffffff' }
-    })
+    await request(app)
+      .put(`/api/pages/${pageId}`)
+      .send({
+        title: '完整链路测试',
+        components,
+        style: { width: 1200, height: 800, backgroundColor: '#ffffff' },
+      })
 
     // 3. 读取并验证
     const getRes = await request(app).get(`/api/pages/${pageId}`)

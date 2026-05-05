@@ -6,16 +6,16 @@
 
 ## 技术栈
 
-| 层 | 技术 |
-|---|---|
-| 前端框架 | Vue 3 + TypeScript + Vite |
-| 状态管理 | Pinia（editor store + history store） |
-| UI 组件库 | Element Plus |
-| 路由 | Vue Router 5 |
-| 后端 | Express + TypeScript（ts-node-dev） |
-| AI 接口 | OpenAI API（通过 server 代理） |
-| 测试（前端） | Vitest + @pinia/testing + happy-dom |
-| 测试（后端） | Vitest v1.x + supertest |
+| 层           | 技术                                  |
+| ------------ | ------------------------------------- |
+| 前端框架     | Vue 3 + TypeScript + Vite             |
+| 状态管理     | Pinia（editor store + history store） |
+| UI 组件库    | Element Plus                          |
+| 路由         | Vue Router 5                          |
+| 后端         | Express + TypeScript（ts-node-dev）   |
+| AI 接口      | OpenAI API（通过 server 代理）        |
+| 测试（前端） | Vitest + @pinia/testing + happy-dom   |
+| 测试（后端） | Vitest v1.x + supertest               |
 
 ## 项目结构
 
@@ -89,7 +89,7 @@ npm run dev:server   # 仅后端（Express，默认 3000）
 npm run dev:all      # 前后端同时启动
 
 # 代码检查
-npm run lint         # oxlint + eslint（自动修复）
+npm run lint         # eslint（自动修复）
 npm run format       # prettier 格式化
 
 # 测试
@@ -105,13 +105,13 @@ cd server && npm test         # 后端集成测试
 
 ### 页面接口（`/api/pages`）
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/pages` | 获取页面列表（摘要） |
-| GET | `/api/pages/:id` | 获取单个页面完整数据 |
-| POST | `/api/pages` | 新建页面 |
-| PUT | `/api/pages/:id` | 保存页面（upsert，id 不存在时创建） |
-| DELETE | `/api/pages/:id` | 删除页面 |
+| 方法   | 路径             | 说明                                |
+| ------ | ---------------- | ----------------------------------- |
+| GET    | `/api/pages`     | 获取页面列表（摘要）                |
+| GET    | `/api/pages/:id` | 获取单个页面完整数据                |
+| POST   | `/api/pages`     | 新建页面                            |
+| PUT    | `/api/pages/:id` | 保存页面（upsert，id 不存在时创建） |
+| DELETE | `/api/pages/:id` | 删除页面                            |
 
 响应格式：`{ success: boolean, data?: T, error?: string }`
 
@@ -158,16 +158,17 @@ cd server && npm test         # 后端集成测试
 各类型默认 props 和默认 style 统一在 `src/components/componentConfigs.ts` 中声明，不再硬编码于 `editor.ts`。
 
 **ComponentData（核心）：**
+
 ```typescript
 interface ComponentData {
-  id: string                               // comp_{Date.now()}_{random6}
+  id: string // comp_{Date.now()}_{random6}
   type: ComponentType
   style: ComponentStyle
   props: ComponentProps
-  events?: ComponentEvent[]                // { type: string, actions: ActionConfig[] }
-  children?: ComponentData[]               // Form 用
-  slots?: Record<string, ComponentData[]>  // Form: {col1,col2} / Tabs: {tab1,tab2}
-  isContainer?: boolean                    // Form/Tabs 为 true
+  events?: ComponentEvent[] // { type: string, actions: ActionConfig[] }
+  children?: ComponentData[] // Form 用
+  slots?: Record<string, ComponentData[]> // Form: {col1,col2} / Tabs: {tab1,tab2}
+  isContainer?: boolean // Form/Tabs 为 true
 }
 ```
 
@@ -194,6 +195,7 @@ XxxComponent.vue        → const isPreview = inject('isPreview', false)
 - **运行态**（`isPreview = true`）：组件开启原生交互，用本地 `ref` 维护临时状态
 
 **新增有交互需求的组件时，必须同时实现两套行为：**
+
 - 纯展示型（Input/Textarea/NumberInput/Radio/Checkbox）：绑定 `:disabled="!isPreview"` 或 `:readonly="!isPreview"`，预览时用本地 `ref` + 事件处理
 - 视觉占位型（Select 等假组件）：`v-if="!isPreview"` 渲染静态占位，`v-else` 渲染真实可交互实现
 
@@ -202,6 +204,7 @@ XxxComponent.vue        → const isPreview = inject('isPreview', false)
 组件事件以数据驱动方式实现，不需要用户写代码。
 
 **数据结构：**
+
 ```typescript
 // ComponentEvent：一种触发方式 + 该触发方式下的动作列表
 { type: 'click', actions: ActionConfig[] }
@@ -215,13 +218,16 @@ interface ActionConfig {
 ```
 
 **运行时状态（不写入 PageData）：**
+
 - `previewHiddenIds: string[]` — 预览时被隐藏的组件 ID，关闭预览自动清空
 
 **执行入口：** `src/components/canvas/composables/useActionExecutor.ts`
+
 - 组件在预览模式下触发事件时调用 `execute(actions)`
 - switch 按 `action.type` 分发，params 原样取用
 
 **新增动作类型步骤：**
+
 1. `src/types/index.ts` → `ActionType` 加新值，`ActionConfig.params` 加对应字段
 2. `useActionExecutor.ts` → switch 加新 case
 3. `PropertyPanel.vue` → Button 事件区域加对应参数表单
@@ -243,8 +249,12 @@ interface ActionConfig {
 
 ```typescript
 const command: Command = {
-  execute: () => { /* 执行 */ },
-  undo:    () => { /* 撤销 */ }
+  execute: () => {
+    /* 执行 */
+  },
+  undo: () => {
+    /* 撤销 */
+  },
 }
 historyStore.executeCommand(command)
 ```
@@ -270,10 +280,10 @@ historyStore.executeCommand(command)
 coder → reviewer
 ```
 
-| Agent | 文件 | 职责 | 触发时机 |
-|-------|------|------|----------|
-| coder | `.claude/agents/coder.md` | 按 6 步流程新增组件 | 用户要求新增某个组件类型 |
-| reviewer | `.claude/agents/reviewer.md` | 代码审查 → 提交推送 | 编码完成后 |
+| Agent    | 文件                         | 职责                | 触发时机                 |
+| -------- | ---------------------------- | ------------------- | ------------------------ |
+| coder    | `.claude/agents/coder.md`    | 按 6 步流程新增组件 | 用户要求新增某个组件类型 |
+| reviewer | `.claude/agents/reviewer.md` | 代码审查 → 提交推送 | 编码完成后               |
 
 ---
 
@@ -281,12 +291,12 @@ coder → reviewer
 
 以下技能文件按需读取，遇到匹配的触发场景时主动加载对应文件。
 
-| 技能 | 文件 | 触发场景 |
-|------|------|----------|
-| 代码实现规范 | `.claude/skills/coding.md` | 编写代码时，了解质量要求和实现规范 |
-| 代码审查 | `.claude/skills/code-review.md` | 用户要求 review、CR、审查代码 |
-| 自动提交 | `.claude/skills/auto-commit.md` | 用户要求提交代码、commit、推送 |
-| 创建分支 | `.claude/skills/create-branch.md` | coder 启动时，编码前建分支 |
-| 单元测试 | `.claude/skills/unit-test.md` | reviewer 审查时，检查并补写 store 测试 |
-| E2E 浏览器测试 | `.claude/skills/e2e-test.md` | reviewer 审查时，通过 Playwright MCP 验证组件在编辑器中的交互 |
-| 集成测试 | `.claude/skills/integration-test.md` | 用户要求写后端接口测试时 |
+| 技能           | 文件                                 | 触发场景                                                      |
+| -------------- | ------------------------------------ | ------------------------------------------------------------- |
+| 代码实现规范   | `.claude/skills/coding.md`           | 编写代码时，了解质量要求和实现规范                            |
+| 代码审查       | `.claude/skills/code-review.md`      | 用户要求 review、CR、审查代码                                 |
+| 自动提交       | `.claude/skills/auto-commit.md`      | 用户要求提交代码、commit、推送                                |
+| 创建分支       | `.claude/skills/create-branch.md`    | coder 启动时，编码前建分支                                    |
+| 单元测试       | `.claude/skills/unit-test.md`        | reviewer 审查时，检查并补写 store 测试                        |
+| E2E 浏览器测试 | `.claude/skills/e2e-test.md`         | reviewer 审查时，通过 Playwright MCP 验证组件在编辑器中的交互 |
+| 集成测试       | `.claude/skills/integration-test.md` | 用户要求写后端接口测试时                                      |

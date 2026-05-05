@@ -28,7 +28,7 @@ jobs:
           sed -i 's|https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/|https://registry.npmmirror.com/|g' package-lock.json
           npm ci
 
-      - name: Lint (oxlint + eslint)
+      - name: Lint (eslint)
         run: npm run lint
 
       - name: Prettier format check
