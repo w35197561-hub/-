@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useEditorStore } from '../editor'
 import { useHistoryStore } from '../history'

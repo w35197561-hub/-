@@ -30,7 +30,7 @@ const status = failed === 0 ? '✅' : '❌'
 let entry = `## ${date}  ${status} 单测  ${failed === 0 ? `${passed}/${total} 通过` : `${failed}/${total} 失败`}\n\n`
 
 if (failed > 0) {
-  const stripAnsi = (str) => str.replace(/\x1B\[[0-9;]*m/g, '')
+  const stripAnsi = (str) => str.replace(/\u001B\[[0-9;]*m/g, '')
   for (const suite of report.testResults ?? []) {
     for (const test of suite.testResults ?? []) {
       if (test.status === 'failed') {

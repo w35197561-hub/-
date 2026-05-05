@@ -36,7 +36,7 @@ let failed = 0
 const failures = []
 let screenshotIndex = 0
 
-const stripAnsi = (str) => str.replace(/\x1B\[[0-9;]*m/g, '')
+const stripAnsi = (str) => str.replace(/\u001B\[[0-9;]*m/g, '')
 
 function collectSpecs(suites, describeChain = []) {
   for (const suite of suites ?? []) {
