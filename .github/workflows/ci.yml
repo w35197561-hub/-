@@ -1,10 +1,6 @@
 name: CI
 
-on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
+on: push
 
 # 同一分支的新 push 自动取消旧的运行
 concurrency:
@@ -28,7 +24,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          sed -i 's|https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/|https://registry.npmmirror.com/|g' package-lock.json
+          npm ci
 
       - name: Lint (oxlint + eslint)
         run: npm run lint
@@ -55,7 +53,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          sed -i 's|https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/|https://registry.npmmirror.com/|g' package-lock.json
+          npm ci
 
       - name: Run unit tests with coverage
         run: npm run test:coverage
@@ -95,7 +95,9 @@ jobs:
 
       - name: Install server dependencies
         working-directory: server
-        run: npm ci
+        run: |
+          sed -i 's|https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/|https://registry.npmmirror.com/|g' package-lock.json
+          npm ci
 
       - name: TypeScript type check
         working-directory: server
@@ -130,7 +132,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          sed -i 's|https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/|https://registry.npmmirror.com/|g' package-lock.json
+          npm ci
 
       - name: Build
         run: npm run build-only
@@ -153,11 +157,15 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          sed -i 's|https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/|https://registry.npmmirror.com/|g' package-lock.json
+          npm ci
 
       - name: Install server dependencies
         working-directory: server
-        run: npm ci
+        run: |
+          sed -i 's|https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/|https://registry.npmmirror.com/|g' package-lock.json
+          npm ci
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
