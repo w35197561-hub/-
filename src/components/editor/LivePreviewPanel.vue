@@ -53,8 +53,7 @@ const validateValue = (value: unknown, rules: ValidationRule[]): string | null =
   for (const rule of rules) {
     switch (rule.type) {
       case 'required':
-        if (value === undefined || value === null || value === '')
-          return rule.message || '此项必填'
+        if (value === undefined || value === null || value === '') return rule.message || '此项必填'
         break
       case 'minLength':
         if (typeof value === 'string' && value.length < (rule.value as number))

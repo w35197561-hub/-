@@ -331,13 +331,23 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
         label: '边框',
         setter: 'SelectSetter',
         field: 'bordered',
-        setterProps: { options: [{ label: '有边框', value: true }, { label: '无边框', value: false }] },
+        setterProps: {
+          options: [
+            { label: '有边框', value: true },
+            { label: '无边框', value: false },
+          ],
+        },
       },
       {
         label: '斑马纹',
         setter: 'SelectSetter',
         field: 'striped',
-        setterProps: { options: [{ label: '开启', value: true }, { label: '关闭', value: false }] },
+        setterProps: {
+          options: [
+            { label: '开启', value: true },
+            { label: '关闭', value: false },
+          ],
+        },
       },
     ],
     styleSetters: [],

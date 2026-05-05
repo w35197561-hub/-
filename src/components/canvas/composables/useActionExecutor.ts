@@ -31,7 +31,6 @@ export function useActionExecutor() {
           else editorStore.setPreviewHidden(componentId, !isHidden)
           break
         }
-
       }
     }
   }

@@ -251,17 +251,10 @@
         </div>
 
         <!-- Table 列配置 -->
-        <div
-          class="property-section"
-          v-if="currentComponent.type === ComponentType.TABLE"
-        >
+        <div class="property-section" v-if="currentComponent.type === ComponentType.TABLE">
           <h4>列配置</h4>
           <div class="table-columns-setter">
-            <div
-              v-for="(col, idx) in tableColumns"
-              :key="idx"
-              class="table-col-card"
-            >
+            <div v-for="(col, idx) in tableColumns" :key="idx" class="table-col-card">
               <div class="table-col-row">
                 <label>标题</label>
                 <el-input
@@ -284,24 +277,18 @@
                 type="danger"
                 link
                 @click="removeTableColumn(idx)"
-              >删除列</el-button>
+                >删除列</el-button
+              >
             </div>
             <el-button :icon="Plus" size="small" @click="addTableColumn">添加列</el-button>
           </div>
         </div>
 
         <!-- Table 数据行配置 -->
-        <div
-          class="property-section"
-          v-if="currentComponent.type === ComponentType.TABLE"
-        >
+        <div class="property-section" v-if="currentComponent.type === ComponentType.TABLE">
           <h4>数据行</h4>
           <div class="table-rows-setter">
-            <div
-              v-for="(row, rIdx) in tableRows"
-              :key="rIdx"
-              class="table-row-card"
-            >
+            <div v-for="(row, rIdx) in tableRows" :key="rIdx" class="table-row-card">
               <div class="table-row-header">
                 <span>第 {{ rIdx + 1 }} 行</span>
                 <el-button
@@ -310,13 +297,10 @@
                   type="danger"
                   link
                   @click="removeTableRow(rIdx)"
-                >删除</el-button>
+                  >删除</el-button
+                >
               </div>
-              <div
-                v-for="col in tableColumns"
-                :key="col.field"
-                class="table-col-row"
-              >
+              <div v-for="col in tableColumns" :key="col.field" class="table-col-row">
                 <label>{{ col.title || col.field }}</label>
                 <el-input
                   :model-value="String(row[col.field] ?? '')"
@@ -332,7 +316,11 @@
         <!-- 输入组件校验规则 -->
         <div
           class="property-section"
-          v-if="[ComponentType.INPUT, ComponentType.TEXTAREA, ComponentType.NUMBER_INPUT].includes(currentComponent.type)"
+          v-if="
+            [ComponentType.INPUT, ComponentType.TEXTAREA, ComponentType.NUMBER_INPUT].includes(
+              currentComponent.type,
+            )
+          "
         >
           <h4>校验规则</h4>
           <div class="action-list">
@@ -353,16 +341,38 @@
                     <el-option label="最小值" value="min" />
                     <el-option label="最大值" value="max" />
                   </template>
-                  <el-option v-if="currentComponent.type === ComponentType.INPUT" label="正则匹配" value="pattern" />
+                  <el-option
+                    v-if="currentComponent.type === ComponentType.INPUT"
+                    label="正则匹配"
+                    value="pattern"
+                  />
                 </el-select>
-                <el-button :icon="Minus" size="small" type="danger" link @click="removeRule(rIdx)" />
+                <el-button
+                  :icon="Minus"
+                  size="small"
+                  type="danger"
+                  link
+                  @click="removeRule(rIdx)"
+                />
               </div>
               <div v-if="rule.type !== 'required'" class="action-param-row">
                 <label>{{ rule.type === 'pattern' ? '正则' : '数值' }}</label>
                 <el-input
                   :model-value="String(rule.value ?? '')"
                   size="small"
-                  @update:model-value="(v: string) => updateRule(rIdx, 'value', rule.type === 'minLength' || rule.type === 'maxLength' || rule.type === 'min' || rule.type === 'max' ? Number(v) : v)"
+                  @update:model-value="
+                    (v: string) =>
+                      updateRule(
+                        rIdx,
+                        'value',
+                        rule.type === 'minLength' ||
+                          rule.type === 'maxLength' ||
+                          rule.type === 'min' ||
+                          rule.type === 'max'
+                          ? Number(v)
+                          : v,
+                      )
+                  "
                 />
               </div>
               <div class="action-param-row">
@@ -380,17 +390,10 @@
         </div>
 
         <!-- Button 交互事件 -->
-        <div
-          class="property-section"
-          v-if="currentComponent.type === ComponentType.BUTTON"
-        >
+        <div class="property-section" v-if="currentComponent.type === ComponentType.BUTTON">
           <h4>交互事件</h4>
           <div class="action-list">
-            <div
-              v-for="(action, aIdx) in clickActions"
-              :key="aIdx"
-              class="action-card"
-            >
+            <div v-for="(action, aIdx) in clickActions" :key="aIdx" class="action-card">
               <div class="action-card-header">
                 <el-select
                   :model-value="action.type"
@@ -617,7 +620,10 @@ const deleteCurrentComponent = () => {
 }
 
 // ---- TABLE helpers ----
-interface TableColDef { title: string; field: string }
+interface TableColDef {
+  title: string
+  field: string
+}
 
 const tableColumns = computed<TableColDef[]>(() => {
   if (currentComponent.value?.type !== ComponentType.TABLE) return []
@@ -641,7 +647,10 @@ const tableRows = computed<Record<string, unknown>[]>(() => {
 
 const saveTableColumns = (cols: TableColDef[]) => {
   if (!currentComponent.value) return
-  setPropVal('columns', cols.map((c) => `${c.title}:${c.field}`))
+  setPropVal(
+    'columns',
+    cols.map((c) => `${c.title}:${c.field}`),
+  )
   updateComponentProps()
 }
 
@@ -663,7 +672,10 @@ const removeTableColumn = (idx: number) => {
 }
 
 const addTableColumn = () => {
-  const cols = [...tableColumns.value, { title: '新列', field: `col${tableColumns.value.length + 1}` }]
+  const cols = [
+    ...tableColumns.value,
+    { title: '新列', field: `col${tableColumns.value.length + 1}` },
+  ]
   saveTableColumns(cols)
 }
 
@@ -680,7 +692,9 @@ const removeTableRow = (rIdx: number) => {
 
 const addTableRow = () => {
   const emptyRow: Record<string, unknown> = {}
-  tableColumns.value.forEach((c) => { emptyRow[c.field] = '' })
+  tableColumns.value.forEach((c) => {
+    emptyRow[c.field] = ''
+  })
   saveTableRows([...tableRows.value, emptyRow])
 }
 
@@ -704,9 +718,7 @@ const removeRule = (idx: number) => {
 }
 
 const updateRule = (idx: number, key: keyof ValidationRule, value: unknown) => {
-  const updated = componentRules.value.map((r, i) =>
-    i === idx ? { ...r, [key]: value } : r,
-  )
+  const updated = componentRules.value.map((r, i) => (i === idx ? { ...r, [key]: value } : r))
   saveRules(updated)
 }
 
@@ -723,7 +735,9 @@ const clickActions = computed<ActionConfig[]>(() => {
 
 const saveClickActions = (actions: ActionConfig[]) => {
   if (!currentComponent.value) return
-  const existing = (currentComponent.value.events ?? []).filter((e: ComponentEvent) => e.type !== 'click')
+  const existing = (currentComponent.value.events ?? []).filter(
+    (e: ComponentEvent) => e.type !== 'click',
+  )
   editorStore.updateComponentEvents(currentComponent.value.id, [
     ...existing,
     { type: 'click', actions },

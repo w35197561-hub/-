@@ -27,7 +27,7 @@ const props = defineProps<{ component: ComponentData }>()
 
 const isPreview = inject<Ref<boolean>>('isPreview', ref(false))
 const editorStore = useEditorStore()
-const localValue = ref<number | ''>(props.component.props.value as number ?? '')
+const localValue = ref<number | ''>((props.component.props.value as number) ?? '')
 
 const { baseStyle } = useComponentStyle(props.component.style)
 
