@@ -77,9 +77,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # ai.test.ts 已 mock openai，不会真实调用，用占位值即可
+      # ai.test.ts 使用规则引擎模式，不需要真实 API Key
       # 若需要真实调用，在 GitHub Secrets 中配置 DEEPSEEK_API_KEY
-      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY || 'ci-placeholder-key' }}
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       DEEPSEEK_BASE_URL: https://api.deepseek.com
       DEEPSEEK_MODEL: deepseek-chat
       PORT: 3001
