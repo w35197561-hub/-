@@ -85,6 +85,7 @@ export enum ComponentType {
   DIVIDER = 'Divider',
   TIME_PICKER = 'TimePicker',
   TABLE = 'Table',
+  CASCADER = 'Cascader',
 }
 
 export type SetterType =
@@ -94,6 +95,8 @@ export type SetterType =
   | 'ColorSetter'
   | 'SelectSetter'
   | 'StringListSetter'
+  | 'SwitchSetter'
+  | 'CascaderOptionsSetter'
 
 export interface PropSetter {
   label: string

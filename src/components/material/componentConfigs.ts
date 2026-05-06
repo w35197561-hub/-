@@ -352,4 +352,55 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     ],
     styleSetters: [],
   },
+
+  [ComponentType.CASCADER]: {
+    defaultProps: {
+      placeholder: '请选择',
+      clearable: true,
+      options: [
+        {
+          label: '浙江',
+          value: 'zj',
+          children: [
+            { label: '杭州', value: 'hz' },
+            { label: '宁波', value: 'nb' },
+          ],
+        },
+        {
+          label: '江苏',
+          value: 'js',
+          children: [
+            { label: '南京', value: 'nj' },
+            { label: '苏州', value: 'sz' },
+          ],
+        },
+      ],
+    },
+    defaultStyle: { width: 240, height: 40, borderRadius: 0 },
+    propSetters: [
+      { label: '占位文本', setter: 'InputSetter', field: 'placeholder' },
+      { label: '可清空', setter: 'SwitchSetter', field: 'clearable' },
+      { label: '选项配置', setter: 'CascaderOptionsSetter', field: 'options' },
+    ],
+    styleSetters: [
+      {
+        label: '宽度',
+        setter: 'NumberSetter',
+        field: 'width',
+        setterProps: { min: 80, max: 600, step: 4 },
+      },
+      {
+        label: '高度',
+        setter: 'NumberSetter',
+        field: 'height',
+        setterProps: { min: 28, max: 60, step: 2 },
+      },
+      {
+        label: '圆角',
+        setter: 'NumberSetter',
+        field: 'borderRadius',
+        setterProps: { min: 0, max: 50, step: 1 },
+      },
+    ],
+  },
 }

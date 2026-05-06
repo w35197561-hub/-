@@ -245,6 +245,102 @@
                     >添加选项</el-button
                   >
                 </div>
+                <el-switch
+                  v-else-if="s.setter === 'SwitchSetter'"
+                  :model-value="getPropVal(s.field) as boolean"
+                  @update:model-value="
+                    (val: boolean) => {
+                      setPropVal(s.field, val)
+                      updateComponentProps()
+                    }
+                  "
+                />
+                <!-- CascaderOptionsSetter：支持一级/二级选项增删改 -->
+                <div v-else-if="s.setter === 'CascaderOptionsSetter'" class="cascader-opts-setter">
+                  <div
+                    v-for="(opt, oIdx) in (getPropVal(s.field) as CascaderOption[]) ?? []"
+                    :key="oIdx"
+                    class="cascader-opt-card"
+                  >
+                    <!-- 一级选项行 -->
+                    <div class="cascader-opt-row">
+                      <el-input
+                        :model-value="opt.label"
+                        size="small"
+                        placeholder="标签"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: string) => updateCascaderOption(s.field, oIdx, 'label', v)
+                        "
+                      />
+                      <el-input
+                        :model-value="opt.value"
+                        size="small"
+                        placeholder="值"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: string) => updateCascaderOption(s.field, oIdx, 'value', v)
+                        "
+                      />
+                      <el-button
+                        size="small"
+                        :type="cascaderExpandedIdx === oIdx ? 'primary' : 'default'"
+                        plain
+                        @click="toggleCascaderExpand(oIdx)"
+                        style="flex-shrink: 0"
+                      >
+                        子项
+                      </el-button>
+                      <el-button
+                        :icon="Minus"
+                        circle
+                        size="small"
+                        type="danger"
+                        @click="removeCascaderOption(s.field, oIdx)"
+                      />
+                    </div>
+                    <!-- 展开后显示 children -->
+                    <div v-if="cascaderExpandedIdx === oIdx" class="cascader-children-list">
+                      <div
+                        v-for="(child, cIdx) in opt.children ?? []"
+                        :key="cIdx"
+                        class="cascader-opt-row cascader-child-row"
+                      >
+                        <el-input
+                          :model-value="child.label"
+                          size="small"
+                          placeholder="标签"
+                          style="flex: 1"
+                          @update:model-value="
+                            (v: string) => updateCascaderChild(s.field, oIdx, cIdx, 'label', v)
+                          "
+                        />
+                        <el-input
+                          :model-value="child.value"
+                          size="small"
+                          placeholder="值"
+                          style="flex: 1"
+                          @update:model-value="
+                            (v: string) => updateCascaderChild(s.field, oIdx, cIdx, 'value', v)
+                          "
+                        />
+                        <el-button
+                          :icon="Minus"
+                          circle
+                          size="small"
+                          type="danger"
+                          @click="removeCascaderChild(s.field, oIdx, cIdx)"
+                        />
+                      </div>
+                      <el-button :icon="Plus" size="small" @click="addCascaderChild(s.field, oIdx)"
+                        >添加子选项</el-button
+                      >
+                    </div>
+                  </div>
+                  <el-button :icon="Plus" size="small" @click="addCascaderOption(s.field)"
+                    >添加选项</el-button
+                  >
+                </div>
               </div>
             </template>
           </div>
@@ -617,6 +713,75 @@ const moveLayer = (direction: 'up' | 'down' | 'top' | 'bottom') => {
 const deleteCurrentComponent = () => {
   if (!currentComponent.value) return
   editorStore.deleteComponent(currentComponent.value.id)
+}
+
+// ---- CascaderOptionsSetter helpers ----
+interface CascaderOption {
+  label: string
+  value: string
+  children?: CascaderOption[]
+}
+
+const cascaderExpandedIdx = ref<number | null>(null)
+
+const toggleCascaderExpand = (idx: number) => {
+  cascaderExpandedIdx.value = cascaderExpandedIdx.value === idx ? null : idx
+}
+
+const getCascaderOptions = (field: string): CascaderOption[] => [
+  ...((getPropVal(field) as CascaderOption[] | undefined) ?? []),
+]
+
+const saveCascaderOptions = (field: string, opts: CascaderOption[]) => {
+  setPropVal(field, opts)
+  updateComponentProps()
+}
+
+const updateCascaderOption = (field: string, oIdx: number, key: 'label' | 'value', val: string) => {
+  const opts = getCascaderOptions(field)
+  opts[oIdx] = { ...opts[oIdx]!, [key]: val }
+  saveCascaderOptions(field, opts)
+}
+
+const removeCascaderOption = (field: string, oIdx: number) => {
+  const opts = getCascaderOptions(field).filter((_, i) => i !== oIdx)
+  if (cascaderExpandedIdx.value === oIdx) cascaderExpandedIdx.value = null
+  saveCascaderOptions(field, opts)
+}
+
+const addCascaderOption = (field: string) => {
+  const opts = getCascaderOptions(field)
+  opts.push({ label: '新选项', value: `opt${opts.length + 1}`, children: [] })
+  saveCascaderOptions(field, opts)
+}
+
+const updateCascaderChild = (
+  field: string,
+  oIdx: number,
+  cIdx: number,
+  key: 'label' | 'value',
+  val: string,
+) => {
+  const opts = getCascaderOptions(field)
+  const children = [...(opts[oIdx]?.children ?? [])]
+  children[cIdx] = { ...children[cIdx]!, [key]: val }
+  opts[oIdx] = { ...opts[oIdx]!, children }
+  saveCascaderOptions(field, opts)
+}
+
+const removeCascaderChild = (field: string, oIdx: number, cIdx: number) => {
+  const opts = getCascaderOptions(field)
+  const children = (opts[oIdx]?.children ?? []).filter((_, i) => i !== cIdx)
+  opts[oIdx] = { ...opts[oIdx]!, children }
+  saveCascaderOptions(field, opts)
+}
+
+const addCascaderChild = (field: string, oIdx: number) => {
+  const opts = getCascaderOptions(field)
+  const children = [...(opts[oIdx]?.children ?? [])]
+  children.push({ label: '子选项', value: `child${children.length + 1}` })
+  opts[oIdx] = { ...opts[oIdx]!, children }
+  saveCascaderOptions(field, opts)
 }
 
 // ---- TABLE helpers ----
@@ -1026,5 +1191,39 @@ const updateActionParam = (idx: number, key: string, value: unknown) => {
   color: #888;
   width: 48px;
   flex-shrink: 0;
+}
+
+.cascader-opts-setter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cascader-opt-card {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cascader-opt-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cascader-children-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 8px;
+  border-left: 2px solid #e4e7ed;
+}
+
+.cascader-child-row {
+  background: #fafafa;
+  padding: 2px 0;
 }
 </style>
