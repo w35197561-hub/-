@@ -46,6 +46,7 @@ import {
   Minus,
   Timer,
   List,
+  Share,
 } from '@element-plus/icons-vue'
 
 const componentGroups = [
@@ -63,6 +64,7 @@ const componentGroups = [
       { type: ComponentType.CHECKBOX_GROUP, name: '多选复选框', icon: Grid },
       { type: ComponentType.DIVIDER, name: '分割线', icon: Minus },
       { type: ComponentType.TIME_PICKER, name: '时间选择', icon: Timer },
+      { type: ComponentType.CASCADER, name: '级联选择', icon: Share },
     ],
   },
   {

@@ -245,6 +245,102 @@
                     >添加选项</el-button
                   >
                 </div>
+                <el-switch
+                  v-else-if="s.setter === 'SwitchSetter'"
+                  :model-value="getPropVal(s.field) as boolean"
+                  @update:model-value="
+                    (val: boolean) => {
+                      setPropVal(s.field, val)
+                      updateComponentProps()
+                    }
+                  "
+                />
+                <!-- CascaderOptionsSetter：支持一级/二级选项增删改 -->
+                <div v-else-if="s.setter === 'CascaderOptionsSetter'" class="cascader-opts-setter">
+                  <div
+                    v-for="(opt, oIdx) in (getPropVal(s.field) as CascaderOption[]) ?? []"
+                    :key="oIdx"
+                    class="cascader-opt-card"
+                  >
+                    <!-- 一级选项行 -->
+                    <div class="cascader-opt-row">
+                      <el-input
+                        :model-value="opt.label"
+                        size="small"
+                        placeholder="标签"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: string) => updateCascaderOption(s.field, oIdx, 'label', v)
+                        "
+                      />
+                      <el-input
+                        :model-value="opt.value"
+                        size="small"
+                        placeholder="值"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: string) => updateCascaderOption(s.field, oIdx, 'value', v)
+                        "
+                      />
+                      <el-button
+                        size="small"
+                        :type="cascaderExpandedIdx === oIdx ? 'primary' : 'default'"
+                        plain
+                        @click="toggleCascaderExpand(oIdx)"
+                        style="flex-shrink: 0"
+                      >
+                        子项
+                      </el-button>
+                      <el-button
+                        :icon="Minus"
+                        circle
+                        size="small"
+                        type="danger"
+                        @click="removeCascaderOption(s.field, oIdx)"
+                      />
+                    </div>
+                    <!-- 展开后显示 children -->
+                    <div v-if="cascaderExpandedIdx === oIdx" class="cascader-children-list">
+                      <div
+                        v-for="(child, cIdx) in opt.children ?? []"
+                        :key="cIdx"
+                        class="cascader-opt-row cascader-child-row"
+                      >
+                        <el-input
+                          :model-value="child.label"
+                          size="small"
+                          placeholder="标签"
+                          style="flex: 1"
+                          @update:model-value="
+                            (v: string) => updateCascaderChild(s.field, oIdx, cIdx, 'label', v)
+                          "
+                        />
+                        <el-input
+                          :model-value="child.value"
+                          size="small"
+                          placeholder="值"
+                          style="flex: 1"
+                          @update:model-value="
+                            (v: string) => updateCascaderChild(s.field, oIdx, cIdx, 'value', v)
+                          "
+                        />
+                        <el-button
+                          :icon="Minus"
+                          circle
+                          size="small"
+                          type="danger"
+                          @click="removeCascaderChild(s.field, oIdx, cIdx)"
+                        />
+                      </div>
+                      <el-button :icon="Plus" size="small" @click="addCascaderChild(s.field, oIdx)"
+                        >添加子选项</el-button
+                      >
+                    </div>
+                  </div>
+                  <el-button :icon="Plus" size="small" @click="addCascaderOption(s.field)"
+                    >添加选项</el-button
+                  >
+                </div>
               </div>
             </template>
           </div>
@@ -389,102 +485,126 @@
           </div>
         </div>
 
-        <!-- Button 交互事件 -->
-        <div class="property-section" v-if="currentComponent.type === ComponentType.BUTTON">
-          <h4>交互事件</h4>
-          <div class="action-list">
-            <div v-for="(action, aIdx) in clickActions" :key="aIdx" class="action-card">
-              <div class="action-card-header">
-                <el-select
-                  :model-value="action.type"
-                  size="small"
-                  style="flex: 1"
-                  @update:model-value="(v: ActionType) => updateActionType(aIdx, v)"
-                >
-                  <el-option label="弹出提示" value="alert" />
-                  <el-option label="跳转链接" value="link" />
-                  <el-option label="显示/隐藏组件" value="toggleVisible" />
-                </el-select>
-                <el-button
-                  :icon="Minus"
-                  size="small"
-                  type="danger"
-                  link
-                  @click="removeAction(aIdx)"
-                />
+        <!-- 交互事件（由 componentConfigs.events 驱动，声明了 events 的组件才显示） -->
+        <template v-if="componentConfig?.events?.length">
+          <div
+            v-for="triggerDef in componentConfig.events"
+            :key="triggerDef.trigger"
+            class="property-section"
+          >
+            <h4>{{ triggerDef.label }}</h4>
+            <div class="action-list">
+              <div
+                v-for="(action, aIdx) in getTriggerActions(triggerDef.trigger)"
+                :key="aIdx"
+                class="action-card"
+              >
+                <div class="action-card-header">
+                  <el-select
+                    :model-value="action.type"
+                    size="small"
+                    style="flex: 1"
+                    @update:model-value="
+                      (v: ActionType) => updateActionType(triggerDef.trigger, aIdx, v)
+                    "
+                  >
+                    <el-option label="弹出提示" value="alert" />
+                    <el-option label="跳转链接" value="link" />
+                    <el-option label="显示/隐藏组件" value="toggleVisible" />
+                  </el-select>
+                  <el-button
+                    :icon="Minus"
+                    size="small"
+                    type="danger"
+                    link
+                    @click="removeAction(triggerDef.trigger, aIdx)"
+                  />
+                </div>
+
+                <!-- alert params -->
+                <template v-if="action.type === 'alert'">
+                  <div class="action-param-row">
+                    <label>消息内容</label>
+                    <el-input
+                      :model-value="action.params.message ?? ''"
+                      size="small"
+                      @update:model-value="
+                        (v: string) => updateActionParam(triggerDef.trigger, aIdx, 'message', v)
+                      "
+                    />
+                  </div>
+                </template>
+
+                <!-- link params -->
+                <template v-else-if="action.type === 'link'">
+                  <div class="action-param-row">
+                    <label>URL</label>
+                    <el-input
+                      :model-value="action.params.url ?? ''"
+                      size="small"
+                      placeholder="https://"
+                      @update:model-value="
+                        (v: string) => updateActionParam(triggerDef.trigger, aIdx, 'url', v)
+                      "
+                    />
+                  </div>
+                  <div class="action-param-row">
+                    <label>打开方式</label>
+                    <el-select
+                      :model-value="action.params.openInNew ?? true"
+                      size="small"
+                      @update:model-value="
+                        (v: boolean) => updateActionParam(triggerDef.trigger, aIdx, 'openInNew', v)
+                      "
+                    >
+                      <el-option label="新窗口" :value="true" />
+                      <el-option label="当前窗口" :value="false" />
+                    </el-select>
+                  </div>
+                </template>
+
+                <!-- toggleVisible params -->
+                <template v-else-if="action.type === 'toggleVisible'">
+                  <div class="action-param-row">
+                    <label>目标组件</label>
+                    <el-select
+                      :model-value="action.params.componentId ?? ''"
+                      size="small"
+                      @update:model-value="
+                        (v: string) => updateActionParam(triggerDef.trigger, aIdx, 'componentId', v)
+                      "
+                    >
+                      <el-option
+                        v-for="comp in otherComponents"
+                        :key="comp.id"
+                        :label="`${comp.type} (${comp.id.slice(-6)})`"
+                        :value="comp.id"
+                      />
+                    </el-select>
+                  </div>
+                  <div class="action-param-row">
+                    <label>操作</label>
+                    <el-select
+                      :model-value="action.params.operation ?? 'toggle'"
+                      size="small"
+                      @update:model-value="
+                        (v: string) => updateActionParam(triggerDef.trigger, aIdx, 'operation', v)
+                      "
+                    >
+                      <el-option label="切换显示" value="toggle" />
+                      <el-option label="显示" value="show" />
+                      <el-option label="隐藏" value="hide" />
+                    </el-select>
+                  </div>
+                </template>
               </div>
 
-              <!-- alert params -->
-              <template v-if="action.type === 'alert'">
-                <div class="action-param-row">
-                  <label>消息内容</label>
-                  <el-input
-                    :model-value="action.params.message ?? ''"
-                    size="small"
-                    @update:model-value="(v: string) => updateActionParam(aIdx, 'message', v)"
-                  />
-                </div>
-              </template>
-
-              <!-- link params -->
-              <template v-else-if="action.type === 'link'">
-                <div class="action-param-row">
-                  <label>URL</label>
-                  <el-input
-                    :model-value="action.params.url ?? ''"
-                    size="small"
-                    placeholder="https://"
-                    @update:model-value="(v: string) => updateActionParam(aIdx, 'url', v)"
-                  />
-                </div>
-                <div class="action-param-row">
-                  <label>打开方式</label>
-                  <el-select
-                    :model-value="action.params.openInNew ?? true"
-                    size="small"
-                    @update:model-value="(v: boolean) => updateActionParam(aIdx, 'openInNew', v)"
-                  >
-                    <el-option label="新窗口" :value="true" />
-                    <el-option label="当前窗口" :value="false" />
-                  </el-select>
-                </div>
-              </template>
-
-              <!-- toggleVisible params -->
-              <template v-else-if="action.type === 'toggleVisible'">
-                <div class="action-param-row">
-                  <label>目标组件</label>
-                  <el-select
-                    :model-value="action.params.componentId ?? ''"
-                    size="small"
-                    @update:model-value="(v: string) => updateActionParam(aIdx, 'componentId', v)"
-                  >
-                    <el-option
-                      v-for="comp in otherComponents"
-                      :key="comp.id"
-                      :label="`${comp.type} (${comp.id.slice(-6)})`"
-                      :value="comp.id"
-                    />
-                  </el-select>
-                </div>
-                <div class="action-param-row">
-                  <label>操作</label>
-                  <el-select
-                    :model-value="action.params.operation ?? 'toggle'"
-                    size="small"
-                    @update:model-value="(v: string) => updateActionParam(aIdx, 'operation', v)"
-                  >
-                    <el-option label="切换显示" value="toggle" />
-                    <el-option label="显示" value="show" />
-                    <el-option label="隐藏" value="hide" />
-                  </el-select>
-                </div>
-              </template>
+              <el-button :icon="Plus" size="small" @click="addAction(triggerDef.trigger)"
+                >添加动作</el-button
+              >
             </div>
-
-            <el-button :icon="Plus" size="small" @click="addAction">添加动作</el-button>
           </div>
-        </div>
+        </template>
       </el-scrollbar>
     </div>
   </div>
@@ -619,6 +739,75 @@ const deleteCurrentComponent = () => {
   editorStore.deleteComponent(currentComponent.value.id)
 }
 
+// ---- CascaderOptionsSetter helpers ----
+interface CascaderOption {
+  label: string
+  value: string
+  children?: CascaderOption[]
+}
+
+const cascaderExpandedIdx = ref<number | null>(null)
+
+const toggleCascaderExpand = (idx: number) => {
+  cascaderExpandedIdx.value = cascaderExpandedIdx.value === idx ? null : idx
+}
+
+const getCascaderOptions = (field: string): CascaderOption[] => [
+  ...((getPropVal(field) as CascaderOption[] | undefined) ?? []),
+]
+
+const saveCascaderOptions = (field: string, opts: CascaderOption[]) => {
+  setPropVal(field, opts)
+  updateComponentProps()
+}
+
+const updateCascaderOption = (field: string, oIdx: number, key: 'label' | 'value', val: string) => {
+  const opts = getCascaderOptions(field)
+  opts[oIdx] = { ...opts[oIdx]!, [key]: val }
+  saveCascaderOptions(field, opts)
+}
+
+const removeCascaderOption = (field: string, oIdx: number) => {
+  const opts = getCascaderOptions(field).filter((_, i) => i !== oIdx)
+  if (cascaderExpandedIdx.value === oIdx) cascaderExpandedIdx.value = null
+  saveCascaderOptions(field, opts)
+}
+
+const addCascaderOption = (field: string) => {
+  const opts = getCascaderOptions(field)
+  opts.push({ label: '新选项', value: `opt${opts.length + 1}`, children: [] })
+  saveCascaderOptions(field, opts)
+}
+
+const updateCascaderChild = (
+  field: string,
+  oIdx: number,
+  cIdx: number,
+  key: 'label' | 'value',
+  val: string,
+) => {
+  const opts = getCascaderOptions(field)
+  const children = [...(opts[oIdx]?.children ?? [])]
+  children[cIdx] = { ...children[cIdx]!, [key]: val }
+  opts[oIdx] = { ...opts[oIdx]!, children }
+  saveCascaderOptions(field, opts)
+}
+
+const removeCascaderChild = (field: string, oIdx: number, cIdx: number) => {
+  const opts = getCascaderOptions(field)
+  const children = (opts[oIdx]?.children ?? []).filter((_, i) => i !== cIdx)
+  opts[oIdx] = { ...opts[oIdx]!, children }
+  saveCascaderOptions(field, opts)
+}
+
+const addCascaderChild = (field: string, oIdx: number) => {
+  const opts = getCascaderOptions(field)
+  const children = [...(opts[oIdx]?.children ?? [])]
+  children.push({ label: '子选项', value: `child${children.length + 1}` })
+  opts[oIdx] = { ...opts[oIdx]!, children }
+  saveCascaderOptions(field, opts)
+}
+
 // ---- TABLE helpers ----
 interface TableColDef {
   title: string
@@ -722,48 +911,56 @@ const updateRule = (idx: number, key: keyof ValidationRule, value: unknown) => {
   saveRules(updated)
 }
 
-// ---- Button action helpers ----
+// ---- 通用交互事件 helpers（由 componentConfigs.events 驱动）----
 const otherComponents = computed(() => {
   if (!editorStore.currentPage || !currentComponent.value) return []
   return editorStore.currentPage.components.filter((c) => c.id !== currentComponent.value!.id)
 })
 
-const clickActions = computed<ActionConfig[]>(() => {
+/** 获取某个 trigger 对应的 actions 列表 */
+const getTriggerActions = (trigger: string): ActionConfig[] => {
   if (!currentComponent.value) return []
-  return currentComponent.value.events?.find((e) => e.type === 'click')?.actions ?? []
-})
+  return currentComponent.value.events?.find((e) => e.type === trigger)?.actions ?? []
+}
 
-const saveClickActions = (actions: ActionConfig[]) => {
+/** 将更新后的 actions 写回 store，保留其他 trigger 的事件记录 */
+const saveTriggerActions = (trigger: string, actions: ActionConfig[]) => {
   if (!currentComponent.value) return
   const existing = (currentComponent.value.events ?? []).filter(
-    (e: ComponentEvent) => e.type !== 'click',
+    (e: ComponentEvent) => e.type !== trigger,
   )
   editorStore.updateComponentEvents(currentComponent.value.id, [
     ...existing,
-    { type: 'click', actions },
+    { type: trigger, actions },
   ])
 }
 
-const addAction = () => {
-  saveClickActions([...clickActions.value, { type: 'alert', params: { message: '' } }])
+const addAction = (trigger: string) => {
+  saveTriggerActions(trigger, [
+    ...getTriggerActions(trigger),
+    { type: 'alert', params: { message: '' } },
+  ])
 }
 
-const removeAction = (idx: number) => {
-  saveClickActions(clickActions.value.filter((_, i) => i !== idx))
+const removeAction = (trigger: string, idx: number) => {
+  saveTriggerActions(
+    trigger,
+    getTriggerActions(trigger).filter((_, i) => i !== idx),
+  )
 }
 
-const updateActionType = (idx: number, type: ActionType) => {
-  const updated = clickActions.value.map((a, i) =>
+const updateActionType = (trigger: string, idx: number, type: ActionType) => {
+  const updated = getTriggerActions(trigger).map((a, i) =>
     i === idx ? ({ type, params: {} } as ActionConfig) : a,
   )
-  saveClickActions(updated)
+  saveTriggerActions(trigger, updated)
 }
 
-const updateActionParam = (idx: number, key: string, value: unknown) => {
-  const updated = clickActions.value.map((a, i) =>
+const updateActionParam = (trigger: string, idx: number, key: string, value: unknown) => {
+  const updated = getTriggerActions(trigger).map((a, i) =>
     i === idx ? { ...a, params: { ...a.params, [key]: value } } : a,
   )
-  saveClickActions(updated)
+  saveTriggerActions(trigger, updated)
 }
 </script>
 
@@ -1026,5 +1223,39 @@ const updateActionParam = (idx: number, key: string, value: unknown) => {
   color: #888;
   width: 48px;
   flex-shrink: 0;
+}
+
+.cascader-opts-setter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cascader-opt-card {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cascader-opt-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cascader-children-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 8px;
+  border-left: 2px solid #e4e7ed;
+}
+
+.cascader-child-row {
+  background: #fafafa;
+  padding: 2px 0;
 }
 </style>

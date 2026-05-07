@@ -165,10 +165,12 @@
 <script setup lang="ts">
 import { computed, inject, ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import type { ComponentData } from '@/types'
+import { useActionExecutor } from '../composables/useActionExecutor'
 
 const props = defineProps<{ component: ComponentData }>()
 
 const isPreview = inject('isPreview', false)
+const { execute } = useActionExecutor()
 
 const panelOpen = ref(false)
 const rootEl = ref<HTMLElement | null>(null)
@@ -291,6 +293,10 @@ const selectSecond = (v: string) => {
 const confirmPanel = () => {
   displayValue.value = `${selectedYear.value}-${selectedMonth.value}-${selectedDay.value} ${selectedHour.value}:${selectedMinute.value}:${selectedSecond.value}`
   panelOpen.value = false
+  if (isPreview) {
+    const ev = props.component.events?.find((e) => e.type === 'change')
+    if (ev) execute(ev.actions)
+  }
 }
 
 const cancelPanel = () => {

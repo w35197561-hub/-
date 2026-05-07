@@ -21,10 +21,12 @@
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
 import type { ComponentData } from '@/types'
+import { useActionExecutor } from '../composables/useActionExecutor'
 
 const props = defineProps<{ component: ComponentData }>()
 
 const isPreview = inject('isPreview', false)
+const { execute } = useActionExecutor()
 
 const options = computed(() => (props.component.props.options as string[] | undefined) ?? [])
 
@@ -38,6 +40,9 @@ function toggleOption(option: string) {
   const idx = localValues.value.indexOf(option)
   if (idx === -1) localValues.value.push(option)
   else localValues.value.splice(idx, 1)
+  if (!isPreview) return
+  const ev = props.component.events?.find((e) => e.type === 'change')
+  if (ev) execute(ev.actions)
 }
 
 const wrapperStyle = computed(() => ({

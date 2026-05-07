@@ -12,7 +12,7 @@
         :value="option"
         :checked="option === (isPreview ? localValue : defaultValue)"
         :disabled="!isPreview"
-        @change="localValue = option"
+        @change="handleChange(option)"
       />
       <span :style="labelStyle">{{ option }}</span>
     </label>
@@ -22,10 +22,12 @@
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
 import type { ComponentData } from '@/types'
+import { useActionExecutor } from '../composables/useActionExecutor'
 
 const props = defineProps<{ component: ComponentData }>()
 
 const isPreview = inject('isPreview', false)
+const { execute } = useActionExecutor()
 
 const options = computed(() => (props.component.props.options as string[] | undefined) ?? [])
 
@@ -34,6 +36,13 @@ const defaultValue = computed(
 )
 
 const localValue = ref(defaultValue.value)
+
+const handleChange = (option: string) => {
+  localValue.value = option
+  if (!isPreview) return
+  const ev = props.component.events?.find((e) => e.type === 'change')
+  if (ev) execute(ev.actions)
+}
 
 const wrapperStyle = computed(() => ({
   width: '100%',

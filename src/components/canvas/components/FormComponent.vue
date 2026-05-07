@@ -25,22 +25,34 @@
         </div>
       </div>
     </div>
+    <!-- 运行态：提交按钮 -->
+    <div v-if="isPreview" class="form-footer">
+      <button class="form-submit-btn" @click="handleSubmit">提交</button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import type { ComponentData } from '@/types'
 import ComponentRenderer from './ComponentRenderer.vue'
 import { useContainerDrop } from './composables/useContainerDrop'
+import { useActionExecutor } from '../composables/useActionExecutor'
 
 const props = defineProps<{
   component: ComponentData
 }>()
 
 const editorStore = useEditorStore()
+const isPreview = inject('isPreview', false)
+const { execute } = useActionExecutor()
 const currentComponentId = computed(() => editorStore.currentComponent?.id)
+
+const handleSubmit = () => {
+  const ev = props.component.events?.find((e) => e.type === 'submit')
+  if (ev) execute(ev.actions)
+}
 
 // 列配置
 const columns = computed(() => {
@@ -146,5 +158,30 @@ const { dragOverSlot, handleDragOver, handleDragLeave, handleDrop, handleChildMo
   color: #409eff;
   font-size: 12px;
   pointer-events: none;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  border-top: 1px solid #ebeef5;
+  background: #fafafa;
+  flex-shrink: 0;
+}
+
+.form-submit-btn {
+  height: 32px;
+  padding: 0 20px;
+  font-size: 13px;
+  background: #409eff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.form-submit-btn:hover {
+  background: #337ecc;
 }
 </style>

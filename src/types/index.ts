@@ -85,6 +85,7 @@ export enum ComponentType {
   DIVIDER = 'Divider',
   TIME_PICKER = 'TimePicker',
   TABLE = 'Table',
+  CASCADER = 'Cascader',
 }
 
 export type SetterType =
@@ -94,6 +95,8 @@ export type SetterType =
   | 'ColorSetter'
   | 'SelectSetter'
   | 'StringListSetter'
+  | 'SwitchSetter'
+  | 'CascaderOptionsSetter'
 
 export interface PropSetter {
   label: string
@@ -110,11 +113,17 @@ export interface StyleSetter {
   setterProps?: Record<string, unknown>
 }
 
+export interface EventTriggerDef {
+  trigger: string // 与 ComponentEvent.type 对应，如 'click' / 'change' / 'submit'
+  label: string // 面板显示，如 '点击时'
+}
+
 export interface ComponentConfig {
   defaultProps: ComponentProps
   defaultStyle?: Partial<ComponentStyle>
   propSetters: PropSetter[]
   styleSetters?: StyleSetter[]
+  events?: EventTriggerDef[]
 }
 
 export interface Command {

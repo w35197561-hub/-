@@ -51,10 +51,12 @@
 <script setup lang="ts">
 import { computed, inject, ref, onMounted, onUnmounted } from 'vue'
 import type { ComponentData } from '@/types'
+import { useActionExecutor } from '../composables/useActionExecutor'
 
 const props = defineProps<{ component: ComponentData }>()
 
 const isPreview = inject('isPreview', false)
+const { execute } = useActionExecutor()
 
 const open = ref(false)
 const selected = ref('')
@@ -87,6 +89,8 @@ function toggle() {
 function select(opt: string) {
   selected.value = opt
   open.value = false
+  const ev = props.component.events?.find((e) => e.type === 'change')
+  if (ev) execute(ev.actions)
 }
 
 function onClickOutside(e: MouseEvent) {

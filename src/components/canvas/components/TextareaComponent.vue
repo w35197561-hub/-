@@ -8,6 +8,7 @@
       :readonly="!isPreview"
       :style="textareaStyle"
       @input="handleInput"
+      @change="handleChange"
     />
     <span v-if="errorMessage" class="validation-error">{{ errorMessage }}</span>
   </div>
@@ -19,11 +20,13 @@ import type { Ref } from 'vue'
 import type { ComponentData } from '@/types'
 import { useComponentStyle } from './composables/useComponentStyle'
 import { useEditorStore } from '@/stores/editor'
+import { useActionExecutor } from '../composables/useActionExecutor'
 
 const props = defineProps<{ component: ComponentData }>()
 
 const isPreview = inject<Ref<boolean>>('isPreview', ref(false))
 const editorStore = useEditorStore()
+const { execute } = useActionExecutor()
 const localValue = ref('')
 
 const { baseStyle } = useComponentStyle(props.component.style)
@@ -45,6 +48,12 @@ const errorMessage = computed(() => editorStore.validationErrors[props.component
 const handleInput = (e: Event) => {
   if (!isPreview.value) return
   localValue.value = (e.target as HTMLTextAreaElement).value
+}
+
+const handleChange = () => {
+  if (!isPreview.value) return
+  const ev = props.component.events?.find((e) => e.type === 'change')
+  if (ev) execute(ev.actions)
 }
 
 watch(localValue, (val) => {

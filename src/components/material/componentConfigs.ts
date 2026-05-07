@@ -38,6 +38,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
         setterProps: { min: 0, max: 50, step: 1 },
       },
     ],
+    events: [{ trigger: 'click', label: '点击时' }],
   },
 
   [ComponentType.IMAGE]: {
@@ -92,6 +93,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
         setterProps: { min: 0, max: 50, step: 1 },
       },
     ],
+    events: [{ trigger: 'change', label: '值变更时' }],
   },
 
   [ComponentType.FORM]: {
@@ -99,6 +101,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     defaultStyle: { width: 520, height: 260 },
     propSetters: [{ label: '容器标题', setter: 'InputSetter', field: 'title' }],
     styleSetters: [{ label: '背景颜色', setter: 'ColorSetter', field: 'backgroundColor' }],
+    events: [{ trigger: 'submit', label: '提交时' }],
   },
 
   [ComponentType.TABS]: {
@@ -114,6 +117,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
       { label: '当前 Tab', setter: 'SelectSetter', field: 'activeTab', optionsField: 'tabs' },
     ],
     styleSetters: [{ label: '背景颜色', setter: 'ColorSetter', field: 'backgroundColor' }],
+    events: [{ trigger: 'tabChange', label: 'Tab 切换时' }],
   },
 
   [ComponentType.CHART]: {
@@ -156,6 +160,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
         setterProps: { min: 0, max: 50, step: 1 },
       },
     ],
+    events: [{ trigger: 'change', label: '值变更时' }],
   },
 
   [ComponentType.SELECT]: {
@@ -177,6 +182,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
         setterProps: { min: 0, max: 50, step: 1 },
       },
     ],
+    events: [{ trigger: 'change', label: '值变更时' }],
   },
 
   [ComponentType.RADIO_GROUP]: {
@@ -199,6 +205,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
       { label: '文字颜色', setter: 'ColorSetter', field: 'color' },
       { label: '背景颜色', setter: 'ColorSetter', field: 'backgroundColor' },
     ],
+    events: [{ trigger: 'change', label: '值变更时' }],
   },
 
   [ComponentType.DIVIDER]: {
@@ -253,6 +260,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
       { label: '文字颜色', setter: 'ColorSetter', field: 'color' },
       { label: '背景颜色', setter: 'ColorSetter', field: 'backgroundColor' },
     ],
+    events: [{ trigger: 'change', label: '值变更时' }],
   },
 
   [ComponentType.TIME_PICKER]: {
@@ -275,6 +283,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
         setterProps: { min: 0, max: 50, step: 1 },
       },
     ],
+    events: [{ trigger: 'change', label: '值变更时' }],
   },
 
   [ComponentType.NUMBER_INPUT]: {
@@ -316,6 +325,7 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
         setterProps: { min: 0, max: 50, step: 1 },
       },
     ],
+    events: [{ trigger: 'change', label: '值变更时' }],
   },
 
   [ComponentType.TABLE]: {
@@ -351,5 +361,57 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
       },
     ],
     styleSetters: [],
+  },
+
+  [ComponentType.CASCADER]: {
+    defaultProps: {
+      placeholder: '请选择',
+      clearable: true,
+      options: [
+        {
+          label: '浙江',
+          value: 'zj',
+          children: [
+            { label: '杭州', value: 'hz' },
+            { label: '宁波', value: 'nb' },
+          ],
+        },
+        {
+          label: '江苏',
+          value: 'js',
+          children: [
+            { label: '南京', value: 'nj' },
+            { label: '苏州', value: 'sz' },
+          ],
+        },
+      ],
+    },
+    defaultStyle: { width: 240, height: 40, borderRadius: 0 },
+    propSetters: [
+      { label: '占位文本', setter: 'InputSetter', field: 'placeholder' },
+      { label: '可清空', setter: 'SwitchSetter', field: 'clearable' },
+      { label: '选项配置', setter: 'CascaderOptionsSetter', field: 'options' },
+    ],
+    styleSetters: [
+      {
+        label: '宽度',
+        setter: 'NumberSetter',
+        field: 'width',
+        setterProps: { min: 80, max: 600, step: 4 },
+      },
+      {
+        label: '高度',
+        setter: 'NumberSetter',
+        field: 'height',
+        setterProps: { min: 28, max: 60, step: 2 },
+      },
+      {
+        label: '圆角',
+        setter: 'NumberSetter',
+        field: 'borderRadius',
+        setterProps: { min: 0, max: 50, step: 1 },
+      },
+    ],
+    events: [{ trigger: 'change', label: '选择完成时' }],
   },
 }

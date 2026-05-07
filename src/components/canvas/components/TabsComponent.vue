@@ -35,17 +35,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import type { ComponentData } from '@/types'
 import ComponentRenderer from './ComponentRenderer.vue'
 import { useContainerDrop } from './composables/useContainerDrop'
+import { useActionExecutor } from '../composables/useActionExecutor'
 
 const props = defineProps<{
   component: ComponentData
 }>()
 
 const editorStore = useEditorStore()
+const isPreview = inject('isPreview', false)
+const { execute } = useActionExecutor()
 const currentComponentId = computed(() => editorStore.currentComponent?.id)
 
 // Tab 配置
@@ -78,6 +81,10 @@ const setActiveTab = (key: string) => {
   localActiveTab.value = key
   // 通过 store 更新，记录到历史
   editorStore.updateComponentProps(props.component.id, { activeTab: key })
+  if (isPreview) {
+    const ev = props.component.events?.find((e) => e.type === 'tabChange')
+    if (ev) execute(ev.actions)
+  }
 }
 
 const activeChildren = computed(() => props.component.slots?.[localActiveTab.value] ?? [])
