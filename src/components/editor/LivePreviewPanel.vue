@@ -41,6 +41,7 @@ import { useEditorStore } from '@/stores/editor'
 import { ComponentType } from '@/types'
 import type { ValidationRule } from '@/types'
 import ComponentRenderer from '@/components/canvas/components/ComponentRenderer.vue'
+import { validateValue } from '@/utils/validateValue'
 
 provide('isPreview', ref(true))
 
@@ -48,37 +49,6 @@ const editorStore = useEditorStore()
 const page = computed(() => editorStore.currentPage)
 
 const INPUT_TYPES = [ComponentType.INPUT, ComponentType.TEXTAREA, ComponentType.NUMBER_INPUT]
-
-const validateValue = (value: unknown, rules: ValidationRule[]): string | null => {
-  for (const rule of rules) {
-    switch (rule.type) {
-      case 'required':
-        if (value === undefined || value === null || value === '') return rule.message || '此项必填'
-        break
-      case 'minLength':
-        if (typeof value === 'string' && value.length < (rule.value as number))
-          return rule.message || `最少 ${rule.value} 个字符`
-        break
-      case 'maxLength':
-        if (typeof value === 'string' && value.length > (rule.value as number))
-          return rule.message || `最多 ${rule.value} 个字符`
-        break
-      case 'min':
-        if (typeof value === 'number' && value < (rule.value as number))
-          return rule.message || `最小值为 ${rule.value}`
-        break
-      case 'max':
-        if (typeof value === 'number' && value > (rule.value as number))
-          return rule.message || `最大值为 ${rule.value}`
-        break
-      case 'pattern':
-        if (typeof value === 'string' && !new RegExp(rule.value as string).test(value))
-          return rule.message || '格式不正确'
-        break
-    }
-  }
-  return null
-}
 
 const handleSubmit = () => {
   if (!page.value) return

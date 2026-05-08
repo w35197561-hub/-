@@ -24,6 +24,7 @@ import TableComponent from './TableComponent.vue'
 import CollapseComponent from './CollapseComponent.vue'
 import SwitchComponent from './SwitchComponent.vue'
 import CascaderComponent from './CascaderComponent.vue'
+import LinkComponent from './LinkComponent.vue'
 
 const props = defineProps<{
   component: ComponentData
@@ -49,6 +50,7 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.COLLAPSE]: CollapseComponent,
   [ComponentType.SWITCH]: SwitchComponent,
   [ComponentType.CASCADER]: CascaderComponent,
+  [ComponentType.LINK]: LinkComponent,
 }
 
 const resolvedComponent = computed(() => componentMap[props.component.type] ?? TextComponent)

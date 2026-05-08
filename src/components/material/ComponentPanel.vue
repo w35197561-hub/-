@@ -48,6 +48,7 @@ import {
   List,
   Fold,
   Open,
+  Link,
 } from '@element-plus/icons-vue'
 
 const componentGroups = [
@@ -67,6 +68,7 @@ const componentGroups = [
       { type: ComponentType.TIME_PICKER, name: '时间选择', icon: Timer },
       { type: ComponentType.SWITCH, name: 'Switch 开关', icon: Open },
       { type: ComponentType.CASCADER, name: '级联选择', icon: Grid },
+      { type: ComponentType.LINK, name: 'Link 链接', icon: Link },
     ],
   },
   {

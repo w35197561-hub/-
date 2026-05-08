@@ -88,6 +88,7 @@ export enum ComponentType {
   COLLAPSE = 'Collapse',
   SWITCH = 'Switch',
   CASCADER = 'Cascader',
+  LINK = 'Link',
 }
 
 export type SetterType =

@@ -15,6 +15,13 @@
 
 测试文件位置：`src/**/__tests__/*.test.ts`
 
+**文件拆分约定：**
+
+- `editor.test.ts` — 通用 store 行为（deleteComponent、updateStyle、selectComponent 等）
+- `{componentName}.test.ts` — 每个组件自己的专项测试（默认 props/style、undo/redo）
+
+> 新增组件的单测必须放在独立的 `{componentName}.test.ts` 文件中，不要追加到 `editor.test.ts`。
+
 ---
 
 ## 文件结构模板
@@ -116,6 +123,24 @@ it('携带正确的默认样式', () => {
 
 ### 4. 容器组件特殊验证
 
+### 4. 组件业务逻辑（纯函数测试）
+
+组件内有非平凡业务逻辑时，**必须将逻辑抽成纯函数**放到 `src/utils/` 中，再针对函数写边界 case 测试，不要用 Vue Test Utils 挂载组件。
+
+**判断标准**：逻辑有明确边界情况、框架不保证行为、出错用户可感知。
+
+**当前已有：**
+
+- `src/utils/resolveHref.ts` — Link 组件 href 补协议（空字符串、无协议、ftp://、mailto: 等）
+- `src/utils/collapseToggle.ts` — Collapse 手风琴互斥逻辑
+
+**不需要抽函数的情况：**
+
+- Element Plus 组件的 `disabled` / `readonly` 绑定（框架保证）
+- 纯条件渲染（`v-if="isPreview"`）
+
+### 5. 容器组件特殊验证
+
 - `Form`/`Tabs` 组件 `isContainer === true`
 - slots 初始化正确
 - 嵌套子组件可通过 `getComponentById` 查找到
@@ -139,6 +164,7 @@ expect(() => fn()).not.toThrow()
 1. **不测实现细节**：只断言结果状态，不断言内部方法被调用几次
 2. **测试文件不引入 Vue 组件**：store 测试只依赖 pinia 和 types
 3. **一个 it 只验证一个行为**：不要在一个用例里塞多个不相关的断言
+4. **用户指出测试问题后直接修正运行**，不要重新展示确认
 
 ## 写完后必须做
 

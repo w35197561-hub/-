@@ -4,7 +4,7 @@
       <table :class="tableClass">
         <thead>
           <tr>
-            <th v-for="col in columns" :key="col.dataIndex" class="table-th">
+            <th v-for="col in columns" :key="col.field" class="table-th">
               {{ col.title }}
             </th>
           </tr>
@@ -15,8 +15,8 @@
             :key="rowIndex"
             :class="{ 'table-row-stripe': isStriped && rowIndex % 2 === 1 }"
           >
-            <td v-for="col in columns" :key="col.dataIndex" class="table-td">
-              {{ row[col.dataIndex] ?? '' }}
+            <td v-for="col in columns" :key="col.field" class="table-td">
+              {{ row[col.field] ?? '' }}
             </td>
           </tr>
           <tr v-if="dataSource.length === 0">
@@ -44,16 +44,13 @@ const wrapperStyle = computed(() => ({
 
 interface TableColumn {
   title: string
-  dataIndex: string
+  field: string
 }
 
 const columns = computed<TableColumn[]>(() => {
-  const raw = props.component.props.columns as string[]
+  const raw = props.component.props.columns as TableColumn[]
   if (!Array.isArray(raw)) return []
-  return raw.map((col) => {
-    const parts = col.split(':')
-    return { title: parts[0] ?? col, dataIndex: parts[1] ?? parts[0] ?? col }
-  })
+  return raw
 })
 
 const dataSource = computed<Record<string, unknown>[]>(() => {
