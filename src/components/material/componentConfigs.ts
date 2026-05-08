@@ -352,4 +352,37 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     ],
     styleSetters: [],
   },
+
+  [ComponentType.COLLAPSE]: {
+    defaultProps: {
+      accordion: false,
+      items: [
+        { name: 'panel1', title: '面板一', content: '面板一的内容' },
+        { name: 'panel2', title: '面板二', content: '面板二的内容' },
+      ],
+    },
+    defaultStyle: { width: 400, height: 200, backgroundColor: '#ffffff', borderRadius: 4 },
+    propSetters: [
+      {
+        label: '手风琴模式',
+        setter: 'SelectSetter',
+        field: 'accordion',
+        setterProps: {
+          options: [
+            { label: '开启', value: true },
+            { label: '关闭', value: false },
+          ],
+        },
+      },
+    ],
+    styleSetters: [
+      { label: '背景颜色', setter: 'ColorSetter', field: 'backgroundColor' },
+      {
+        label: '圆角',
+        setter: 'NumberSetter',
+        field: 'borderRadius',
+        setterProps: { min: 0, max: 20, step: 1 },
+      },
+    ],
+  },
 }

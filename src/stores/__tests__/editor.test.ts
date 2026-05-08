@@ -643,6 +643,67 @@ describe('addChildComponent', () => {
   })
 })
 
+// ── Collapse 专项 ────────────────────────────────────────────
+describe('addComponent - Collapse', () => {
+  it('携带正确的默认 props（accordion / items）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.COLLAPSE)
+    const props = editorStore.currentComponent?.props
+    expect(props?.accordion).toBe(false)
+    expect(Array.isArray(props?.items)).toBe(true)
+    expect((props?.items as unknown[]).length).toBe(2)
+  })
+
+  it('携带正确的默认样式（width / height / backgroundColor / borderRadius）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.COLLAPSE)
+    const style = editorStore.currentComponent?.style
+    expect(style?.width).toBe(400)
+    expect(style?.height).toBe(200)
+    expect(style?.backgroundColor).toBe('#ffffff')
+    expect(style?.borderRadius).toBe(4)
+  })
+
+  it('添加后 undo 移除组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.COLLAPSE)
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    historyStore.undo()
+    expect(editorStore.currentPage?.components).toHaveLength(0)
+  })
+
+  it('undo 后 redo 恢复组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.COLLAPSE)
+    historyStore.undo()
+    historyStore.redo()
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    expect(editorStore.currentComponent?.type).toBe(ComponentType.COLLAPSE)
+  })
+
+  it('items 数组元素包含正确的结构字段', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.COLLAPSE)
+    const items = editorStore.currentComponent?.props.items as Array<{
+      name: string
+      title: string
+      content: string
+    }>
+    expect(items[0].name).toBe('panel1')
+    expect(items[0].title).toBe('面板一')
+    expect(items[0].content).toBe('面板一的内容')
+    expect(items[1].name).toBe('panel2')
+    expect(items[1].title).toBe('面板二')
+    expect(items[1].content).toBe('面板二的内容')
+  })
+
+  it('不是容器组件（isContainer 为 falsy）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.COLLAPSE)
+    expect(editorStore.currentComponent?.isContainer).toBeFalsy()
+  })
+})
+
 // ── updateComponentEvents ─────────────────────────────────────
 describe('updateComponentEvents', () => {
   it('设置组件事件列表', () => {

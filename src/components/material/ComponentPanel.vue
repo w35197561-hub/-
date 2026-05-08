@@ -46,6 +46,7 @@ import {
   Minus,
   Timer,
   List,
+  Fold,
 } from '@element-plus/icons-vue'
 
 const componentGroups = [
@@ -72,6 +73,7 @@ const componentGroups = [
       { type: ComponentType.TABS, name: 'Tabs容器', icon: Menu },
       { type: ComponentType.TABLE, name: '表格', icon: List },
       { type: ComponentType.CHART, name: '图表', icon: TrendCharts },
+      { type: ComponentType.COLLAPSE, name: 'Collapse 折叠', icon: Fold },
     ],
   },
 ]
