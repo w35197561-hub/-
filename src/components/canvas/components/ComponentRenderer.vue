@@ -21,6 +21,7 @@ import CheckboxGroupComponent from './CheckboxGroupComponent.vue'
 import DividerComponent from './DividerComponent.vue'
 import TimePickerComponent from './TimePickerComponent.vue'
 import TableComponent from './TableComponent.vue'
+import CollapseComponent from './CollapseComponent.vue'
 
 const props = defineProps<{
   component: ComponentData
@@ -43,6 +44,7 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.DIVIDER]: DividerComponent,
   [ComponentType.TIME_PICKER]: TimePickerComponent,
   [ComponentType.TABLE]: TableComponent,
+  [ComponentType.COLLAPSE]: CollapseComponent,
 }
 
 const resolvedComponent = computed(() => componentMap[props.component.type] ?? TextComponent)

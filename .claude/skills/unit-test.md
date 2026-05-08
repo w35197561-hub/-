@@ -2,13 +2,14 @@
 
 ## 技术栈
 
-| 工具 | 版本 | 用途 |
-|------|------|------|
-| Vitest | 最新 | 测试运行器 |
+| 工具           | 版本     | 用途           |
+| -------------- | -------- | -------------- |
+| Vitest         | 最新     | 测试运行器     |
 | @pinia/testing | 随 pinia | store 测试隔离 |
-| happy-dom | 最新 | DOM 环境模拟 |
+| happy-dom      | 最新     | DOM 环境模拟   |
 
 运行命令：
+
 - `npm test` — 单次运行
 - `npm run test:watch` — 监听模式
 
@@ -38,6 +39,7 @@ describe('useXxxStore', () => {
 ```
 
 **固定约定：**
+
 - `beforeEach` 必须调用 `setActivePinia(createPinia())`，确保每个测试 store 状态独立
 - 测试描述用中文，格式：`'做了什么 / 期望什么结果'`
 - 每个 `it` 块只测一件事
@@ -51,7 +53,7 @@ function setup() {
   setActivePinia(createPinia())
   const editorStore = useEditorStore()
   const historyStore = useHistoryStore()
-  editorStore.createNewPage()   // 必须先创建页面，否则 addComponent 不生效
+  editorStore.createNewPage() // 必须先创建页面，否则 addComponent 不生效
   return { editorStore, historyStore }
 }
 ```
@@ -61,7 +63,9 @@ function setup() {
 ## 必须覆盖的测试场景
 
 ### 1. 数据变更 + undo/redo（核心）
+
 每个会写入 history 的操作都必须有：
+
 - 正向操作验证
 - `undo` 后状态回滚验证
 - `redo` 后状态恢复验证（可选）
@@ -78,13 +82,16 @@ it('addComponent 后可以 undo 恢复', () => {
 ```
 
 ### 2. 边界情况
+
 - 空状态下调用不应抛出异常
 - 查询不存在的 id 返回 `undefined`
 
 ### 3. 新增组件必须验证的两项
+
 每个新 `ComponentType` 加入后，必须有对应的单测覆盖：
 
 **a. 默认 props 正确**
+
 ```typescript
 it('携带正确的默认 props', () => {
   editorStore.addComponent(ComponentType.XXX)
@@ -94,6 +101,7 @@ it('携带正确的默认 props', () => {
 ```
 
 **b. 默认 style 字段正确**（针对 `typeStyleMap` 中声明的字段）
+
 ```typescript
 it('携带正确的默认样式', () => {
   editorStore.addComponent(ComponentType.XXX)
@@ -107,6 +115,7 @@ it('携带正确的默认样式', () => {
 > 背景：`typeStyleMap` 里漏设字段，属性面板会出现空值（没有单测则无法提前发现）。
 
 ### 4. 容器组件特殊验证
+
 - `Form`/`Tabs` 组件 `isContainer === true`
 - slots 初始化正确
 - 嵌套子组件可通过 `getComponentById` 查找到
@@ -118,8 +127,8 @@ it('携带正确的默认样式', () => {
 ```typescript
 expect(array).toHaveLength(n)
 expect(value).toBeDefined()
-expect(value).toBe(expected)        // 严格相等（原始值）
-expect(value).toEqual(expected)     // 深比较（对象/数组）
+expect(value).toBe(expected) // 严格相等（原始值）
+expect(value).toEqual(expected) // 深比较（对象/数组）
 expect(() => fn()).not.toThrow()
 ```
 
@@ -130,3 +139,7 @@ expect(() => fn()).not.toThrow()
 1. **不测实现细节**：只断言结果状态，不断言内部方法被调用几次
 2. **测试文件不引入 Vue 组件**：store 测试只依赖 pinia 和 types
 3. **一个 it 只验证一个行为**：不要在一个用例里塞多个不相关的断言
+
+## 写完后必须做
+
+写完单元测试后，**先展示新增的测试内容给用户确认，等用户明确同意后再运行**。不要直接执行 `npm test`。
