@@ -87,6 +87,7 @@ export enum ComponentType {
   TABLE = 'Table',
   COLLAPSE = 'Collapse',
   SWITCH = 'Switch',
+  CASCADER = 'Cascader',
 }
 
 export type SetterType =
@@ -96,6 +97,8 @@ export type SetterType =
   | 'ColorSetter'
   | 'SelectSetter'
   | 'StringListSetter'
+  | 'SwitchSetter'
+  | 'CascaderOptionsSetter'
 
 export interface PropSetter {
   label: string

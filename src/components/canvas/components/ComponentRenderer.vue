@@ -23,6 +23,7 @@ import TimePickerComponent from './TimePickerComponent.vue'
 import TableComponent from './TableComponent.vue'
 import CollapseComponent from './CollapseComponent.vue'
 import SwitchComponent from './SwitchComponent.vue'
+import CascaderComponent from './CascaderComponent.vue'
 
 const props = defineProps<{
   component: ComponentData
@@ -47,6 +48,7 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.TABLE]: TableComponent,
   [ComponentType.COLLAPSE]: CollapseComponent,
   [ComponentType.SWITCH]: SwitchComponent,
+  [ComponentType.CASCADER]: CascaderComponent,
 }
 
 const resolvedComponent = computed(() => componentMap[props.component.type] ?? TextComponent)

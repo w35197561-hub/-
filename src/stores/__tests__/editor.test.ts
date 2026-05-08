@@ -791,3 +791,24 @@ describe('updateComponentEvents', () => {
     expect(editorStore.getComponentById(id)?.events).toBeUndefined()
   })
 })
+
+// ── Cascader 专项 ─────────────────────────────────────────────
+describe('addComponent - Cascader', () => {
+  it('携带正确的默认 props', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.CASCADER)
+    const props = editorStore.currentComponent?.props
+    expect(props?.placeholder).toBe('请选择')
+    expect(props?.clearable).toBe(true)
+    expect(Array.isArray(props?.options)).toBe(true)
+    expect((props?.options as unknown[]).length).toBeGreaterThan(0)
+  })
+
+  it('携带正确的默认样式（width / height）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.CASCADER)
+    const style = editorStore.currentComponent?.style
+    expect(style?.width).toBe(240)
+    expect(style?.height).toBe(40)
+  })
+})
