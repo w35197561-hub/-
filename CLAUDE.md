@@ -274,16 +274,21 @@ historyStore.executeCommand(command)
 
 ## 多 Agent 流程
 
-新增组件由两个子 Agent 顺序承接：
+新增组件由主 Agent 确认设计后，由两个子 Agent 顺序承接：
 
 ```
-coder → reviewer
+主 Agent 设计确认 → coder → reviewer
 ```
 
 | Agent    | 文件                         | 职责                | 触发时机                 |
 | -------- | ---------------------------- | ------------------- | ------------------------ |
 | coder    | `.claude/agents/coder.md`    | 按 6 步流程新增组件 | 用户要求新增某个组件类型 |
 | reviewer | `.claude/agents/reviewer.md` | 代码审查 → 提交推送 | 编码完成后               |
+
+**设计确认要点：**
+
+- 每个 propSetter / styleSetter 必须有实际使用场景，不加无意义的通用项（如 Table 不需要 borderRadius）
+- 方案以列表形式呈现，让用户能快速判断增删
 
 ---
 
