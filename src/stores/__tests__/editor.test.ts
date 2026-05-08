@@ -643,6 +643,74 @@ describe('addChildComponent', () => {
   })
 })
 
+// ── Switch 专项 ───────────────────────────────────────────────
+describe('addComponent - Switch', () => {
+  it('携带正确的默认 props', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    const props = editorStore.currentComponent?.props
+    expect(props?.value).toBe(false)
+    expect(props?.activeText).toBe('')
+    expect(props?.inactiveText).toBe('')
+    expect(props?.disabled).toBe(false)
+  })
+
+  it('携带正确的默认样式（width / height）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    const style = editorStore.currentComponent?.style
+    expect(style?.width).toBe(100)
+    expect(style?.height).toBe(32)
+  })
+
+  it('添加后 undo 移除组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    historyStore.undo()
+    expect(editorStore.currentPage?.components).toHaveLength(0)
+  })
+
+  it('undo 后 redo 恢复组件', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    historyStore.undo()
+    historyStore.redo()
+    expect(editorStore.currentPage?.components).toHaveLength(1)
+    expect(editorStore.currentComponent?.type).toBe(ComponentType.SWITCH)
+  })
+
+  it('更新 activeText props 后属性面板数据正确', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    const id = editorStore.currentComponent!.id
+
+    editorStore.updateComponentProps(id, { activeText: '开启' })
+    expect(editorStore.getComponentById(id)?.props.activeText).toBe('开启')
+  })
+
+  it('更新 inactiveText props 后属性面板数据正确', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    const id = editorStore.currentComponent!.id
+
+    editorStore.updateComponentProps(id, { inactiveText: '关闭' })
+    expect(editorStore.getComponentById(id)?.props.inactiveText).toBe('关闭')
+  })
+
+  it('更新 disabled props 后支持 undo 恢复', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    const id = editorStore.currentComponent!.id
+
+    editorStore.updateComponentProps(id, { disabled: true })
+    expect(editorStore.getComponentById(id)?.props.disabled).toBe(true)
+
+    historyStore.undo()
+    expect(editorStore.getComponentById(id)?.props.disabled).toBe(false)
+  })
+})
+
 // ── updateComponentEvents ─────────────────────────────────────
 describe('updateComponentEvents', () => {
   it('设置组件事件列表', () => {
