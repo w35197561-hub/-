@@ -320,7 +320,11 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
 
   [ComponentType.TABLE]: {
     defaultProps: {
-      columns: ['姓名:name:text', '年龄:age:number', '城市:city:text'],
+      columns: [
+        { title: '姓名', field: 'name' },
+        { title: '年龄', field: 'age' },
+        { title: '城市', field: 'city' },
+      ],
       dataSource: '[{"name":"张三","age":25,"city":"北京"},{"name":"李四","age":30,"city":"上海"}]',
       bordered: true,
       striped: false,

@@ -627,12 +627,9 @@ interface TableColDef {
 
 const tableColumns = computed<TableColDef[]>(() => {
   if (currentComponent.value?.type !== ComponentType.TABLE) return []
-  const raw = currentComponent.value.props.columns as string[] | undefined
+  const raw = currentComponent.value.props.columns as TableColDef[] | undefined
   if (!Array.isArray(raw)) return []
-  return raw.map((s) => {
-    const parts = s.split(':')
-    return { title: parts[0] ?? '', field: parts[1] ?? parts[0] ?? '' }
-  })
+  return raw
 })
 
 const tableRows = computed<Record<string, unknown>[]>(() => {
@@ -647,10 +644,7 @@ const tableRows = computed<Record<string, unknown>[]>(() => {
 
 const saveTableColumns = (cols: TableColDef[]) => {
   if (!currentComponent.value) return
-  setPropVal(
-    'columns',
-    cols.map((c) => `${c.title}:${c.field}`),
-  )
+  setPropVal('columns', cols)
   updateComponentProps()
 }
 
