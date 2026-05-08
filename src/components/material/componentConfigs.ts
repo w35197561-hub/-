@@ -385,4 +385,30 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
       },
     ],
   },
+
+  [ComponentType.SWITCH]: {
+    defaultProps: {
+      value: false,
+      activeText: '',
+      inactiveText: '',
+      disabled: false,
+    },
+    defaultStyle: { width: 100, height: 32 },
+    propSetters: [
+      { label: '开启文字', setter: 'InputSetter', field: 'activeText' },
+      { label: '关闭文字', setter: 'InputSetter', field: 'inactiveText' },
+      {
+        label: '禁用',
+        setter: 'SelectSetter',
+        field: 'disabled',
+        setterProps: {
+          options: [
+            { label: '否', value: false },
+            { label: '是', value: true },
+          ],
+        },
+      },
+    ],
+    styleSetters: [],
+  },
 }

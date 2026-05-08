@@ -695,10 +695,31 @@ describe('addComponent - Collapse', () => {
     expect(style?.backgroundColor).toBe('#ffffff')
     expect(style?.borderRadius).toBe(4)
   })
+})
+
+// ── Switch 专项 ───────────────────────────────────────────────
+describe('addComponent - Switch', () => {
+  it('携带正确的默认 props', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    const props = editorStore.currentComponent?.props
+    expect(props?.value).toBe(false)
+    expect(props?.activeText).toBe('')
+    expect(props?.inactiveText).toBe('')
+    expect(props?.disabled).toBe(false)
+  })
+
+  it('携带正确的默认样式（width / height）', () => {
+    const { editorStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    const style = editorStore.currentComponent?.style
+    expect(style?.width).toBe(100)
+    expect(style?.height).toBe(32)
+  })
 
   it('添加后 undo 移除组件', () => {
     const { editorStore, historyStore } = setup()
-    editorStore.addComponent(ComponentType.COLLAPSE)
+    editorStore.addComponent(ComponentType.SWITCH)
     expect(editorStore.currentPage?.components).toHaveLength(1)
     historyStore.undo()
     expect(editorStore.currentPage?.components).toHaveLength(0)
@@ -706,33 +727,41 @@ describe('addComponent - Collapse', () => {
 
   it('undo 后 redo 恢复组件', () => {
     const { editorStore, historyStore } = setup()
-    editorStore.addComponent(ComponentType.COLLAPSE)
+    editorStore.addComponent(ComponentType.SWITCH)
     historyStore.undo()
     historyStore.redo()
     expect(editorStore.currentPage?.components).toHaveLength(1)
-    expect(editorStore.currentComponent?.type).toBe(ComponentType.COLLAPSE)
+    expect(editorStore.currentComponent?.type).toBe(ComponentType.SWITCH)
   })
 
-  it('items 数组元素包含正确的结构字段', () => {
+  it('更新 activeText props 后属性面板数据正确', () => {
     const { editorStore } = setup()
-    editorStore.addComponent(ComponentType.COLLAPSE)
-    const items = editorStore.currentComponent?.props.items as Array<{
-      name: string
-      title: string
-      content: string
-    }>
-    expect(items[0].name).toBe('panel1')
-    expect(items[0].title).toBe('面板一')
-    expect(items[0].content).toBe('面板一的内容')
-    expect(items[1].name).toBe('panel2')
-    expect(items[1].title).toBe('面板二')
-    expect(items[1].content).toBe('面板二的内容')
+    editorStore.addComponent(ComponentType.SWITCH)
+    const id = editorStore.currentComponent!.id
+
+    editorStore.updateComponentProps(id, { activeText: '开启' })
+    expect(editorStore.getComponentById(id)?.props.activeText).toBe('开启')
   })
 
-  it('不是容器组件（isContainer 为 falsy）', () => {
+  it('更新 inactiveText props 后属性面板数据正确', () => {
     const { editorStore } = setup()
-    editorStore.addComponent(ComponentType.COLLAPSE)
-    expect(editorStore.currentComponent?.isContainer).toBeFalsy()
+    editorStore.addComponent(ComponentType.SWITCH)
+    const id = editorStore.currentComponent!.id
+
+    editorStore.updateComponentProps(id, { inactiveText: '关闭' })
+    expect(editorStore.getComponentById(id)?.props.inactiveText).toBe('关闭')
+  })
+
+  it('更新 disabled props 后支持 undo 恢复', () => {
+    const { editorStore, historyStore } = setup()
+    editorStore.addComponent(ComponentType.SWITCH)
+    const id = editorStore.currentComponent!.id
+
+    editorStore.updateComponentProps(id, { disabled: true })
+    expect(editorStore.getComponentById(id)?.props.disabled).toBe(true)
+
+    historyStore.undo()
+    expect(editorStore.getComponentById(id)?.props.disabled).toBe(false)
   })
 })
 

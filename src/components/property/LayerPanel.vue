@@ -116,6 +116,7 @@ const getComponentName = (c: ComponentData, idx: number): string => {
     [ComponentType.TIME_PICKER]: '时间选择',
     [ComponentType.TABLE]: '表格',
     [ComponentType.COLLAPSE]: '折叠面板',
+    [ComponentType.SWITCH]: 'Switch 开关',
   }
   const baseName = typeNames[c.type] || c.type
   // 尝试取 props 中有意义的标识
@@ -141,6 +142,7 @@ const getTypeIcon = (type: ComponentType): string => {
     [ComponentType.TIME_PICKER]: '⏱',
     [ComponentType.TABLE]: '⊟',
     [ComponentType.COLLAPSE]: '❐',
+    [ComponentType.SWITCH]: '⇌',
   }
   return icons[type] || '□'
 }

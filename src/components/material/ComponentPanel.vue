@@ -47,6 +47,7 @@ import {
   Timer,
   List,
   Fold,
+  Open,
 } from '@element-plus/icons-vue'
 
 const componentGroups = [
@@ -64,6 +65,7 @@ const componentGroups = [
       { type: ComponentType.CHECKBOX_GROUP, name: '多选复选框', icon: Grid },
       { type: ComponentType.DIVIDER, name: '分割线', icon: Minus },
       { type: ComponentType.TIME_PICKER, name: '时间选择', icon: Timer },
+      { type: ComponentType.SWITCH, name: 'Switch 开关', icon: Open },
     ],
   },
   {

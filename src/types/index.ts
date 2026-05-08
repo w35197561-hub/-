@@ -86,6 +86,7 @@ export enum ComponentType {
   TIME_PICKER = 'TimePicker',
   TABLE = 'Table',
   COLLAPSE = 'Collapse',
+  SWITCH = 'Switch',
 }
 
 export type SetterType =

@@ -22,6 +22,7 @@ import DividerComponent from './DividerComponent.vue'
 import TimePickerComponent from './TimePickerComponent.vue'
 import TableComponent from './TableComponent.vue'
 import CollapseComponent from './CollapseComponent.vue'
+import SwitchComponent from './SwitchComponent.vue'
 
 const props = defineProps<{
   component: ComponentData
@@ -45,6 +46,7 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.TIME_PICKER]: TimePickerComponent,
   [ComponentType.TABLE]: TableComponent,
   [ComponentType.COLLAPSE]: CollapseComponent,
+  [ComponentType.SWITCH]: SwitchComponent,
 }
 
 const resolvedComponent = computed(() => componentMap[props.component.type] ?? TextComponent)
