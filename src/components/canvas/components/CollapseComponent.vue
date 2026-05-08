@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import type { ComponentData } from '@/types'
 
 interface CollapseItem {
@@ -59,6 +59,18 @@ const accordion = computed(() => props.component.props.accordion === true)
 
 // 运行态：记录当前展开的面板名称集合
 const expandedNames = ref<Set<string>>(new Set(items.value.map((item) => item.name)))
+
+// 新增面板时自动展开
+watch(
+  () => items.value.map((i) => i.name),
+  (names) => {
+    names.forEach((name) => {
+      if (!expandedNames.value.has(name)) {
+        expandedNames.value = new Set([...expandedNames.value, name])
+      }
+    })
+  },
+)
 
 // 设计态全部展开，运行态由 expandedNames 控制
 function isExpanded(name: string): boolean {

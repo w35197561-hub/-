@@ -250,6 +250,42 @@
           </div>
         </div>
 
+        <!-- Collapse 面板配置 -->
+        <div class="property-section" v-if="currentComponent.type === ComponentType.COLLAPSE">
+          <h4>面板列表</h4>
+          <div class="table-columns-setter">
+            <div v-for="(item, idx) in collapseItems" :key="idx" class="table-col-card">
+              <div class="table-col-row">
+                <label>标题</label>
+                <el-input
+                  :model-value="item.title"
+                  size="small"
+                  @update:model-value="(v: string) => updateCollapseItem(idx, 'title', v)"
+                />
+              </div>
+              <div class="table-col-row">
+                <label>内容</label>
+                <el-input
+                  :model-value="item.content"
+                  size="small"
+                  type="textarea"
+                  :rows="2"
+                  @update:model-value="(v: string) => updateCollapseItem(idx, 'content', v)"
+                />
+              </div>
+              <el-button
+                :icon="Minus"
+                size="small"
+                type="danger"
+                link
+                @click="removeCollapseItem(idx)"
+                >删除面板</el-button
+              >
+            </div>
+            <el-button :icon="Plus" size="small" @click="addCollapseItem">添加面板</el-button>
+          </div>
+        </div>
+
         <!-- Table 列配置 -->
         <div class="property-section" v-if="currentComponent.type === ComponentType.TABLE">
           <h4>列配置</h4>
@@ -617,6 +653,42 @@ const moveLayer = (direction: 'up' | 'down' | 'top' | 'bottom') => {
 const deleteCurrentComponent = () => {
   if (!currentComponent.value) return
   editorStore.deleteComponent(currentComponent.value.id)
+}
+
+// ---- Collapse helpers ----
+interface CollapseItem {
+  name: string
+  title: string
+  content: string
+}
+
+const collapseItems = computed<CollapseItem[]>(() => {
+  if (currentComponent.value?.type !== ComponentType.COLLAPSE) return []
+  const raw = currentComponent.value.props.items
+  return Array.isArray(raw) ? (raw as CollapseItem[]) : []
+})
+
+const saveCollapseItems = (items: CollapseItem[]) => {
+  setPropVal('items', items)
+  updateComponentProps()
+}
+
+const updateCollapseItem = (idx: number, key: 'title' | 'content', val: string) => {
+  const items = collapseItems.value.map((it) => ({ ...it }))
+  items[idx]![key] = val
+  saveCollapseItems(items)
+}
+
+const removeCollapseItem = (idx: number) => {
+  saveCollapseItems(collapseItems.value.filter((_, i) => i !== idx))
+}
+
+const addCollapseItem = () => {
+  const n = collapseItems.value.length + 1
+  saveCollapseItems([
+    ...collapseItems.value,
+    { name: `panel${n}`, title: `面板${n}`, content: `面板${n}的内容` },
+  ])
 }
 
 // ---- TABLE helpers ----
