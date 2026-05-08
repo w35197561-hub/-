@@ -21,6 +21,7 @@ import { computed, inject, ref } from 'vue'
 import type { Ref } from 'vue'
 import type { ComponentData } from '@/types'
 import { useComponentStyle } from './composables/useComponentStyle'
+import { resolveHref } from '@/utils/resolveHref'
 
 const props = defineProps<{
   component: ComponentData
@@ -29,11 +30,7 @@ const props = defineProps<{
 const { baseStyle } = useComponentStyle(props.component.style)
 const isPreview = inject<Ref<boolean>>('isPreview', ref(false))
 
-const resolvedHref = computed(() => {
-  const href = (props.component.props.href as string) || ''
-  if (!href) return '#'
-  return /^https?:\/\//i.test(href) ? href : `https://${href}`
-})
+const resolvedHref = computed(() => resolveHref((props.component.props.href as string) || ''))
 
 const wrapperStyle = computed(() => ({
   ...baseStyle.value,

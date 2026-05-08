@@ -121,7 +121,23 @@ it('携带正确的默认样式', () => {
 
 > 背景：`typeStyleMap` 里漏设字段，属性面板会出现空值（没有单测则无法提前发现）。
 
-### 4. 容器组件特殊验证
+### 4. 组件业务逻辑（纯函数测试）
+
+组件内有非平凡业务逻辑时，**必须将逻辑抽成纯函数**放到 `src/utils/` 中，再针对函数写边界 case 测试，不要用 Vue Test Utils 挂载组件。
+
+**判断标准**：逻辑有明确边界情况、框架不保证行为、出错用户可感知。
+
+**当前已有：**
+
+- `src/utils/resolveHref.ts` — Link 组件 href 补协议（空字符串、无协议、ftp://、mailto: 等）
+- `src/utils/collapseToggle.ts` — Collapse 手风琴互斥逻辑
+
+**不需要抽函数的情况：**
+
+- Element Plus 组件的 `disabled` / `readonly` 绑定（框架保证）
+- 纯条件渲染（`v-if="isPreview"`）
+
+### 5. 容器组件特殊验证
 
 - `Form`/`Tabs` 组件 `isContainer === true`
 - slots 初始化正确
