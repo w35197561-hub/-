@@ -352,4 +352,37 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     ],
     styleSetters: [],
   },
+
+  [ComponentType.LINK]: {
+    defaultProps: {
+      content: '链接文字',
+      href: '',
+      target: '_blank',
+    },
+    defaultStyle: { width: 120, height: 32, color: '#409eff', fontSize: 14 },
+    propSetters: [
+      { label: '链接文字', setter: 'InputSetter', field: 'content' },
+      { label: '链接地址', setter: 'InputSetter', field: 'href' },
+      {
+        label: '打开方式',
+        setter: 'SelectSetter',
+        field: 'target',
+        setterProps: {
+          options: [
+            { label: '新窗口', value: '_blank' },
+            { label: '当前窗口', value: '_self' },
+          ],
+        },
+      },
+    ],
+    styleSetters: [
+      { label: '文字颜色', setter: 'ColorSetter', field: 'color' },
+      {
+        label: '字号',
+        setter: 'NumberSetter',
+        field: 'fontSize',
+        setterProps: { min: 10, max: 72, step: 1 },
+      },
+    ],
+  },
 }
