@@ -5,9 +5,11 @@
 触发此技能后，按以下步骤执行：
 
 ### Step 1：获取变更
+
 执行 `git diff HEAD`（或 `git diff --staged`）获取本次改动内容。
 
 ### Step 2：逐项检查
+
 对照下方检查清单逐项核对，记录发现的问题。
 
 ### Step 3：输出审查报告
@@ -29,34 +31,48 @@
 ```
 
 ### Step 4：结论判断
+
 - **通过** → 输出"审查通过"，由 reviewer 继续执行后续步骤
-- **需修复** → 列出问题，等用户修复后重新审查
+- **需修复** → 按下方问题分级表决定处理方，不得直接等用户
+
+### 问题分级参考
+
+| 档位              | 典型问题                                                  | 处理方              |
+| ----------------- | --------------------------------------------------------- | ------------------- |
+| 1 — lint 可修     | console.log、未用 import、命名格式                        | npm run lint 自动修 |
+| 2 — reviewer 可修 | componentMap 字符串 key、直接赋值跳过 Command、6 处未同步 | reviewer 直接改代码 |
+| 3 — 需用户决策    | 架构选择、业务逻辑歧义、不确定影响范围的改动              | 上报用户            |
 
 ---
 
 ## 检查清单
 
 ### 通用规范
+
 - [ ] 没有遗留 `console.log` / `console.error` / `debugger`
 - [ ] 没有硬编码的魔法字符串（应使用常量或枚举）
 - [ ] 变量/函数命名清晰，符合驼峰命名规范
 - [ ] 没有未使用的变量、import、函数
 
 ### Vue 组件规范
+
 - [ ] Props 固定为 `defineProps<{ component: ComponentData }>()`，不得随意扩展
 - [ ] 样式映射通过 `computed` 对象或 `useComponentStyle` composable，禁止在模板中写大段内联对象
 - [ ] 容器组件内部状态（如 activeTab）用本地 `ref` 维护，通过 `updateComponentProps()` 写入 store，禁止直接赋值 `props.component.props.xxx`
 - [ ] 新增组件类型已同步到 6 处（枚举、defaultProps、Vue 文件、ComponentRenderer、ComponentPanel、PropertyPanel）
 
 ### Store / 数据变更规范
+
 - [ ] 所有用户操作产生的数据变更通过 `Command` 模式提交（`execute + undo`）
 - [ ] 拖拽过程使用 `updateComponentStyleSilent`，拖拽结束使用 `batchUpdateComponentStyle`
 - [ ] 没有直接修改 `currentPage.value` 或 `currentComponent.value` 跳过 command
 
 ### ComponentRenderer 规范
+
 - [ ] `componentMap` 类型为 `Record<ComponentType, Component>`，key 用 `[ComponentType.XXX]` 枚举写法
 - [ ] 新增枚举值后 componentMap 已补全对应项
 
 ### TypeScript 规范
+
 - [ ] 没有 `as any` 或不必要的 `as` 类型断言
 - [ ] 函数参数和返回值有明确类型，无隐式 `any`
