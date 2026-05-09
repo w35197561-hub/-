@@ -495,4 +495,48 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
       },
     ],
   },
+
+  [ComponentType.TREE]: {
+    defaultProps: {
+      data: [
+        {
+          label: '节点一',
+          value: 'node1',
+          children: [
+            { label: '子节点 1-1', value: 'node1-1' },
+            { label: '子节点 1-2', value: 'node1-2' },
+          ],
+        },
+        {
+          label: '节点二',
+          value: 'node2',
+          children: [{ label: '子节点 2-1', value: 'node2-1' }],
+        },
+      ],
+      defaultExpandAll: false,
+    },
+    defaultStyle: { width: 240, height: 200, fontSize: 14 },
+    propSetters: [
+      { label: '树节点数据', setter: 'TreeDataSetter', field: 'data' },
+      {
+        label: '默认展开全部',
+        setter: 'SelectSetter',
+        field: 'defaultExpandAll',
+        setterProps: {
+          options: [
+            { label: '开启', value: true },
+            { label: '关闭', value: false },
+          ],
+        },
+      },
+    ],
+    styleSetters: [
+      {
+        label: '字体大小',
+        setter: 'NumberSetter',
+        field: 'fontSize',
+        setterProps: { min: 10, max: 24, step: 1 },
+      },
+    ],
+  },
 }

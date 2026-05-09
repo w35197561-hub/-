@@ -246,6 +246,91 @@
                   >
                 </div>
 
+                <!-- TreeDataSetter：树节点卡片式编辑器 -->
+                <div v-else-if="s.setter === 'TreeDataSetter'" class="tree-data-setter">
+                  <div
+                    v-for="(node, nIdx) in (getPropVal(s.field) as TreeNode[]) ?? []"
+                    :key="nIdx"
+                    class="tree-node-card"
+                  >
+                    <div class="tree-node-row">
+                      <el-input
+                        :model-value="node.label"
+                        size="small"
+                        placeholder="标签"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: string) => updateTreeNode(s.field, nIdx, 'label', v)
+                        "
+                      />
+                      <el-input
+                        :model-value="node.value"
+                        size="small"
+                        placeholder="值"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: string) => updateTreeNode(s.field, nIdx, 'value', v)
+                        "
+                      />
+                      <el-button
+                        size="small"
+                        :type="treeExpandedIdx === nIdx ? 'primary' : 'default'"
+                        plain
+                        @click="toggleTreeExpand(nIdx)"
+                        style="flex-shrink: 0"
+                      >
+                        子项
+                      </el-button>
+                      <el-button
+                        :icon="Minus"
+                        circle
+                        size="small"
+                        type="danger"
+                        @click="removeTreeNode(s.field, nIdx)"
+                      />
+                    </div>
+                    <div v-if="treeExpandedIdx === nIdx" class="tree-children-list">
+                      <div
+                        v-for="(child, cIdx) in node.children ?? []"
+                        :key="cIdx"
+                        class="tree-node-row tree-child-row"
+                      >
+                        <el-input
+                          :model-value="child.label"
+                          size="small"
+                          placeholder="标签"
+                          style="flex: 1"
+                          @update:model-value="
+                            (v: string) => updateTreeChild(s.field, nIdx, cIdx, 'label', v)
+                          "
+                        />
+                        <el-input
+                          :model-value="child.value"
+                          size="small"
+                          placeholder="值"
+                          style="flex: 1"
+                          @update:model-value="
+                            (v: string) => updateTreeChild(s.field, nIdx, cIdx, 'value', v)
+                          "
+                        />
+                        <el-button
+                          :icon="Minus"
+                          circle
+                          size="small"
+                          type="danger"
+                          @click="removeTreeChild(s.field, nIdx, cIdx)"
+                        />
+                      </div>
+                      <el-button :icon="Plus" size="small" @click="addTreeChild(s.field, nIdx)"
+                        >添加子节点</el-button
+                      >
+                    </div>
+                  </div>
+                  <el-button :icon="Plus" size="small" @click="addTreeNode(s.field)"
+                    >添加节点</el-button
+                  >
+                </div>
+
                 <!-- CascaderOptionsSetter：支持一级/二级选项增删改 -->
                 <div v-else-if="s.setter === 'CascaderOptionsSetter'" class="cascader-opts-setter">
                   <div
@@ -845,6 +930,75 @@ const addCascaderChild = (field: string, oIdx: number) => {
   saveCascaderOptions(field, opts)
 }
 
+// ---- TreeDataSetter helpers ----
+interface TreeNode {
+  label: string
+  value: string
+  children?: TreeNode[]
+}
+
+const treeExpandedIdx = ref<number | null>(null)
+
+const toggleTreeExpand = (idx: number) => {
+  treeExpandedIdx.value = treeExpandedIdx.value === idx ? null : idx
+}
+
+const getTreeNodes = (field: string): TreeNode[] => [
+  ...((getPropVal(field) as TreeNode[] | undefined) ?? []),
+]
+
+const saveTreeNodes = (field: string, nodes: TreeNode[]) => {
+  setPropVal(field, nodes)
+  updateComponentProps()
+}
+
+const updateTreeNode = (field: string, nIdx: number, key: 'label' | 'value', val: string) => {
+  const nodes = getTreeNodes(field)
+  nodes[nIdx] = { ...nodes[nIdx]!, [key]: val }
+  saveTreeNodes(field, nodes)
+}
+
+const removeTreeNode = (field: string, nIdx: number) => {
+  const nodes = getTreeNodes(field).filter((_, i) => i !== nIdx)
+  if (treeExpandedIdx.value === nIdx) treeExpandedIdx.value = null
+  saveTreeNodes(field, nodes)
+}
+
+const addTreeNode = (field: string) => {
+  const nodes = getTreeNodes(field)
+  nodes.push({ label: '新节点', value: `node${nodes.length + 1}`, children: [] })
+  saveTreeNodes(field, nodes)
+}
+
+const updateTreeChild = (
+  field: string,
+  nIdx: number,
+  cIdx: number,
+  key: 'label' | 'value',
+  val: string,
+) => {
+  const nodes = getTreeNodes(field)
+  const children = [...(nodes[nIdx]?.children ?? [])]
+  children[cIdx] = { ...children[cIdx]!, [key]: val }
+  nodes[nIdx] = { ...nodes[nIdx]!, children }
+  saveTreeNodes(field, nodes)
+}
+
+const removeTreeChild = (field: string, nIdx: number, cIdx: number) => {
+  const nodes = getTreeNodes(field)
+  const children = (nodes[nIdx]?.children ?? []).filter((_, i) => i !== cIdx)
+  nodes[nIdx] = { ...nodes[nIdx]!, children }
+  saveTreeNodes(field, nodes)
+}
+
+const addTreeChild = (field: string, nIdx: number) => {
+  const nodes = getTreeNodes(field)
+  const children = [...(nodes[nIdx]?.children ?? [])]
+  children.push({ label: '子节点', value: `child${children.length + 1}` })
+  nodes[nIdx] = { ...nodes[nIdx]!, children }
+  saveTreeNodes(field, nodes)
+}
+
 // ---- TABLE helpers ----
 interface TableColDef {
   title: string
@@ -1246,5 +1400,41 @@ const updateActionParam = (idx: number, key: string, value: unknown) => {
   color: #888;
   width: 48px;
   flex-shrink: 0;
+}
+
+.tree-data-setter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tree-node-card {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tree-node-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tree-children-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 12px;
+  margin-top: 4px;
+  border-left: 2px solid #e4e7ed;
+}
+
+.tree-child-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>
