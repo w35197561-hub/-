@@ -89,6 +89,7 @@ export enum ComponentType {
   CASCADER = 'Cascader',
   LINK = 'Link',
   TREE = 'Tree',
+  TABLE = 'Table',
 }
 
 export type SetterType =
@@ -101,6 +102,8 @@ export type SetterType =
   | 'SwitchSetter'
   | 'CascaderOptionsSetter'
   | 'TreeDataSetter'
+  | 'TableColumnSetter'
+  | 'TableDataSetter'
 
 export interface PropSetter {
   label: string

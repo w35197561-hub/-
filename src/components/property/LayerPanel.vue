@@ -119,6 +119,7 @@ const getComponentName = (c: ComponentData, idx: number): string => {
     [ComponentType.CASCADER]: '级联选择',
     [ComponentType.LINK]: 'Link 链接',
     [ComponentType.TREE]: '树形控件',
+    [ComponentType.TABLE]: '表格',
   }
   const baseName = typeNames[c.type] || c.type
   // 尝试取 props 中有意义的标识
@@ -147,6 +148,7 @@ const getTypeIcon = (type: ComponentType): string => {
     [ComponentType.CASCADER]: '⊞',
     [ComponentType.LINK]: '🔗',
     [ComponentType.TREE]: '⊹',
+    [ComponentType.TABLE]: '⊟',
   }
   return icons[type] || '□'
 }

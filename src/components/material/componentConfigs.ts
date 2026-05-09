@@ -461,6 +461,38 @@ export const componentConfigs: Record<ComponentType, ComponentConfig> = {
     ],
   },
 
+  [ComponentType.TABLE]: {
+    defaultProps: {
+      columns: [
+        { field: 'name', label: '姓名', width: 120, sortable: true },
+        { field: 'age', label: '年龄', width: 80, sortable: true },
+        { field: 'city', label: '城市', width: 120, sortable: false },
+      ],
+      data: [
+        { name: '张三', age: 28, city: '北京' },
+        { name: '李四', age: 32, city: '上海' },
+        { name: '王五', age: 25, city: '广州' },
+      ],
+      pageSize: 5,
+      stripe: false,
+    },
+    defaultStyle: { width: 500, height: 240, backgroundColor: '#ffffff' },
+    propSetters: [
+      { label: '列定义', setter: 'TableColumnSetter', field: 'columns' },
+      { label: '行数据', setter: 'TableDataSetter', field: 'data' },
+      { label: '斑马纹', setter: 'SwitchSetter', field: 'stripe' },
+      {
+        label: '每页行数（0=不分页）',
+        setter: 'NumberSetter',
+        field: 'pageSize',
+        setterProps: { min: 0, max: 100, step: 1 },
+      },
+    ],
+    styleSetters: [
+      { label: '背景颜色', setter: 'ColorSetter', field: 'backgroundColor' },
+    ],
+  },
+
   [ComponentType.TREE]: {
     defaultProps: {
       data: [

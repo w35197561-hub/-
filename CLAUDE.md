@@ -126,7 +126,7 @@ cd server && npm test         # 后端集成测试
 ## 组件 Schema（`src/types/index.ts`）
 
 **ComponentType 枚举（当前已有）：**
-`Text` / `Image` / `Button` / `Input` / `NumberInput` / `Select` / `Textarea` / `RadioGroup` / `CheckboxGroup` / `Divider` / `Form`（容器）/ `Chart` / `Tabs`（容器）/ `TimePicker` / `Table` / `Collapse` / `Switch` / `Cascader` / `Link` / `Tree`
+`Text` / `Image` / `Button` / `Input` / `NumberInput` / `Select` / `Textarea` / `RadioGroup` / `CheckboxGroup` / `Divider` / `Form`（容器）/ `Chart` / `Tabs`（容器）/ `TimePicker` / `Collapse` / `Switch` / `Cascader` / `Link` / `Tree` / `Table`
 
 **ComponentStyle：** `top, left, width, height, zIndex, rotate`（必填）+ `fontSize, color, backgroundColor, borderWidth, borderColor, borderRadius`（可选，数值均为 `number`，渲染时拼接 `px`）
 

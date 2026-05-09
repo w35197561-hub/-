@@ -49,6 +49,7 @@ import {
   Open,
   Link,
   Share,
+  List,
 } from '@element-plus/icons-vue'
 
 const componentGroups = [
@@ -70,6 +71,7 @@ const componentGroups = [
       { type: ComponentType.CASCADER, name: '级联选择', icon: Grid },
       { type: ComponentType.LINK, name: 'Link 链接', icon: Link },
       { type: ComponentType.TREE, name: '树形控件', icon: Share },
+      { type: ComponentType.TABLE, name: '表格', icon: List },
     ],
   },
   {

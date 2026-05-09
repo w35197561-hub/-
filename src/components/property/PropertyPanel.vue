@@ -246,6 +246,18 @@
                   >
                 </div>
 
+                <!-- SwitchSetter：开关 -->
+                <el-switch
+                  v-else-if="s.setter === 'SwitchSetter'"
+                  :model-value="getPropVal(s.field) as boolean"
+                  @update:model-value="
+                    (val: boolean) => {
+                      setPropVal(s.field, val)
+                      updateComponentProps()
+                    }
+                  "
+                />
+
                 <!-- TreeDataSetter：树节点卡片式编辑器 -->
                 <div v-else-if="s.setter === 'TreeDataSetter'" class="tree-data-setter">
                   <div
@@ -328,6 +340,105 @@
                   </div>
                   <el-button :icon="Plus" size="small" @click="addTreeNode(s.field)"
                     >添加节点</el-button
+                  >
+                </div>
+
+                <!-- TableColumnSetter：列定义卡片列表（field/label/width/sortable） -->
+                <div v-else-if="s.setter === 'TableColumnSetter'" class="table-col-setter">
+                  <div
+                    v-for="(col, cIdx) in (getPropVal(s.field) as TableColumn[]) ?? []"
+                    :key="cIdx"
+                    class="table-col-card"
+                  >
+                    <div class="table-col-row">
+                      <el-input
+                        :model-value="col.field"
+                        size="small"
+                        placeholder="字段名"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: string) => updateTableColumn(s.field, cIdx, 'field', v)
+                        "
+                      />
+                      <el-input
+                        :model-value="col.label"
+                        size="small"
+                        placeholder="列标题"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: string) => updateTableColumn(s.field, cIdx, 'label', v)
+                        "
+                      />
+                      <el-button
+                        :icon="Minus"
+                        circle
+                        size="small"
+                        type="danger"
+                        @click="removeTableColumn(s.field, cIdx)"
+                      />
+                    </div>
+                    <div class="table-col-row">
+                      <label style="font-size: 11px; color: #888; white-space: nowrap">宽度</label>
+                      <el-input-number
+                        :model-value="col.width ?? 120"
+                        size="small"
+                        :min="40"
+                        :max="600"
+                        :step="10"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: number) => updateTableColumn(s.field, cIdx, 'width', v)
+                        "
+                      />
+                      <label style="font-size: 11px; color: #888; white-space: nowrap">可排序</label>
+                      <el-switch
+                        :model-value="col.sortable ?? false"
+                        @update:model-value="
+                          (v: boolean) => updateTableColumn(s.field, cIdx, 'sortable', v)
+                        "
+                      />
+                    </div>
+                  </div>
+                  <el-button :icon="Plus" size="small" @click="addTableColumn(s.field)"
+                    >添加列</el-button
+                  >
+                </div>
+
+                <!-- TableDataSetter：行数据卡片列表，字段随当前 columns 动态变化 -->
+                <div v-else-if="s.setter === 'TableDataSetter'" class="table-data-setter">
+                  <div
+                    v-for="(row, rIdx) in (getPropVal(s.field) as TableRow[]) ?? []"
+                    :key="rIdx"
+                    class="table-row-card"
+                  >
+                    <div class="table-row-header">
+                      <span style="font-size: 11px; color: #888">行 {{ rIdx + 1 }}</span>
+                      <el-button
+                        :icon="Minus"
+                        circle
+                        size="small"
+                        type="danger"
+                        @click="removeTableRow(s.field, rIdx)"
+                      />
+                    </div>
+                    <div
+                      v-for="col in tableColumns"
+                      :key="col.field"
+                      class="table-cell-row"
+                    >
+                      <label class="table-cell-label">{{ col.label }}</label>
+                      <el-input
+                        :model-value="String(row[col.field] ?? '')"
+                        size="small"
+                        style="flex: 1"
+                        @update:model-value="
+                          (v: string) => updateTableRow(s.field, rIdx, col.field, v)
+                        "
+                      />
+                    </div>
+                  </div>
+                  <el-button :icon="Plus" size="small" @click="addTableRow(s.field)"
+                    >添加行</el-button
                   >
                 </div>
 
@@ -936,6 +1047,84 @@ const addTreeChild = (field: string, nIdx: number) => {
   saveTreeNodes(field, nodes)
 }
 
+// ---- TableColumnSetter helpers ----
+interface TableColumn {
+  field: string
+  label: string
+  width?: number
+  sortable?: boolean
+}
+
+type TableRow = Record<string, unknown>
+
+// 当前组件的 columns，供 TableDataSetter 动态生成字段
+const tableColumns = computed<TableColumn[]>(() => {
+  if (!currentComponent.value) return []
+  const raw = currentComponent.value.props.columns
+  return Array.isArray(raw) ? (raw as TableColumn[]) : []
+})
+
+const getTableColumns = (field: string): TableColumn[] => [
+  ...((getPropVal(field) as TableColumn[] | undefined) ?? []),
+]
+
+const saveTableColumns = (field: string, cols: TableColumn[]) => {
+  setPropVal(field, cols)
+  updateComponentProps()
+}
+
+const updateTableColumn = (
+  field: string,
+  cIdx: number,
+  key: keyof TableColumn,
+  val: string | number | boolean,
+) => {
+  const cols = getTableColumns(field)
+  cols[cIdx] = { ...cols[cIdx]!, [key]: val }
+  saveTableColumns(field, cols)
+}
+
+const removeTableColumn = (field: string, cIdx: number) => {
+  saveTableColumns(field, getTableColumns(field).filter((_, i) => i !== cIdx))
+}
+
+const addTableColumn = (field: string) => {
+  const cols = getTableColumns(field)
+  cols.push({ field: `col${cols.length + 1}`, label: `列${cols.length + 1}`, width: 120, sortable: false })
+  saveTableColumns(field, cols)
+}
+
+// ---- TableDataSetter helpers ----
+const getTableRows = (field: string): TableRow[] => [
+  ...((getPropVal(field) as TableRow[] | undefined) ?? []),
+]
+
+const saveTableRows = (field: string, rows: TableRow[]) => {
+  setPropVal(field, rows)
+  updateComponentProps()
+}
+
+const updateTableRow = (field: string, rIdx: number, colField: string, val: string) => {
+  const rows = getTableRows(field)
+  rows[rIdx] = { ...rows[rIdx]!, [colField]: val }
+  saveTableRows(field, rows)
+}
+
+const removeTableRow = (field: string, rIdx: number) => {
+  saveTableRows(field, getTableRows(field).filter((_, i) => i !== rIdx))
+}
+
+const addTableRow = (field: string) => {
+  const rows = getTableRows(field)
+  // 初始化一行，字段来自当前 columns
+  const emptyRow: TableRow = {}
+  tableColumns.value.forEach((col) => {
+    emptyRow[col.field] = ''
+  })
+  rows.push(emptyRow)
+  saveTableRows(field, rows)
+}
+
 // ---- 校验规则 helpers ----
 const componentRules = computed<ValidationRule[]>(() => {
   if (!currentComponent.value) return []
@@ -1290,5 +1479,64 @@ const updateActionParam = (idx: number, key: string, value: unknown) => {
   color: #888;
   width: 28px;
   flex-shrink: 0;
+}
+
+.table-col-setter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.table-col-card {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.table-col-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.table-data-setter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.table-row-card {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.table-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.table-cell-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.table-cell-label {
+  font-size: 11px;
+  color: #888;
+  width: 48px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
