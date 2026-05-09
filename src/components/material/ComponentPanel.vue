@@ -45,7 +45,6 @@ import {
   Grid,
   Minus,
   Timer,
-  List,
   Fold,
   Open,
   Link,
@@ -78,7 +77,6 @@ const componentGroups = [
     items: [
       { type: ComponentType.FORM, name: '表单容器', icon: Tickets },
       { type: ComponentType.TABS, name: 'Tabs容器', icon: Menu },
-      { type: ComponentType.TABLE, name: '表格', icon: List },
       { type: ComponentType.CHART, name: '图表', icon: TrendCharts },
       { type: ComponentType.COLLAPSE, name: 'Collapse 折叠', icon: Fold },
     ],

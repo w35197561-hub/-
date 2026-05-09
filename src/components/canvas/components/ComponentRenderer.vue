@@ -20,7 +20,6 @@ import RadioGroupComponent from './RadioGroupComponent.vue'
 import CheckboxGroupComponent from './CheckboxGroupComponent.vue'
 import DividerComponent from './DividerComponent.vue'
 import TimePickerComponent from './TimePickerComponent.vue'
-import TableComponent from './TableComponent.vue'
 import CollapseComponent from './CollapseComponent.vue'
 import SwitchComponent from './SwitchComponent.vue'
 import CascaderComponent from './CascaderComponent.vue'
@@ -47,7 +46,6 @@ const componentMap: Record<ComponentType, Component> = {
   [ComponentType.CHECKBOX_GROUP]: CheckboxGroupComponent,
   [ComponentType.DIVIDER]: DividerComponent,
   [ComponentType.TIME_PICKER]: TimePickerComponent,
-  [ComponentType.TABLE]: TableComponent,
   [ComponentType.COLLAPSE]: CollapseComponent,
   [ComponentType.SWITCH]: SwitchComponent,
   [ComponentType.CASCADER]: CascaderComponent,

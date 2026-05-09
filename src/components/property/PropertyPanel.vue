@@ -423,9 +423,9 @@
         <!-- Collapse 面板配置 -->
         <div class="property-section" v-if="currentComponent.type === ComponentType.COLLAPSE">
           <h4>面板列表</h4>
-          <div class="table-columns-setter">
-            <div v-for="(item, idx) in collapseItems" :key="idx" class="table-col-card">
-              <div class="table-col-row">
+          <div class="collapse-items-setter">
+            <div v-for="(item, idx) in collapseItems" :key="idx" class="collapse-item-card">
+              <div class="collapse-item-row">
                 <label>标题</label>
                 <el-input
                   :model-value="item.title"
@@ -433,7 +433,7 @@
                   @update:model-value="(v: string) => updateCollapseItem(idx, 'title', v)"
                 />
               </div>
-              <div class="table-col-row">
+              <div class="collapse-item-row">
                 <label>内容</label>
                 <el-input
                   :model-value="item.content"
@@ -453,69 +453,6 @@
               >
             </div>
             <el-button :icon="Plus" size="small" @click="addCollapseItem">添加面板</el-button>
-          </div>
-        </div>
-
-        <!-- Table 列配置 -->
-        <div class="property-section" v-if="currentComponent.type === ComponentType.TABLE">
-          <h4>列配置</h4>
-          <div class="table-columns-setter">
-            <div v-for="(col, idx) in tableColumns" :key="idx" class="table-col-card">
-              <div class="table-col-row">
-                <label>标题</label>
-                <el-input
-                  :model-value="col.title"
-                  size="small"
-                  @update:model-value="(v: string) => updateTableColumn(idx, 'title', v)"
-                />
-              </div>
-              <div class="table-col-row">
-                <label>字段</label>
-                <el-input
-                  :model-value="col.field"
-                  size="small"
-                  @update:model-value="(v: string) => updateTableColumn(idx, 'field', v)"
-                />
-              </div>
-              <el-button
-                :icon="Minus"
-                size="small"
-                type="danger"
-                link
-                @click="removeTableColumn(idx)"
-                >删除列</el-button
-              >
-            </div>
-            <el-button :icon="Plus" size="small" @click="addTableColumn">添加列</el-button>
-          </div>
-        </div>
-
-        <!-- Table 数据行配置 -->
-        <div class="property-section" v-if="currentComponent.type === ComponentType.TABLE">
-          <h4>数据行</h4>
-          <div class="table-rows-setter">
-            <div v-for="(row, rIdx) in tableRows" :key="rIdx" class="table-row-card">
-              <div class="table-row-header">
-                <span>第 {{ rIdx + 1 }} 行</span>
-                <el-button
-                  :icon="Minus"
-                  size="small"
-                  type="danger"
-                  link
-                  @click="removeTableRow(rIdx)"
-                  >删除</el-button
-                >
-              </div>
-              <div v-for="col in tableColumns" :key="col.field" class="table-col-row">
-                <label>{{ col.title || col.field }}</label>
-                <el-input
-                  :model-value="String(row[col.field] ?? '')"
-                  size="small"
-                  @update:model-value="(v: string) => updateTableCell(rIdx, col.field, v)"
-                />
-              </div>
-            </div>
-            <el-button :icon="Plus" size="small" @click="addTableRow">添加行</el-button>
           </div>
         </div>
 
@@ -999,79 +936,6 @@ const addTreeChild = (field: string, nIdx: number) => {
   saveTreeNodes(field, nodes)
 }
 
-// ---- TABLE helpers ----
-interface TableColDef {
-  title: string
-  field: string
-}
-
-const tableColumns = computed<TableColDef[]>(() => {
-  if (currentComponent.value?.type !== ComponentType.TABLE) return []
-  const raw = currentComponent.value.props.columns as TableColDef[] | undefined
-  if (!Array.isArray(raw)) return []
-  return raw
-})
-
-const tableRows = computed<Record<string, unknown>[]>(() => {
-  if (currentComponent.value?.type !== ComponentType.TABLE) return []
-  try {
-    const parsed = JSON.parse(currentComponent.value.props.dataSource as string)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-})
-
-const saveTableColumns = (cols: TableColDef[]) => {
-  if (!currentComponent.value) return
-  setPropVal('columns', cols)
-  updateComponentProps()
-}
-
-const saveTableRows = (rows: Record<string, unknown>[]) => {
-  if (!currentComponent.value) return
-  setPropVal('dataSource', JSON.stringify(rows))
-  updateComponentProps()
-}
-
-const updateTableColumn = (idx: number, key: 'title' | 'field', val: string) => {
-  const cols = tableColumns.value.map((c) => ({ ...c }))
-  cols[idx]![key] = val
-  saveTableColumns(cols)
-}
-
-const removeTableColumn = (idx: number) => {
-  const cols = tableColumns.value.filter((_, i) => i !== idx)
-  saveTableColumns(cols)
-}
-
-const addTableColumn = () => {
-  const cols = [
-    ...tableColumns.value,
-    { title: '新列', field: `col${tableColumns.value.length + 1}` },
-  ]
-  saveTableColumns(cols)
-}
-
-const updateTableCell = (rIdx: number, field: string, val: string) => {
-  const rows = tableRows.value.map((r) => ({ ...r }))
-  rows[rIdx]![field] = val
-  saveTableRows(rows)
-}
-
-const removeTableRow = (rIdx: number) => {
-  const rows = tableRows.value.filter((_, i) => i !== rIdx)
-  saveTableRows(rows)
-}
-
-const addTableRow = () => {
-  const emptyRow: Record<string, unknown> = {}
-  tableColumns.value.forEach((c) => {
-    emptyRow[c.field] = ''
-  })
-  saveTableRows([...tableRows.value, emptyRow])
-}
-
 // ---- 校验规则 helpers ----
 const componentRules = computed<ValidationRule[]>(() => {
   if (!currentComponent.value) return []
@@ -1330,44 +1194,6 @@ const updateActionParam = (idx: number, key: string, value: unknown) => {
   flex: 1;
 }
 
-.table-columns-setter,
-.table-rows-setter {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.table-col-card,
-.table-row-card {
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.table-col-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.table-col-row label {
-  font-size: 11px;
-  color: #888;
-  width: 28px;
-  flex-shrink: 0;
-}
-
-.table-row-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #666;
-}
-
 .action-list {
   display: flex;
   flex-direction: column;
@@ -1436,5 +1262,33 @@ const updateActionParam = (idx: number, key: string, value: unknown) => {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.collapse-items-setter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.collapse-item-card {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.collapse-item-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.collapse-item-row label {
+  font-size: 11px;
+  color: #888;
+  width: 28px;
+  flex-shrink: 0;
 }
 </style>
