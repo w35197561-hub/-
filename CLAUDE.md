@@ -123,28 +123,7 @@ cd server && npm test         # 后端集成测试
 
 ---
 
-## 编码规范
-
-### 命名规范
-
-- 文件命名：（待补充）
-- 变量命名：（待补充）
-- 函数命名：（待补充）
-- 类命名：（待补充）
-
-### 代码风格
-
-- 缩进：（待补充）
-- 换行：（待补充）
-- 注释：（待补充）
-
----
-
-## 组件结构定义规范
-
-所有新组件、属性扩展必须严格遵循本规范。
-
-### 核心数据类型（`src/types/index.ts`）
+## 组件 Schema（`src/types/index.ts`）
 
 **ComponentType 枚举（当前已有）：**
 `Text` / `Image` / `Button` / `Input` / `NumberInput` / `Select` / `Textarea` / `RadioGroup` / `CheckboxGroup` / `Divider` / `Form`（容器）/ `Chart` / `Tabs`（容器）/ `TimePicker` / `Table` / `Collapse` / `Switch` / `Cascader` / `Link` / `Tree`
@@ -174,36 +153,7 @@ interface ComponentData {
 
 **PageData：** `{ id, title, components: ComponentData[], style: { width:1200, height:800, backgroundColor:'#fff' } }`
 
-### Vue 组件文件规范（`src/components/canvas/components/`）
-
-- Props 固定为 `defineProps<{ component: ComponentData }>()`
-- 样式通过 `computed` 对象绑定，使用 `useComponentStyle(component.style)` composable 获取基础样式
-- 容器组件的拖放逻辑通过 `useContainerDrop(containerId, getSlotKey)` composable 复用
-- 子组件 wrapper 样式抽为独立函数，避免模板内联对象导致额外重渲染
-- CSS 固定 `width:100%; height:100%; box-sizing:border-box`
-
-### 设计态 / 运行态双模式
-
-所有可交互组件通过 `provide/inject` 区分设计态（编辑器）和运行态（预览页）：
-
-```
-PreviewView.vue         → provide('isPreview', true)
-XxxComponent.vue        → const isPreview = inject('isPreview', false)
-```
-
-- **设计态**（默认，`isPreview = false`）：组件禁止交互（`disabled` / `readonly`），配合画布拖拽/选中不冲突
-- **运行态**（`isPreview = true`）：组件开启原生交互，用本地 `ref` 维护临时状态
-
-**新增有交互需求的组件时，必须同时实现两套行为：**
-
-- 纯展示型（Input/Textarea/NumberInput/Radio/Checkbox）：绑定 `:disabled="!isPreview"` 或 `:readonly="!isPreview"`，预览时用本地 `ref` + 事件处理
-- 视觉占位型（Select 等假组件）：`v-if="!isPreview"` 渲染静态占位，`v-else` 渲染真实可交互实现
-
-### 事件系统（可视化动作配置）
-
-组件事件以数据驱动方式实现，不需要用户写代码。
-
-**数据结构：**
+**事件 Schema：**
 
 ```typescript
 // ComponentEvent：一种触发方式 + 该触发方式下的动作列表
@@ -217,58 +167,9 @@ interface ActionConfig {
 }
 ```
 
-**运行时状态（不写入 PageData）：**
+运行时 `previewHiddenIds: string[]` 不写入 PageData，关闭预览自动清空。
 
-- `previewHiddenIds: string[]` — 预览时被隐藏的组件 ID，关闭预览自动清空
-
-**执行入口：** `src/components/canvas/composables/useActionExecutor.ts`
-
-- 组件在预览模式下触发事件时调用 `execute(actions)`
-- switch 按 `action.type` 分发，params 原样取用
-
-**新增动作类型步骤：**
-
-1. `src/types/index.ts` → `ActionType` 加新值，`ActionConfig.params` 加对应字段
-2. `useActionExecutor.ts` → switch 加新 case
-3. `PropertyPanel.vue` → Button 事件区域加对应参数表单
-
-**当前只有 Button 支持事件绑定**，其他组件如需支持，在组件内 inject `isPreview` 并调用 `useActionExecutor`。
-
-### 新增组件的完整流程（6 步）
-
-1. **`src/types/index.ts`** → `ComponentType` 枚举加新值，并同步更新 `CLAUDE.md` 本文件的"ComponentType 枚举（当前已有）"列表
-2. **`src/components/material/componentConfigs.ts`** → 新增一条配置（`defaultProps`、`defaultStyle`、`propSetters`、`styleSetters`），详见 `.claude/skills/coding.md` 的"新增组件自查清单 §2"
-3. **`src/components/canvas/components/XxxComponent.vue`** → 新建组件文件，遵循上方规范；**若组件有交互行为，必须实现设计态/运行态双模式**（见上方"设计态 / 运行态双模式"）
-4. **`src/components/canvas/components/ComponentRenderer.vue`** → `componentMap` 加新枚举 key
-5. **`src/components/material/ComponentPanel.vue`** → `componentTypes` 数组加 `{ type, name, icon }`
-6. **`src/components/property/LayerPanel.vue`** → `typeNames` 和 `typeIcons` 加入新类型（`PropertyPanel.vue` 无需改动，由 `componentConfigs` 自动驱动）
-
-### Store 操作规范（`src/stores/editor.ts`）
-
-所有数据变更必须通过 Command 模式，确保撤销/重做正常：
-
-```typescript
-const command: Command = {
-  execute: () => {
-    /* 执行 */
-  },
-  undo: () => {
-    /* 撤销 */
-  },
-}
-historyStore.executeCommand(command)
-```
-
-### 关键约束
-
-1. **ID**：由 `createComponentId()` 自动生成，禁止手动硬编码
-2. **历史**：用户操作的数据变更必须通过 Command 模式提交
-3. **拖拽性能**：拖拽中用 `updateComponentStyleSilent`，结束时用 `batchUpdateComponentStyle`
-4. **嵌套**：只有 `Form`/`Tabs` 有 `children`/`slots`，普通组件这两个字段为 `undefined`
-5. **多选**：`selectedComponentIds`（数组）管理多选，`currentComponent` 指向最后选中项
-6. **样式单位**：`style` 数值不带单位，渲染时拼接 `px`
-7. **容器禁止直接改 props**：容器内部状态用本地 `ref` 维护，切换时调用 `updateComponentProps()` 写入 store
-8. **ComponentRenderer 禁止字符串 key**：`componentMap` 必须声明为 `Record<ComponentType, Component>`，key 用 `[ComponentType.XXX]` 写法
+新增组件流程见 `.claude/agents/coder.md`，编码规范见 `.claude/skills/coding.md`。
 
 ---
 
@@ -285,11 +186,6 @@ historyStore.executeCommand(command)
 | coder    | `.claude/agents/coder.md`    | 按 6 步流程新增组件 | 用户要求新增某个组件类型 |
 | reviewer | `.claude/agents/reviewer.md` | 代码审查 → 提交推送 | 编码完成后               |
 
-**设计确认要点：**
-
-- 每个 propSetter / styleSetter 必须有实际使用场景，不加无意义的通用项（如 Table 不需要 borderRadius）
-- 方案以列表形式呈现，让用户能快速判断增删
-
 ---
 
 ## 技能索引
@@ -298,7 +194,6 @@ historyStore.executeCommand(command)
 
 | 技能           | 文件                                 | 触发场景                                                      |
 | -------------- | ------------------------------------ | ------------------------------------------------------------- |
-| 代码实现规范   | `.claude/skills/coding.md`           | 编写代码时，了解质量要求和实现规范                            |
 | 代码审查       | `.claude/skills/code-review.md`      | 用户要求 review、CR、审查代码                                 |
 | 自动提交       | `.claude/skills/auto-commit.md`      | 用户要求提交代码、commit、推送                                |
 | 创建分支       | `.claude/skills/create-branch.md`    | coder 启动时，编码前建分支                                    |
