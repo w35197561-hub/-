@@ -78,7 +78,18 @@ npm run test:e2e
   **要求：** 修复后重新移交 reviewer
   ```
 
-### Step 4：提交
+### Step 4：写入流程日志
+
+将本次 reviewer 运行情况追加到 `docs/flow-log.md` 的 Reviewer 段：
+
+- 代码审查：通过 / 回传 Issue 块 N 次（问题简述）
+- 单测：通过 / 自修 N 轮（错误类型）/ 回传 coder
+- E2E：通过 / 回传 coder / 跳过（原因）
+- 用户干预次数
+
+写入后检查 flow-log 历史，若同类问题已出现 ≥ 2 次，主动提示用户考虑更新 `coder.md` 或 `coding.md`。
+
+### Step 5：提交
 
 代码审查、单测、浏览器验证均通过后，读取 `.claude/skills/auto-commit.md` 执行提交流程。
 
