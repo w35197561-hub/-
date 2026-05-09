@@ -93,6 +93,8 @@ SELECT = 'Select'
 npm run lint && npm run type-check && npm test
 ```
 
+若命令失败，读取原始报错自主修复，修完重跑；**最多 3 轮**，超限将问题 + 已尝试的修法上报用户，不再继续。
+
 ## 完成后
 
 输出变更摘要：
