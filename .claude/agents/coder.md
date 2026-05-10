@@ -131,50 +131,13 @@ Element Plus <组件名> props 常用属性 <当前年份>
 
 **① 整理常用 props 清单**：列出该组件最常用的 5~10 个属性及其类型和含义。
 
-**② 区分 defaultProps vs setter**：
+**② 区分 defaultProps vs setter**：判断维度见 `.claude/rules/coding.md` "新增组件设计规则"。
 
-| 判断维度                                        | 放 `defaultProps`（仅初始值） | 放 `propSetters`（面板可编辑） |
-| ----------------------------------------------- | ----------------------------- | ------------------------------ |
-| 用户是否需要在属性面板修改？                    | 否                            | **是**                         |
-| 是结构性/程序性数据？（如 `type="submit"`）     | 是                            | 否                             |
-| 是复杂嵌套数组对象？（如 `tabs:[{key,label}]`） | 是，选合适 setter 或跳过      | 视 setter 支持情况             |
-| 用户清空后画布是否应该跟着空？                  | —                             | 是则用 `??`，不是则用 `\|\|`   |
+**③ 确认每个 prop 对应的 setter 类型**：可用 setter 类型见 `.claude/rules/coding.md`。
 
-**③ 确认每个 prop 对应的 setter 类型**（参考下方 setter 表）。
+**④ 确认组件特征**：有无交互行为、是否容器、是否触发事件，判断规则见 `.claude/rules/coding.md`。
 
-**④ 确认 `defaultStyle` 中所有被 styleSetter 引用的字段都有初始值**（如 `borderRadius: 0`），否则属性面板显示空白。
-
-**⑤ styleSetters 精准暴露**：只暴露对该组件视觉有实际效果的样式属性。
-
-| 样式属性                  | 适用组件                                       | 不适用                                                   |
-| ------------------------- | ---------------------------------------------- | -------------------------------------------------------- |
-| fontSize / color          | 有文字内容的组件（Text/Button/Input/Textarea） | Image/Select/容器                                        |
-| borderWidth / borderColor | 自绘边框的组件（Image/Input）                  | 使用 el-\* 组件自管边框的（Textarea/Select/NumberInput） |
-| borderRadius              | 几乎所有组件                                   | —                                                        |
-| backgroundColor           | 几乎所有组件                                   | —                                                        |
-
-### §1 特征判断（决定额外规则）
-
-**① 该组件有原生浏览器交互行为？**（点击、输入、选择、切换等）
-
-→ 是：canvas 模板中必须加 `disabled` 或 `readonly`
-
-- `input` / `textarea` 用 `readonly`
-- `select` / `button` / `checkbox` 等用 `disabled`
-
-**② 该组件能包含其他可拖拽子组件？**（容器）
-
-→ 是：必须满足以下三点：
-
-- `isContainer: true`
-- `slots` 或 `children` 字段存放子组件
-- 拖放逻辑通过 `useContainerDrop(containerId, getSlotKey)` 复用，禁止自行实现
-
-**③ 该组件主要触发动作/事件？**（按钮、链接等）
-
-→ 是：在 `componentConfigs` 的 `propSetters` 中为事件类型提供配置入口。
-
-### §2 在 componentConfigs.ts 中声明组件配置（必须）
+### §1 在 componentConfigs.ts 中声明组件配置（必须）
 
 ```typescript
 [ComponentType.XXX]: {
@@ -190,18 +153,7 @@ Element Plus <组件名> props 常用属性 <当前年份>
 }
 ```
 
-**可用 setter 类型：**
-
-| SetterType         | 对应控件                     | 适用场景                        |
-| ------------------ | ---------------------------- | ------------------------------- |
-| `NumberSetter`     | `el-input-number`            | 数值（宽度、大小、步长…）       |
-| `InputSetter`      | `el-input`                   | 单行文本                        |
-| `TextareaSetter`   | `el-input` type="textarea"   | 多行文本                        |
-| `ColorSetter`      | `el-color-picker`            | 颜色值                          |
-| `SelectSetter`     | `el-select`                  | 枚举选择，需配合 `optionsField` |
-| `StringListSetter` | 多行 `el-input` + ➕/➖ 按钮 | 字符串数组（如下拉选项列表）    |
-
-### §3 属性面板验证
+### §2 属性面板验证
 
 拖入组件后打开属性面板，确认 propSetters / styleSetters 各字段有合理初始值，无空白项。
 

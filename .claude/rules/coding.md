@@ -136,6 +136,62 @@ cols[idx]![key] = val
 
 - `input` 的 `:type="props.type || 'text'"` — 浏览器需要有效 type 值，空值行为异常
 
+## 新增组件设计规则
+
+### defaultProps vs propSetters 判断维度
+
+| 判断维度                                        | 放 `defaultProps`（仅初始值） | 放 `propSetters`（面板可编辑） |
+| ----------------------------------------------- | ----------------------------- | ------------------------------ |
+| 用户是否需要在属性面板修改？                    | 否                            | **是**                         |
+| 是结构性/程序性数据？（如 `type="submit"`）     | 是                            | 否                             |
+| 是复杂嵌套数组对象？（如 `tabs:[{key,label}]`） | 是，选合适 setter 或跳过      | 视 setter 支持情况             |
+| 用户清空后画布是否应该跟着空？                  | —                             | 是则用 `??`，不是则用 `\|\|`   |
+
+`defaultStyle` 中所有被 styleSetter 引用的字段必须有初始值（如 `borderRadius: 0`），否则属性面板显示空白。
+
+### styleSetters 精准暴露
+
+只暴露对该组件视觉有实际效果的样式属性：
+
+| 样式属性                  | 适用组件                                       | 不适用                                                   |
+| ------------------------- | ---------------------------------------------- | -------------------------------------------------------- |
+| fontSize / color          | 有文字内容的组件（Text/Button/Input/Textarea） | Image/Select/容器                                        |
+| borderWidth / borderColor | 自绘边框的组件（Image/Input）                  | 使用 el-\* 组件自管边框的（Textarea/Select/NumberInput） |
+| borderRadius              | 几乎所有组件                                   | —                                                        |
+| backgroundColor           | 几乎所有组件                                   | —                                                        |
+
+### 可用 setter 类型
+
+| SetterType         | 对应控件                     | 适用场景                        |
+| ------------------ | ---------------------------- | ------------------------------- |
+| `NumberSetter`     | `el-input-number`            | 数值（宽度、大小、步长…）       |
+| `InputSetter`      | `el-input`                   | 单行文本                        |
+| `TextareaSetter`   | `el-input` type="textarea"   | 多行文本                        |
+| `ColorSetter`      | `el-color-picker`            | 颜色值                          |
+| `SelectSetter`     | `el-select`                  | 枚举选择，需配合 `optionsField` |
+| `StringListSetter` | 多行 `el-input` + ➕/➖ 按钮 | 字符串数组（如下拉选项列表）    |
+
+### 组件特征判断
+
+**① 有原生浏览器交互行为？**（点击、输入、选择、切换等）
+
+→ 是：canvas 模板中必须加 `disabled` 或 `readonly`
+
+- `input` / `textarea` 用 `readonly`
+- `select` / `button` / `checkbox` 等用 `disabled`
+
+**② 能包含其他可拖拽子组件？**（容器）
+
+→ 是：必须满足以下三点：
+
+- `isContainer: true`
+- `slots` 或 `children` 字段存放子组件
+- 拖放逻辑通过 `useContainerDrop(containerId, getSlotKey)` 复用，禁止自行实现
+
+**③ 主要触发动作/事件？**（按钮、链接等）
+
+→ 是：在 `componentConfigs` 的 `propSetters` 中为事件类型提供配置入口。
+
 ## 关键约束
 
 - **ID**：组件 ID 由 `createComponentId()` 自动生成，禁止手动硬编码
