@@ -14,19 +14,15 @@ export type ActionType =
   | 'update_component_props'
   | 'delete_component'
   | 'set_page_style'
+  | 'clear_canvas'
   | 'none'
 
 export interface CanvasAction {
   type: ActionType
-  /** 组件类型 (add_component 时必填): Text | Image | Button | Input | Form | Tabs */
   componentType?: string
-  /** 目标组件 id (update/delete 时使用) */
   componentId?: string
-  /** 样式更新 */
   style?: Record<string, unknown>
-  /** 属性更新 */
   props?: Record<string, unknown>
-  /** 页面样式 (set_page_style) */
   pageStyle?: Record<string, unknown>
 }
 
@@ -37,12 +33,17 @@ export interface AiMessage {
 
 export interface AiChatRequest {
   messages: AiMessage[]
-  /** 当前画布简要快照，传给 AI 作为上下文 */
   canvasContext?: {
     pageTitle?: string
     componentCount?: number
-    components?: Array<{ id: string; type: string; props: Record<string, unknown> }>
+    components?: Array<{
+      id: string
+      type: string
+      props: Record<string, unknown>
+      style?: { width: number; height: number }
+    }>
   }
+  generateMode?: 'append' | 'replace'
 }
 
 export interface AiChatResponse {
@@ -51,14 +52,28 @@ export interface AiChatResponse {
 }
 
 // =====================
-// System Prompt（告知 AI 输出格式）
+// System Prompt
 // =====================
-function buildSystemPrompt(canvasContext: AiChatRequest['canvasContext']): string {
-  const componentList = (canvasContext?.components ?? [])
-    .map(c => `  - id: ${c.id}, type: ${c.type}, props: ${JSON.stringify(c.props)}`)
-    .join('\n') || '  （暂无组件）'
+function buildSystemPrompt(
+  canvasContext: AiChatRequest['canvasContext'],
+  generateMode: 'append' | 'replace' = 'append',
+): string {
+  const componentList =
+    (canvasContext?.components ?? [])
+      .map(
+        (c) =>
+          `  - id:${c.id} type:${c.type} size:(w:${c.style?.width ?? '?'},h:${c.style?.height ?? '?'}) props:${JSON.stringify(c.props)}`,
+      )
+      .join('\n') || '  （暂无组件）'
 
-  return `你是一个可视化页面编辑器的 AI 助手，帮助用户通过自然语言操控画布。
+  const modeHint =
+    generateMode === 'replace'
+      ? '【生成模式：全量替换】用户希望生成全新页面。请在 actions 数组第一个元素返回 {"type":"clear_canvas"}，然后返回所有新组件的 add_component。'
+      : '【生成模式：追加】在现有组件基础上追加新组件，不要修改或删除已有组件。'
+
+  return `你是一个可视化页面编辑器的 AI 助手。画布为流式布局，组件从上到下依次排列，每个组件占一行居中显示。
+
+${modeHint}
 
 当前画布状态：
 - 页面标题：${canvasContext?.pageTitle ?? '未命名页面'}
@@ -66,78 +81,292 @@ function buildSystemPrompt(canvasContext: AiChatRequest['canvasContext']): strin
 - 组件列表：
 ${componentList}
 
-【你的任务】理解用户的意图，严格以如下 JSON 格式响应（只返回 JSON，不要 markdown 代码块，不要多余文字）：
+【布局规则】
+1. 流式布局：组件按 actions 数组顺序从上到下排列，无需指定 top/left
+2. 只需在 style 中指定 width 和 height（像素数字）
+3. 不同组件类型使用不同的推荐尺寸
+
+【推荐组件尺寸】
+- Text 标题：width:400, height:50, props 中加 fontSize:28
+- Text 正文：width:600, height:36
+- Input 输入框：width:400, height:44
+- Button 按钮：width:200, height:44
+- Image 图片：width:300, height:200
+- Form 表单容器：width:560, height:300
+- Tabs 标签页：width:700, height:360
+
+【输出格式】严格 JSON，无 markdown 代码块：
 {
-  "reply": "用中文向用户解释你做了什么",
+  "reply": "中文说明",
   "actions": [
     {
-      "type": "<动作类型>",
-      "componentType": "<组件类型（仅 add_component 时填写）>",
-      "componentId": "<目标组件 id（仅 update/delete 时填写）>",
-      "style": { "<样式属性>": "<值>" },
-      "props": { "<属性名>": "<值>" },
-      "pageStyle": { "<样式属性>": "<值>" }
+      "type": "add_component",
+      "componentType": "Text|Image|Button|Input|Form|Tabs",
+      "style": { "width": 数字, "height": 数字 },
+      "props": { "content": "..." }
     }
   ]
 }
 
 【动作类型说明】
-- add_component：在画布新增组件，需同时填 componentType
-- update_component_style：更新已有组件的样式，需填 componentId 和 style
-- update_component_props：更新已有组件的属性，需填 componentId 和 props
+- add_component：新增组件，需填 componentType、style、props
+- update_component_style：更新样式，需填 componentId 和 style
+- update_component_props：更新属性，需填 componentId 和 props
 - delete_component：删除组件，需填 componentId
-- set_page_style：修改页面整体样式（如背景色），填 pageStyle
-- none：不执行任何画布操作，仅回复文字
+- set_page_style：修改页面样式（如背景色），填 pageStyle
+- clear_canvas：清空画布所有组件（仅在全量替换模式使用，放在 actions 第一个）
+- none：不执行操作，仅回复文字
 
 【可用组件类型】Text（文本）、Image（图片）、Button（按钮）、Input（输入框）、Form（表单容器）、Tabs（标签页）
 
-【示例】
-用户说「添加一个大标题」→
+【示例：生成登录页】
+用户说「生成一个登录页」→
 {
-  "reply": "好的，已为您添加了一个标题文本组件。",
-  "actions": [{ "type": "add_component", "componentType": "Text", "props": { "content": "大标题" }, "style": { "fontSize": 32, "fontWeight": "bold", "width": 400, "height": 70 } }]
-}
-
-用户说「把页面背景改成深色」→
-{
-  "reply": "好的，已将页面背景色改为深色。",
-  "actions": [{ "type": "set_page_style", "pageStyle": { "backgroundColor": "#1a1a2e" } }]
+  "reply": "已为您生成登录页，包含标题、用户名输入框、密码输入框和登录按钮。",
+  "actions": [
+    { "type": "clear_canvas" },
+    { "type": "add_component", "componentType": "Text", "style": { "width": 400, "height": 50 }, "props": { "content": "用户登录", "fontSize": 28 } },
+    { "type": "add_component", "componentType": "Input", "style": { "width": 400, "height": 44 }, "props": { "placeholder": "请输入用户名" } },
+    { "type": "add_component", "componentType": "Input", "style": { "width": 400, "height": 44 }, "props": { "placeholder": "请输入密码", "type": "password" } },
+    { "type": "add_component", "componentType": "Button", "style": { "width": 400, "height": 44 }, "props": { "content": "登录" } }
+  ]
 }
 
 如果用户的意图不涉及画布操作，则 actions 为空数组。`
 }
 
 // =====================
-// 内置规则引擎（fallback 模式，无需 API Key）
+// 内置规则引擎（fallback 模式）
 // =====================
-function parseIntentToActions(userMsg: string): CanvasAction[] {
+function parseIntentToActions(
+  userMsg: string,
+  generateMode: 'append' | 'replace' = 'append',
+): CanvasAction[] {
   const msg = userMsg.toLowerCase()
 
-  if ((msg.includes('添加') || msg.includes('加') || msg.includes('新增') || msg.includes('插入')) &&
-      (msg.includes('文本') || msg.includes('标题') || msg.includes('文字'))) {
-    const isTitle = msg.includes('标题')
-    return [{
-      type: 'add_component',
-      componentType: 'Text',
-      props: { content: isTitle ? '标题文字' : '文本内容' },
-      style: isTitle ? { fontSize: 28, fontWeight: 'bold', width: 300, height: 60 } : {}
-    }]
+  // Batch generation patterns
+  const isGenerate =
+    msg.includes('生成') || msg.includes('创建') || msg.includes('做一个') || msg.includes('帮我做')
+
+  if (isGenerate && (msg.includes('登录') || msg.includes('login'))) {
+    const prefix: CanvasAction[] = generateMode === 'replace' ? [{ type: 'clear_canvas' }] : []
+    return [
+      ...prefix,
+      {
+        type: 'add_component',
+        componentType: 'Text',
+        style: { width: 400, height: 50 },
+        props: { content: '用户登录', fontSize: 28 },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Input',
+        style: { width: 400, height: 44 },
+        props: { placeholder: '请输入用户名' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Input',
+        style: { width: 400, height: 44 },
+        props: { placeholder: '请输入密码', type: 'password' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Button',
+        style: { width: 400, height: 44 },
+        props: { content: '登录' },
+      },
+    ]
   }
-  if ((msg.includes('添加') || msg.includes('加') || msg.includes('新增')) && msg.includes('按钮')) {
+
+  if (isGenerate && (msg.includes('注册') || msg.includes('register'))) {
+    const prefix: CanvasAction[] = generateMode === 'replace' ? [{ type: 'clear_canvas' }] : []
+    return [
+      ...prefix,
+      {
+        type: 'add_component',
+        componentType: 'Text',
+        style: { width: 400, height: 50 },
+        props: { content: '用户注册', fontSize: 28 },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Input',
+        style: { width: 400, height: 44 },
+        props: { placeholder: '请输入用户名' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Input',
+        style: { width: 400, height: 44 },
+        props: { placeholder: '请输入邮箱' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Input',
+        style: { width: 400, height: 44 },
+        props: { placeholder: '请输入密码', type: 'password' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Input',
+        style: { width: 400, height: 44 },
+        props: { placeholder: '确认密码', type: 'password' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Button',
+        style: { width: 400, height: 44 },
+        props: { content: '注册' },
+      },
+    ]
+  }
+
+  if (isGenerate && (msg.includes('表单') || msg.includes('form'))) {
+    const prefix: CanvasAction[] = generateMode === 'replace' ? [{ type: 'clear_canvas' }] : []
+    return [
+      ...prefix,
+      {
+        type: 'add_component',
+        componentType: 'Text',
+        style: { width: 400, height: 50 },
+        props: { content: '基本信息', fontSize: 28 },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Input',
+        style: { width: 400, height: 44 },
+        props: { placeholder: '请输入姓名' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Input',
+        style: { width: 400, height: 44 },
+        props: { placeholder: '请输入手机号' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Input',
+        style: { width: 400, height: 44 },
+        props: { placeholder: '请输入邮箱' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Button',
+        style: { width: 200, height: 44 },
+        props: { content: '提交' },
+      },
+    ]
+  }
+
+  if (isGenerate && (msg.includes('仪表') || msg.includes('dashboard'))) {
+    const prefix: CanvasAction[] = generateMode === 'replace' ? [{ type: 'clear_canvas' }] : []
+    return [
+      ...prefix,
+      {
+        type: 'add_component',
+        componentType: 'Text',
+        style: { width: 600, height: 50 },
+        props: { content: '数据概览', fontSize: 28 },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Text',
+        style: { width: 600, height: 36 },
+        props: { content: '总用户数: 12,345 | 今日访问: 892 | 转化率: 5.6%' },
+      },
+      { type: 'add_component', componentType: 'Tabs', style: { width: 700, height: 360 } },
+    ]
+  }
+
+  if (isGenerate && (msg.includes('落地') || msg.includes('landing'))) {
+    const prefix: CanvasAction[] = generateMode === 'replace' ? [{ type: 'clear_canvas' }] : []
+    return [
+      ...prefix,
+      {
+        type: 'add_component',
+        componentType: 'Text',
+        style: { width: 600, height: 60 },
+        props: { content: '欢迎使用我们的产品', fontSize: 32 },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Text',
+        style: { width: 600, height: 36 },
+        props: { content: '简洁高效的可视化页面编辑器，让创意触手可及' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Image',
+        style: { width: 500, height: 250 },
+        props: { src: '', alt: 'Banner' },
+      },
+      {
+        type: 'add_component',
+        componentType: 'Button',
+        style: { width: 200, height: 48 },
+        props: { content: '立即体验' },
+      },
+    ]
+  }
+
+  // Single component patterns (existing)
+  if (
+    (msg.includes('添加') || msg.includes('加') || msg.includes('新增') || msg.includes('插入')) &&
+    (msg.includes('文本') || msg.includes('标题') || msg.includes('文字'))
+  ) {
+    const isTitle = msg.includes('标题')
+    return [
+      {
+        type: 'add_component',
+        componentType: 'Text',
+        props: { content: isTitle ? '标题文字' : '文本内容' },
+        style: isTitle ? { fontSize: 28, width: 300, height: 60 } : {},
+      },
+    ]
+  }
+  if (
+    (msg.includes('添加') || msg.includes('加') || msg.includes('新增')) &&
+    msg.includes('按钮')
+  ) {
     return [{ type: 'add_component', componentType: 'Button', props: { content: '按钮' } }]
   }
-  if ((msg.includes('添加') || msg.includes('加') || msg.includes('新增')) && msg.includes('图片')) {
-    return [{ type: 'add_component', componentType: 'Image', props: { src: '' }, style: { width: 200, height: 150 } }]
+  if (
+    (msg.includes('添加') || msg.includes('加') || msg.includes('新增')) &&
+    msg.includes('图片')
+  ) {
+    return [
+      {
+        type: 'add_component',
+        componentType: 'Image',
+        props: { src: '' },
+        style: { width: 200, height: 150 },
+      },
+    ]
   }
-  if ((msg.includes('添加') || msg.includes('加') || msg.includes('新增')) &&
-      (msg.includes('输入框') || msg.includes('输入'))) {
+  if (
+    (msg.includes('添加') || msg.includes('加') || msg.includes('新增')) &&
+    (msg.includes('输入框') || msg.includes('输入'))
+  ) {
     return [{ type: 'add_component', componentType: 'Input', props: { placeholder: '请输入内容' } }]
   }
-  if ((msg.includes('添加') || msg.includes('加') || msg.includes('新增')) && msg.includes('表单')) {
-    return [{ type: 'add_component', componentType: 'Form', props: { title: '表单容器' }, style: { width: 520, height: 260 } }]
+  if (
+    (msg.includes('添加') || msg.includes('加') || msg.includes('新增')) &&
+    msg.includes('表单')
+  ) {
+    return [
+      {
+        type: 'add_component',
+        componentType: 'Form',
+        props: { title: '表单容器' },
+        style: { width: 520, height: 260 },
+      },
+    ]
   }
-  if ((msg.includes('添加') || msg.includes('加') || msg.includes('新增')) &&
-      (msg.includes('标签') || msg.includes('tab'))) {
+  if (
+    (msg.includes('添加') || msg.includes('加') || msg.includes('新增')) &&
+    (msg.includes('标签') || msg.includes('tab'))
+  ) {
     return [{ type: 'add_component', componentType: 'Tabs', style: { width: 560, height: 320 } }]
   }
 
@@ -157,11 +386,28 @@ function parseIntentToActions(userMsg: string): CanvasAction[] {
 }
 
 function mockReply(actions: CanvasAction[], userMsg: string): string {
-  if (actions.length === 0) return `抱歉，我暂时无法理解"${userMsg}"。请配置 DEEPSEEK_API_KEY 后即可获得更智能的理解能力。`
-  const action = actions[0]
-  const typeLabel: Record<string, string> = { Text: '文本', Image: '图片', Button: '按钮', Input: '输入框', Form: '表单', Tabs: '标签页' }
-  if (action.type === 'add_component') return `好的，已添加一个${typeLabel[action.componentType ?? ''] ?? action.componentType}组件。`
-  if (action.type === 'set_page_style') return `好的，已将页面背景色更新为 ${action.pageStyle?.backgroundColor}。`
+  if (actions.length === 0)
+    return `抱歉，我暂时无法理解"${userMsg}"。请配置 DEEPSEEK_API_KEY 后即可获得更智能的理解能力。`
+
+  const addCount = actions.filter((a) => a.type === 'add_component').length
+  if (addCount > 1) {
+    const hasClear = actions.some((a) => a.type === 'clear_canvas')
+    return `好的，已${hasClear ? '生成' : '追加'}了 ${addCount} 个组件。可按 Ctrl+Z 一次性撤销。`
+  }
+
+  const action = actions[0]!
+  const typeLabel: Record<string, string> = {
+    Text: '文本',
+    Image: '图片',
+    Button: '按钮',
+    Input: '输入框',
+    Form: '表单',
+    Tabs: '标签页',
+  }
+  if (action.type === 'add_component')
+    return `好的，已添加一个${typeLabel[action.componentType ?? ''] ?? action.componentType}组件。`
+  if (action.type === 'set_page_style')
+    return `好的，已将页面背景色更新为 ${action.pageStyle?.backgroundColor}。`
   return '操作已完成。'
 }
 
@@ -174,7 +420,7 @@ function getOpenAIClient(): OpenAI {
   if (!openaiClient) {
     openaiClient = new OpenAI({
       baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
-      apiKey: process.env.DEEPSEEK_API_KEY!
+      apiKey: process.env.DEEPSEEK_API_KEY!,
     })
   }
   return openaiClient
@@ -182,7 +428,8 @@ function getOpenAIClient(): OpenAI {
 
 async function callDeepSeek(
   messages: AiMessage[],
-  canvasContext: AiChatRequest['canvasContext']
+  canvasContext: AiChatRequest['canvasContext'],
+  generateMode: 'append' | 'replace' = 'append',
 ): Promise<AiChatResponse> {
   const client = getOpenAIClient()
   const model = process.env.DEEPSEEK_MODEL || 'deepseek-chat'
@@ -190,24 +437,21 @@ async function callDeepSeek(
   const completion = await client.chat.completions.create({
     model,
     messages: [
-      { role: 'system', content: buildSystemPrompt(canvasContext) },
-      ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+      { role: 'system', content: buildSystemPrompt(canvasContext, generateMode) },
+      ...messages.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
     ],
-    // deepseek-chat 支持 json_object 格式
     response_format: { type: 'json_object' },
     temperature: 0.3,
-    stream: false
+    stream: false,
   })
 
   const raw = completion.choices[0]?.message?.content ?? '{}'
 
   try {
     const parsed = JSON.parse(raw) as AiChatResponse
-    // 保证 actions 是数组
     if (!Array.isArray(parsed.actions)) parsed.actions = []
     return parsed
   } catch {
-    // 解析失败时作为纯文字回复
     return { reply: raw, actions: [] }
   }
 }
@@ -223,16 +467,15 @@ router.post('/chat', async (req: Request, res: Response, next: NextFunction) => 
       return
     }
 
-    const lastUserMsg = body.messages.filter(m => m.role === 'user').at(-1)?.content ?? ''
+    const lastUserMsg = body.messages.filter((m) => m.role === 'user').at(-1)?.content ?? ''
+    const generateMode = body.generateMode ?? 'append'
     let chatResponse: AiChatResponse
 
     if (process.env.DEEPSEEK_API_KEY) {
-      // 已配置 API Key → 调用 DeepSeek
-      chatResponse = await callDeepSeek(body.messages, body.canvasContext)
+      chatResponse = await callDeepSeek(body.messages, body.canvasContext, generateMode)
     } else {
-      // 未配置 API Key → 规则引擎兜底
       console.warn('[AI] DEEPSEEK_API_KEY 未配置，使用规则引擎模式')
-      const actions = parseIntentToActions(lastUserMsg)
+      const actions = parseIntentToActions(lastUserMsg, generateMode)
       chatResponse = { reply: mockReply(actions, lastUserMsg), actions }
     }
 
@@ -242,16 +485,16 @@ router.post('/chat', async (req: Request, res: Response, next: NextFunction) => 
   }
 })
 
-// GET /api/ai/status - 查询 AI 配置状态
+// GET /api/ai/status
 router.get('/status', (_req: Request, res: Response) => {
   const hasKey = !!process.env.DEEPSEEK_API_KEY
   res.json({
     success: true,
     data: {
       mode: hasKey ? 'deepseek' : 'mock',
-      model: hasKey ? (process.env.DEEPSEEK_MODEL || 'deepseek-chat') : null,
-      baseURL: hasKey ? (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com') : null
-    }
+      model: hasKey ? process.env.DEEPSEEK_MODEL || 'deepseek-chat' : null,
+      baseURL: hasKey ? process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' : null,
+    },
   })
 })
 

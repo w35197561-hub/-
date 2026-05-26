@@ -1,0 +1,269 @@
+.propertyPanel {
+  width: 300px;
+  background: white;
+  border-left: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+.panelHeader {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fafafa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.panelHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+.deleteBtn {
+  padding: 4px 12px;
+  border: 1px solid #f56c6c;
+  background: white;
+  color: #f56c6c;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.deleteBtn:hover {
+  background: #f56c6c;
+  color: white;
+}
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  padding: 40px 20px;
+}
+.emptyState p {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+.propertyContent {
+  flex: 1;
+  height: 0;
+}
+.section {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.section:last-child {
+  border-bottom: none;
+}
+.section h4 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.propItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.propItem label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+.input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+}
+.input:focus {
+  border-color: #409eff;
+}
+.textarea {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  resize: none;
+  font-family: inherit;
+}
+.select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+  background: white;
+}
+.zinfoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: #f5f7fa;
+  border-radius: 6px;
+}
+.zinfoLabel {
+  font-size: 12px;
+  color: #666;
+}
+.zinfoBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 22px;
+  padding: 0 8px;
+  background: #409eff;
+  color: white;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.zinfoTip {
+  font-size: 11px;
+  color: #999;
+}
+.layerBtnGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.zinputRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+.zinputRow label {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}
+.normalizeBtn {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #dcdfe6;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #909399;
+}
+.normalizeBtn:hover {
+  border-color: #409eff;
+  color: #409eff;
+}
+.smallBtn {
+  padding: 4px 12px;
+  border: 1px solid #dcdfe6;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #606266;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.smallBtn:hover:not(:disabled) {
+  border-color: #409eff;
+  color: #409eff;
+}
+.smallBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.miniBtn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #dcdfe6;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  color: #f56c6c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.miniBtn:hover {
+  background: #f56c6c;
+  color: white;
+}
+.stringList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stringListRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stringListRow .input {
+  flex: 1;
+}
+.actionCard {
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.actionCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.actionCardHeader .select {
+  flex: 1;
+}
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.actionRow label {
+  font-size: 11px;
+  color: #888;
+  width: 48px;
+  flex-shrink: 0;
+}
+.actionRow .input,
+.actionRow .select {
+  flex: 1;
+}
+.linkBtn {
+  background: none;
+  border: none;
+  color: #f56c6c;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 0;
+}
+.hint {
+  font-size: 11px;
+  color: #999;
+}

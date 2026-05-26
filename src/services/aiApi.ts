@@ -8,6 +8,7 @@ export type ActionType =
   | 'update_component_props'
   | 'delete_component'
   | 'set_page_style'
+  | 'clear_canvas'
   | 'none'
 
 export interface CanvasAction {
@@ -37,13 +38,19 @@ export async function chatWithAI(
   canvasContext?: {
     pageTitle?: string
     componentCount?: number
-    components?: Array<{ id: string; type: string; props: Record<string, unknown> }>
+    components?: Array<{
+      id: string
+      type: string
+      props: Record<string, unknown>
+      style?: { width: number; height: number }
+    }>
   },
+  generateMode: 'append' | 'replace' = 'append',
 ): Promise<AiChatResult> {
   const res = await fetch('/api/ai/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, canvasContext }),
+    body: JSON.stringify({ messages, canvasContext, generateMode }),
   })
 
   const json = (await res.json()) as {

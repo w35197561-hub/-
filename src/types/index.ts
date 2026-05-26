@@ -1,10 +1,10 @@
 export interface ComponentStyle {
-  top: number
-  left: number
+  top?: number
+  left?: number
   width: number
   height: number
   zIndex: number
-  rotate: number
+  rotate?: number
   fontSize?: number
   color?: string
   backgroundColor?: string

@@ -1,0 +1,60 @@
+.numberInput {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f5f7fa;
+  cursor: pointer;
+  font-size: 14px;
+  color: #606266;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  background: #e4e7ed;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.input {
+  width: 56px;
+  height: 32px;
+  border: none;
+  border-left: 1px solid #dcdfe6;
+  border-right: 1px solid #dcdfe6;
+  text-align: center;
+  font-size: 13px;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.input::-webkit-inner-spin-button,
+.input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.small .btn {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+
+.small .input {
+  width: 48px;
+  height: 28px;
+  font-size: 12px;
+}

@@ -1,0 +1,66 @@
+.tabsComponent {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+.tabsHeader {
+  height: 40px;
+  border-bottom: 1px solid #ebeef5;
+  background: #f5f7fa;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.tabItem {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #606266;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+  user-select: none;
+}
+.active {
+  color: #409eff;
+  background: rgba(64, 158, 255, 0.12);
+}
+.tabsBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  min-height: 80px;
+  transition: background 0.15s;
+}
+.isDragOver {
+  background: rgba(64, 158, 255, 0.06);
+  outline: 1px dashed #409eff;
+}
+.childWrapper {
+  flex-shrink: 0;
+  border: 1px solid transparent;
+}
+.childWrapper > * {
+  width: 100%;
+  height: 100%;
+}
+.selected {
+  border-color: #409eff;
+}
+.dropTip {
+  color: #409eff;
+  font-size: 12px;
+  padding: 12px 0;
+}
